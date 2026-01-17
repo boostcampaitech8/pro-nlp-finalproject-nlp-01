@@ -6,11 +6,13 @@
 
 ```text
 pro-nlp-finalproject-nlp-01/
-├── backend/                # 백엔드 서버 코드
-├── frontend/               # 프론트엔드 클라이언트 코드
-├── COMMIT_CONVENTION.md    # 커밋 메시지 컨벤션 가이드
-├── GIT_BRANCH_STRATEGY.md  # Git 브랜치 전략 가이드
-└── README.md               # 프로젝트 메인 문서
+├── backend/            # 백엔드 서버 코드 (Node.js/Express)
+├── frontend/           # 프론트엔드 클라이언트 코드 (Next.js)
+├── docs/               # 문서 및 설계 자료
+│   ├── conventions/    # 협업 가이드 (Git/Commit/PR)
+│   ├── api/            # API 명세 및 Swagger 규격
+│   └── db/             # 데이터베이스 스키마
+└── README.md           # 프로젝트 메인 문서
 ```
 
 ## 🚀 Getting Started
@@ -22,5 +24,8 @@ pro-nlp-finalproject-nlp-01/
 
 ## 🤝 Collaboration Guide
 
-- **Branch Strategy**: [See Strategy](./GIT_BRANCH_STRATEGY.md)
-- **Commit Convention**: [See Convention](./COMMIT_CONVENTION.md)
+프로젝트 협업을 위한 가이드는 `docs/conventions` 디렉토리에 정의되어 있습니다.
+
+- **Git Branch Strategy**: [전략 보기](./docs/conventions/GIT_BRANCH_STRATEGY.md)
+- **Commit Convention**: [컨벤션 보기](./docs/conventions/COMMIT_CONVENTION.md)
+- **PR Convention**: [가이드 보기](./docs/conventions/PR_CONVENTION.md)
