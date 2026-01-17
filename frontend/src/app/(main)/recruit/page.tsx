@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,7 +48,7 @@ export default function RecruitPage() {
 
     const TECH_STACKS = ["React", "TypeScript", "Next.js", "Java", "Spring", "Python", "PyTorch", "Node.js", "Go", "Swift", "AWS", "Kubernetes"];
 
-    const fetchRecruits = async () => {
+    const fetchRecruits = useCallback(async () => {
         setLoading(true);
         try {
             const params = new URLSearchParams({
@@ -74,11 +74,11 @@ export default function RecruitPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [activeTab, currentPage, itemsPerPage, selectedCategory, selectedTechs, searchQuery]);
 
     useEffect(() => {
         fetchRecruits();
-    }, [activeTab, currentPage, selectedCategory, selectedTechs, searchQuery, isAuthenticated]);
+    }, [fetchRecruits, isAuthenticated]);
 
     const toggleTech = (tech: string) => {
         setSelectedTechs(prev =>

@@ -216,7 +216,7 @@ export const handlers = [
         const rawItems = filtered.slice((page - 1) * limit, page * limit)
 
         // 데이터 클렌징: isPopular, isRecommended 필드 제거
-        const items = rawItems.map(({ isPopular, isRecommended, ...rest }) => rest)
+        const items = rawItems.map(({ isPopular: _isPopular, isRecommended: _isRecommended, ...rest }) => rest)
 
         return HttpResponse.json({
             items,
@@ -237,7 +237,7 @@ export const handlers = [
         const rawItems = recommended.slice((page - 1) * limit, page * limit)
 
         // 내부용 플래그 제거
-        const items = rawItems.map(({ isPopular, isRecommended, ...rest }) => rest)
+        const items = rawItems.map(({ isPopular: _isPopular, isRecommended: _isRecommended, ...rest }) => rest)
 
         return HttpResponse.json({
             items,
