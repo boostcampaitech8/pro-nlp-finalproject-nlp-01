@@ -353,16 +353,16 @@ export default function RecruitPage() {
                             {JOB_CATEGORIES.map((cat) => (
                                 <Button
                                     key={cat.value}
-                                    variant={selectedCategory === cat.value ? "default" : "outline"}
+                                    variant="outline"
                                     onClick={() => {
                                         setSelectedCategory(cat.value);
                                         setCurrentPage(1);
                                     }}
                                     className={cn(
-                                        "rounded-full h-10 px-5 font-bold transition-all duration-300 transform",
+                                        "rounded-full h-10 px-5 font-bold transition-colors duration-200 border-2",
                                         selectedCategory === cat.value
-                                            ? "bg-slate-900 border-slate-900 text-white shadow-xl scale-105"
-                                            : "bg-white border-slate-200 text-slate-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/20"
+                                            ? "bg-slate-900 border-slate-900 text-white shadow-md"
+                                            : "bg-white border-slate-100 text-slate-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/20"
                                     )}
                                 >
                                     {cat.label}

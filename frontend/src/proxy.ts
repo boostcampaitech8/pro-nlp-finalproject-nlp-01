@@ -10,7 +10,8 @@ export function proxy(request: NextRequest) {
         pathname === '/login' ||
         pathname === '/signup' ||
         pathname === '/favicon.ico' ||
-        pathname.startsWith('/recruit');
+        pathname.startsWith('/recruit') ||
+        pathname.startsWith('/api');
 
     if (isPublicPath) {
         return NextResponse.next()

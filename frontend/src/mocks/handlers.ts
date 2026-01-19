@@ -133,7 +133,7 @@ export const handlers = [
                 createdAt: new Date().toISOString().split('T')[0]
             }
         ];
-        return HttpResponse.json(generated);
+        return HttpResponse.json({ items: generated });
     }),
 
     // 카카오 로그인 콜백
@@ -166,10 +166,7 @@ export const handlers = [
         })
     }),
 
-    // 전체 채용 공고 리스트
-    http.get('/api/recruits', () => {
-        return HttpResponse.json(ALL_RECRUITS)
-    }),
+
 
     // 전체 채용 공고 리스트 (필터링, 검색, 페이지네이션 지원)
     http.get('/api/recruits', ({ request }) => {
@@ -183,7 +180,7 @@ export const handlers = [
 
         let filtered = [...ALL_RECRUITS]
 
-        // 카테고리 필터링 (Mock 데이터 제목/태그 기반 시뮬레이션)
+        // 카테고리 필터링
         if (category && category !== 'all') {
             filtered = filtered.filter(r => {
                 const title = r.title.toLowerCase()
@@ -220,7 +217,6 @@ export const handlers = [
         const totalPages = Math.ceil(total / limit)
         const rawItems = filtered.slice((page - 1) * limit, page * limit)
 
-        // 데이터 클렌징: 내부용 필드(isPopular, isRecommended) 제거 후 전달
         const items = rawItems.map((r) => {
             const item = { ...r };
             delete item.isPopular;

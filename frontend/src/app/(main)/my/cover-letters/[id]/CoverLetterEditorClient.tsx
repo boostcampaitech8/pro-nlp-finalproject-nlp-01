@@ -59,7 +59,10 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
         const loadData = async () => {
             try {
                 const pfRes = await fetch('/api/portfolios');
-                if (pfRes.ok) setPortfolios(await pfRes.json());
+                if (pfRes.ok) {
+                    const data = await pfRes.json();
+                    setPortfolios(data.items || data || []);
+                }
             } catch (e) { console.error(e); }
 
             if (!isNew) {

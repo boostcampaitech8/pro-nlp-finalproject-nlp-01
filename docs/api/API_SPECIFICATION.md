@@ -36,54 +36,24 @@
 
 ## 1. 인증 (Authentication)
 
-### POST `/api/auth/login`
-사용자 인증을 수행하고 세션 토큰을 반환합니다.
+### GET `/api/auth/kakao/callback`
+카카오 OAuth 인증 코드를 처리하여 로그인을 완료하고 토큰을 반환합니다.
 
-**요청 본문:**
-```json
-{
-  "email": "test@example.com",
-  "password": "password123"
-}
-```
+**쿼리 파라미터:**
+| 필드 | 타입 | 필수 여부 | 설명 |
+| :--- | :--- | :--- | :--- |
+| `code` | String | Y | 카카오에서 발급한 인가 코드 |
 
 **응답 성공 (200 OK):**
 ```json
 {
   "user": {
     "id": 1,
-    "email": "test@example.com",
-    "name": "김코딩"
+    "email": "user@kakao.com",
+    "name": "카카오본인",
+    "profileImage": "https://..."
   },
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
-
-**응답 실패 (401 Unauthorized):**
-```json
-{
-  "success": false,
-  "error": { "code": "AUTH_001", "message": "이메일 또는 비밀번호가 일치하지 않습니다." }
-}
-```
-
-### POST `/api/auth/signup`
-신규 회원가입을 처리합니다.
-
-**요청 본문:**
-```json
-{
-  "email": "test@example.com",
-  "password": "password123",
-  "name": "김코딩"
-}
-```
-
-**응답 성공 (201 Created):**
-```json
-{
-  "success": true,
-  "message": "회원가입이 완료되었습니다."
 }
 ```
 
@@ -96,8 +66,9 @@
 ```json
 {
   "id": 1,
-  "email": "test@example.com",
-  "name": "김코딩"
+  "email": "user@kakao.com",
+  "name": "카카오본인",
+  "profileImage": "https://..."
 }
 ```
 
@@ -106,17 +77,16 @@
 ## 2. 채용 공고 (Recruitments)
 
 ### GET `/api/recruits`
-채용 공고 목록을 조회합니다. 필터링, 키워드 검색 및 페이지네이션을 지원합니다.
+채용 공고 목록을 조회합니다. 필터링 및 검색을 지원합니다.
 
 **쿼리 파라미터:**
-| 필드 | 타입 | 필수 여부 | 설명 | 예시 |
-| :--- | :--- | :--- | :--- | :--- |
-| `page` | Integer | - | 조회할 페이지 번호 (기본: 1) | `1` |
-| `limit` | Integer | - | 페이지당 항목 수 (기본: 10) | `20` |
-| `category` | String | - | 직무 카테고리 필터 | `frontend` |
-| `techStack` | String | - | 기술 스택 필터 (콤마 구분) | `React,TS` |
-| `keyword` | String | - | 검색어 (회사명, 공고명) | `구글` |
-| `sort` | String | - | 정렬 (`latest`, `popular`) | `popular` |
+| 필드 | 타입 | 필수 여부 | 설명 |
+| :--- | :--- | :--- | :--- |
+| `page` | Integer | - | 페이지 번호 (기본: 1) |
+| `limit` | Integer | - | 항목 수 (기본: 10) |
+| `category` | String | - | 직무 필터 (`frontend`, `backend`, `ai`, `all`) |
+| `keyword` | String | - | 검색어 (회사명, 공고명) |
+| `sort` | String | - | 정렬 (`latest`, `popular`) |
 
 **응답 성공 (200 OK):**
 ```json
@@ -136,180 +106,76 @@
 ```
 
 ### GET `/api/recruits/:id`
-특정 채용 공고의 상세 정보를 조회합니다.
-
-**응답 성공 (200 OK):**
-```json
-{
-  "id": 1,
-  "title": "프론트엔드 개발자",
-  "company": "Google",
-  "startDate": "2026-02-01",
-  "deadline": "2026-03-01",
-  "tags": ["React", "TypeScript"],
-  "content": "상세 채용 공고 내용..."
-}
-```
+특정 공고의 상세 정보와 본문을 조회합니다.
 
 ### GET `/api/recruits/recommend`
-사용자 커리어 데이터 기반 AI 추천 공고 목록을 조회합니다.
-
-**쿼리 파라미터:** 
-| 필드 | 타입 | 필수 여부 | 설명 | 예시 |
-| :--- | :--- | :--- | :--- | :--- |
-| `page` | Integer | - | 페이지 번호 | `1` |
-| `limit` | Integer | - | 페이지당 수 | `9` |
+사용자 커리어 데이터 기반 AI 맞춤 공고 목록을 조회합니다.
 
 ---
 
 ## 3. 포트폴리오 (Portfolios)
 
-**필수 헤더 (모든 API 공통):** `Authorization: Bearer {token}`
-
-### GET `/api/portfolios`
-로그인한 사용자의 포트폴리오 목록을 조회합니다.
-
-**쿼리 파라미터:**
-| 필드 | 타입 | 필수 여부 | 설명 | 예시 |
-| :--- | :--- | :--- | :--- | :--- |
-| `page` | Integer | - | 페이지 번호 | `1` |
-| `limit` | Integer | - | 페이지당 수 | `10` |
-
-**응답 성공 (200 OK):**
-```json
-{
-  "items": [{ "id": 1, "title": "개인 프로젝트", "type": "github", "createdAt": "2026-01-15" }],
-  "meta": { "total": 5, "page": 1, "limit": 10, "totalPages": 1 }
-}
-```
-
-### POST `/api/portfolios`
-새 포트폴리오를 등록합니다.
+### POST `/api/portfolios/extract`
+GitHub URL, 블로그 링크 또는 PDF 파일로부터 비정형 텍스트를 추출합니다.
 
 **요청 본문:**
 ```json
 {
-  "title": "내 기술 블로그",
-  "type": "link",
-  "url": "https://...",
-  "description": "설명...",
-  "content": "추출된 텍스트..."
+  "source": "https://github.com/...",
+  "type": "github"
 }
 ```
-
-**응답 성공 (201 Created):**
-```json
-{ "id": 123, "title": "내 기술 블로그", "createdAt": "2026-01-18" }
-```
-
-### PATCH `/api/portfolios/:id`
-기존 포트폴리오 정보를 수정합니다.
-
-**요청 본문:** `POST /api/portfolios`와 동일 (변경이 필요한 필드만 포함 가능)
-
-**응답 성공 (200 OK):** 수정된 포트폴리오 객체
-
-### DELETE `/api/portfolios/:id`
-포트폴리오를 삭제합니다. **응답 성공 (200 OK)**
 
 ### POST `/api/portfolios/analyze`
-GitHub, URL, 파일 등에서 프로젝트 데이터를 추출하는 AI 분석을 수행합니다.
+추출된 텍스트를 AI(LLM)가 분석하여 프로젝트 단위로 구조화합니다.
 
-**요청 본문:**
-```json
-{
-  "source": "https://github.com/user/repo",
-  "type": "github",
-  "customPrompt": "특정 부분 위주로 분석해줘 (선택)"
-}
-```
+**응답 성공 (200 OK):** 구조화된 프로젝트 목록 반환
 
-**응답 성공 (200 OK):** 분석된 프로젝트 항목들의 배열
+### GET `/api/portfolios`
+저장된 포트폴리오 목록 조회
+
+### PATCH `/api/portfolios/:id`
+포트폴리오 정보 수정
+
+### DELETE `/api/portfolios/:id`
+포트폴리오 삭제
 
 ---
 
 ## 4. 자기소개서 (Cover Letters)
 
-**필수 헤더:** `Authorization: Bearer {token}`
+### POST `/api/cover-letters/generate`
+AI를 통해 포트폴리오 기반의 자소서 초안을 생성합니다.
+
+**요청 본문:**
+```json
+{
+  "recruitId": 1,
+  "portfolioIds": [1, 2],
+  "question": "지원동기",
+  "tone": "professional"
+}
+```
+
+### POST `/api/cover-letters/refine`
+작성 중인 텍스트에 대해 AI가 문맥을 첨삭하고 대안 문장을 제안합니다.
+
+**요청 본문:**
+```json
+{
+  "currentText": "저는 리액트를 잘합니다...",
+  "focus": "기술적 전문성 강조"
+}
+```
 
 ### GET `/api/cover-letters`
-자소서 목록을 조회합니다.
-
-**쿼리 파라미터:**
-| 필드 | 타입 | 필수 여부 | 설명 | 예시 |
-| :--- | :--- | :--- | :--- | :--- |
-| `recruitId` | Integer | - | 특정 공고 관련 자소서만 필터링 | `1` |
-| `page` | Integer | - | 페이지 번호 | `1` |
-| `limit` | Integer | - | 페이지당 수 | `10` |
-
-**응답 성공 (200 OK):**
-```json
-{
-  "items": [
-    { "id": 1, "title": "[지원] Google", "recruitId": 1, "updatedAt": "2026-01-15" }
-  ],
-  "meta": { "total": 12, "page": 1, "limit": 10, "totalPages": 2 }
-}
-```
+자소서 목록 조회
 
 ### GET `/api/cover-letters/:id`
-특정 자소서를 상세 조회합니다.
-
-**응답 성공 (200 OK):**
-```json
-{
-  "id": 1,
-  "title": "제목",
-  "recruitId": 1,
-  "questions": [
-    { "id": 1642, "question": "지원동기", "answer": "저는..." }
-  ]
-}
-```
-
-### POST `/api/cover-letters`
-새 자소서를 작성합니다.
-
-**요청 본문:**
-```json
-{
-  "title": "구글 지원 자소서",
-  "recruitId": 1,
-  "questions": [
-    { "question": "지원동기", "answer": "..." }
-  ]
-}
-```
-
-**응답 성공 (201 Created):** 생성된 자소서 객체
+자소서 상세 조회
 
 ### PATCH `/api/cover-letters/:id`
-자소서를 수정합니다.
-
-**요청 본문:** `POST /api/cover-letters`와 동일 (부분 수정 가능)
-
-**응답 성공 (200 OK):** 수정된 자소서 객체
+자소서 내용 수정 (수동 편집)
 
 ### DELETE `/api/cover-letters/:id`
-자소서를 삭제합니다. **응답 성공 (200 OK)**
-
-### POST `/api/cover-letters/generate`
-AI를 통해 자소서 초안 또는 가이드를 생성합니다.
-
-**요청 본문:**
-```json
-{
-  "mode": "draft",
-  "tone": "professional",
-  "focus": "기술 스택",
-  "portfolioIds": [1, 2],
-  "question": "지원동기"
-}
-```
-
-**응답 성공 (200 OK):**
-```json
-{
-  "result": "AI가 생성한 텍스트 결과물..."
-}
-```
+자소서 삭제

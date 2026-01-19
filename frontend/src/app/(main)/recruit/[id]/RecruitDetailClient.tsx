@@ -51,8 +51,8 @@ export default function RecruitDetailPage({ params }: { params: Promise<{ id: st
 
         if (isAuthenticated && id) {
             fetch(`/api/cover-letters?recruitId=${id}`, { cache: 'no-store' })
-                .then(res => res.ok ? res.json() : [])
-                .then(data => setExistingDocs(data))
+                .then(res => res.ok ? res.json() : { items: [] })
+                .then(data => setExistingDocs(data.items || []))
                 .catch(err => console.error(err));
         }
     }, [id, isAuthenticated]);

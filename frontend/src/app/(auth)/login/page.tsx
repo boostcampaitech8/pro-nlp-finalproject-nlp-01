@@ -19,7 +19,12 @@ export default function LoginPage() {
         e.preventDefault();
         setLoading(true);
         setTimeout(() => {
+            // Zustand 상태 저장
             login({ id: 1, email: "test@example.com", name: "김코딩" }, "mock-jwt-token");
+
+            // 미들웨어를 위한 쿠키 설정
+            document.cookie = "accessToken=mock-jwt-token; path=/; max-age=86400";
+
             setLoading(false);
             router.push("/recruit");
         }, 1200);

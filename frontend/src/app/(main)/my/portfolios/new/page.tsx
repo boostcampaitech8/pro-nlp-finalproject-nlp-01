@@ -57,8 +57,9 @@ export default function NewPortfolioPage() {
                 body: JSON.stringify({ source, type, customPrompt: prompt })
             });
             const data = await res.json();
-            // 기존 데이터에 추가 분석 결과를 합침
-            setAnalyzedItems(prev => [...prev, ...data]);
+            // API 응답 규격({items: []})에 맞춰 데이터 추출
+            const newItems = Array.isArray(data) ? data : (data.items || []);
+            setAnalyzedItems(prev => [...prev, ...newItems]);
             setStep('review');
         } catch (e) {
             console.error(e);
