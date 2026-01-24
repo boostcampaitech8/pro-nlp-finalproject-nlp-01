@@ -13,10 +13,13 @@ async def list_recruits(
     limit: int = 10, 
     category: Optional[str] = None, 
     keyword: Optional[str] = None,
+    location: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     skip = (page - 1) * limit
-    items, total = recruit_service.get_recruitments(db, skip=skip, limit=limit, category=category, keyword=keyword)
+    items, total = recruit_service.get_recruitments(
+        db, skip=skip, limit=limit, category=category, keyword=keyword, location=location
+    )
     return {
         "items": items,
         "meta": {

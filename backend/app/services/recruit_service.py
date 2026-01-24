@@ -2,12 +2,14 @@ from sqlalchemy.orm import Session
 from app.models import models
 from app.schemas import schemas
 
-def get_recruitments(db: Session, skip: int = 0, limit: int = 10, category: str = None, keyword: str = None):
+def get_recruitments(db: Session, skip: int = 0, limit: int = 10, category: str = None, keyword: str = None, location: str = None):
     query = db.query(models.Recruitment)
     if category and category != 'all':
         query = query.filter(models.Recruitment.category == category)
     if keyword:
         query = query.filter(models.Recruitment.title.contains(keyword) | models.Recruitment.company.contains(keyword))
+    if location:
+        query = query.filter(models.Recruitment.location.contains(location))
     
     total = query.count()
     items = query.offset(skip).limit(limit).all()
