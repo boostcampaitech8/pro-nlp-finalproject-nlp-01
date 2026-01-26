@@ -1,0 +1,250 @@
+2026-01-26T14:45:32.323830729Z #10 9.912 
+2026-01-26T14:45:32.32383888Z #10 9.912 [notice] A new release of pip is available: 24.0 -> 25.3
+2026-01-26T14:45:32.32384449Z #10 9.912 [notice] To update, run: pip install --upgrade pip
+2026-01-26T14:45:33.885760624Z #10 DONE 11.6s
+2026-01-26T14:45:34.025933171Z 
+2026-01-26T14:45:34.025954802Z #11 [6/6] COPY . .
+2026-01-26T14:45:34.025959542Z #11 DONE 0.1s
+2026-01-26T14:45:34.181348809Z 
+2026-01-26T14:45:34.18139964Z #12 exporting to docker image format
+2026-01-26T14:45:34.18140849Z #12 exporting layers
+2026-01-26T14:45:44.980499862Z #12 exporting layers 10.9s done
+2026-01-26T14:45:45.131239908Z #12 exporting manifest sha256:85dbae2e203c286587cbf80fff9952b12c9c9dc5fdedc10bd1aea28a3572ff0a
+2026-01-26T14:45:45.513456697Z #12 exporting manifest sha256:85dbae2e203c286587cbf80fff9952b12c9c9dc5fdedc10bd1aea28a3572ff0a 0.5s done
+2026-01-26T14:45:45.513481548Z #12 exporting config sha256:05219a29aa1b9e1790da2aed5522f13efc5e19ecbcb69492f1eddb8b5d3dba33
+2026-01-26T14:45:46.227751007Z #12 exporting config sha256:05219a29aa1b9e1790da2aed5522f13efc5e19ecbcb69492f1eddb8b5d3dba33 0.7s done
+2026-01-26T14:45:47.076786946Z #12 DONE 13.0s
+2026-01-26T14:45:47.076807026Z 
+2026-01-26T14:45:47.076812086Z #13 exporting cache to client directory
+2026-01-26T14:45:47.076816347Z #13 preparing build cache for export
+2026-01-26T14:45:52.377706393Z #13 writing cache image manifest sha256:1422b1f6d532e64282f11f3103d149ee5b73d8b339b128ee54251960e08f2406
+2026-01-26T14:45:52.549489893Z #13 writing cache image manifest sha256:1422b1f6d532e64282f11f3103d149ee5b73d8b339b128ee54251960e08f2406 0.2s done
+2026-01-26T14:45:52.549602116Z #13 DONE 5.5s
+2026-01-26T14:45:57.152476031Z Pushing image to registry...
+2026-01-26T14:46:01.629897983Z Upload succeeded
+2026-01-26T14:46:14.751889081Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-01-26T14:46:14.919802033Z ==> Deploying...
+2026-01-26T14:46:27.518154213Z Traceback (most recent call last):
+2026-01-26T14:46:27.518185963Z   File "/usr/local/lib/python3.11/site-packages/pydantic/networks.py", line 352, in import_email_validator
+2026-01-26T14:46:27.518248175Z     import email_validator
+2026-01-26T14:46:27.518262315Z ModuleNotFoundError: No module named 'email_validator'
+2026-01-26T14:46:27.518265695Z 
+2026-01-26T14:46:27.518269605Z The above exception was the direct cause of the following exception:
+2026-01-26T14:46:27.518272975Z 
+2026-01-26T14:46:27.518276985Z Traceback (most recent call last):
+2026-01-26T14:46:27.518280265Z   File "/usr/local/bin/uvicorn", line 8, in <module>
+2026-01-26T14:46:27.518338616Z     sys.exit(main())
+2026-01-26T14:46:27.518355377Z              ^^^^^^
+2026-01-26T14:46:27.518360077Z   File "/usr/local/lib/python3.11/site-packages/click/core.py", line 1485, in __call__
+2026-01-26T14:46:27.518589942Z     return self.main(*args, **kwargs)
+2026-01-26T14:46:27.518599012Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.518603312Z   File "/usr/local/lib/python3.11/site-packages/click/core.py", line 1406, in main
+2026-01-26T14:46:27.518857777Z     rv = self.invoke(ctx)
+2026-01-26T14:46:27.518864088Z          ^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.518866848Z   File "/usr/local/lib/python3.11/site-packages/click/core.py", line 1269, in invoke
+2026-01-26T14:46:27.519087032Z     return ctx.invoke(self.callback, **ctx.params)
+2026-01-26T14:46:27.519101293Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.519105003Z   File "/usr/local/lib/python3.11/site-packages/click/core.py", line 824, in invoke
+2026-01-26T14:46:27.519317217Z     return callback(*args, **kwargs)
+2026-01-26T14:46:27.519328407Z            ^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.519332238Z   File "/usr/local/lib/python3.11/site-packages/uvicorn/main.py", line 418, in main
+2026-01-26T14:46:27.519467501Z     run(
+2026-01-26T14:46:27.519472381Z   File "/usr/local/lib/python3.11/site-packages/uvicorn/main.py", line 587, in run
+2026-01-26T14:46:27.519597073Z     server.run()
+2026-01-26T14:46:27.519600903Z   File "/usr/local/lib/python3.11/site-packages/uvicorn/server.py", line 62, in run
+2026-01-26T14:46:27.519676245Z     return asyncio.run(self.serve(sockets=sockets))
+2026-01-26T14:46:27.519701826Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.519704766Z   File "/usr/local/lib/python3.11/asyncio/runners.py", line 190, in run
+2026-01-26T14:46:27.520409721Z     return runner.run(main)
+2026-01-26T14:46:27.520419011Z            ^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.520421591Z   File "/usr/local/lib/python3.11/asyncio/runners.py", line 118, in run
+2026-01-26T14:46:27.520495462Z     return self._loop.run_until_complete(task)
+2026-01-26T14:46:27.520502172Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.520505272Z   File "/usr/local/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+2026-01-26T14:46:27.521977684Z     return future.result()
+2026-01-26T14:46:27.521984724Z            ^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.521987374Z   File "/usr/local/lib/python3.11/site-packages/uvicorn/server.py", line 69, in serve
+2026-01-26T14:46:27.522093626Z     config.load()
+2026-01-26T14:46:27.522100487Z   File "/usr/local/lib/python3.11/site-packages/uvicorn/config.py", line 458, in load
+2026-01-26T14:46:27.522230599Z     self.loaded_app = import_from_string(self.app)
+2026-01-26T14:46:27.522237409Z                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.52224328Z   File "/usr/local/lib/python3.11/site-packages/uvicorn/importer.py", line 21, in import_from_string
+2026-01-26T14:46:27.522309411Z     module = importlib.import_module(module_str)
+2026-01-26T14:46:27.522322231Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.522324941Z   File "/usr/local/lib/python3.11/importlib/__init__.py", line 126, in import_module
+2026-01-26T14:46:27.522964575Z     return _bootstrap._gcd_import(name[level:], package, level)
+2026-01-26T14:46:27.522974745Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.522978175Z   File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+2026-01-26T14:46:27.522981165Z   File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+2026-01-26T14:46:27.522984016Z   File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+2026-01-26T14:46:27.522986985Z   File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+2026-01-26T14:46:27.522990076Z   File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+2026-01-26T14:46:27.522996906Z   File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+2026-01-26T14:46:27.522999706Z   File "/app/app/main.py", line 5, in <module>
+2026-01-26T14:46:27.523100768Z     from app.api.endpoints import auth, recruits, portfolios, cover_letters, health
+2026-01-26T14:46:27.523116538Z   File "/app/app/api/endpoints/recruits.py", line 5, in <module>
+2026-01-26T14:46:27.52319164Z     from app.schemas import schemas
+2026-01-26T14:46:27.52319726Z   File "/app/app/schemas/schemas.py", line 6, in <module>
+2026-01-26T14:46:27.523292512Z     class UserBase(BaseModel):
+2026-01-26T14:46:27.523298462Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_model_construction.py", line 182, in __new__
+2026-01-26T14:46:27.523388884Z     complete_model_class(
+2026-01-26T14:46:27.523394754Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_model_construction.py", line 491, in complete_model_class
+2026-01-26T14:46:27.523530507Z     schema = cls.__get_pydantic_core_schema__(cls, handler)
+2026-01-26T14:46:27.523538227Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.523541017Z   File "/usr/local/lib/python3.11/site-packages/pydantic/main.py", line 578, in __get_pydantic_core_schema__
+2026-01-26T14:46:27.523716911Z     return __handler(__source)
+2026-01-26T14:46:27.523720751Z            ^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.523723211Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_schema_generation_shared.py", line 82, in __call__
+2026-01-26T14:46:27.523786943Z     schema = self._handler(__source_type)
+2026-01-26T14:46:27.523792783Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.523795163Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 468, in generate_schema
+2026-01-26T14:46:27.523957956Z     schema = self._generate_schema(obj)
+2026-01-26T14:46:27.523962316Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.523965026Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 700, in _generate_schema
+2026-01-26T14:46:27.5241252Z     schema = self._post_process_generated_schema(self._generate_schema_inner(obj))
+2026-01-26T14:46:27.5241369Z                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.52414031Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 722, in _generate_schema_inner
+2026-01-26T14:46:27.524334164Z     return self._model_schema(obj)
+2026-01-26T14:46:27.524341545Z            ^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.524352055Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 541, in _model_schema
+2026-01-26T14:46:27.524492328Z     {k: self._generate_md_field_schema(k, v, decorators) for k, v in fields.items()},
+2026-01-26T14:46:27.524538129Z     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.524542929Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 541, in <dictcomp>
+2026-01-26T14:46:27.524707972Z     {k: self._generate_md_field_schema(k, v, decorators) for k, v in fields.items()},
+2026-01-26T14:46:27.524741183Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.524744503Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 886, in _generate_md_field_schema
+2026-01-26T14:46:27.524917967Z     common_field = self._common_field_schema(name, field_info, decorators)
+2026-01-26T14:46:27.524924177Z                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.524926617Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 951, in _common_field_schema
+2026-01-26T14:46:27.525114851Z     schema = self._apply_annotations(
+2026-01-26T14:46:27.525118101Z              ^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.525120461Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 1654, in _apply_annotations
+2026-01-26T14:46:27.607918767Z     schema = get_inner_schema(source_type)
+2026-01-26T14:46:27.607948607Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.607952457Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_schema_generation_shared.py", line 82, in __call__
+2026-01-26T14:46:27.60807523Z     schema = self._handler(__source_type)
+2026-01-26T14:46:27.60808515Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.60808872Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 1633, in inner_handler
+2026-01-26T14:46:27.608417137Z     from_property = self._generate_schema_from_property(obj, obj)
+2026-01-26T14:46:27.608427457Z                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:27.608436747Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 616, in _generate_schema_from_property
+2026-01-26T14:46:27.608648302Z     schema = get_schema(
+2026-01-26T14:46:27.608655002Z              ^^^^^^^^^^^
+2026-01-26T14:46:27.608659032Z   File "/usr/local/lib/python3.11/site-packages/pydantic/networks.py", line 390, in __get_pydantic_core_schema__
+2026-01-26T14:46:27.608808406Z     import_email_validator()
+2026-01-26T14:46:27.608813916Z   File "/usr/local/lib/python3.11/site-packages/pydantic/networks.py", line 354, in import_email_validator
+2026-01-26T14:46:27.608958929Z     raise ImportError('email-validator is not installed, run `pip install pydantic[email]`') from e
+2026-01-26T14:46:27.608972979Z ImportError: email-validator is not installed, run `pip install pydantic[email]`
+2026-01-26T14:46:30.53528818Z ==> Exited with status 1
+2026-01-26T14:46:30.702342021Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2026-01-26T14:46:35.794792083Z Traceback (most recent call last):
+2026-01-26T14:46:35.794821273Z   File "/usr/local/lib/python3.11/site-packages/pydantic/networks.py", line 352, in import_email_validator
+2026-01-26T14:46:35.794938236Z     import email_validator
+2026-01-26T14:46:35.794943406Z ModuleNotFoundError: No module named 'email_validator'
+2026-01-26T14:46:35.794945546Z 
+2026-01-26T14:46:35.794948206Z The above exception was the direct cause of the following exception:
+2026-01-26T14:46:35.794950046Z 
+2026-01-26T14:46:35.794953646Z Traceback (most recent call last):
+2026-01-26T14:46:35.794955756Z   File "/usr/local/bin/uvicorn", line 8, in <module>
+2026-01-26T14:46:35.795015898Z     sys.exit(main())
+2026-01-26T14:46:35.795053649Z              ^^^^^^
+2026-01-26T14:46:35.795057189Z   File "/usr/local/lib/python3.11/site-packages/click/core.py", line 1485, in __call__
+2026-01-26T14:46:35.795324114Z     return self.main(*args, **kwargs)
+2026-01-26T14:46:35.795334555Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.795403776Z   File "/usr/local/lib/python3.11/site-packages/click/core.py", line 1406, in main
+2026-01-26T14:46:35.795693422Z     rv = self.invoke(ctx)
+2026-01-26T14:46:35.795700042Z          ^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.795703952Z   File "/usr/local/lib/python3.11/site-packages/click/core.py", line 1269, in invoke
+2026-01-26T14:46:35.795924927Z     return ctx.invoke(self.callback, **ctx.params)
+2026-01-26T14:46:35.796002139Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.796006689Z   File "/usr/local/lib/python3.11/site-packages/click/core.py", line 824, in invoke
+2026-01-26T14:46:35.796147422Z     return callback(*args, **kwargs)
+2026-01-26T14:46:35.796164162Z            ^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.796239214Z   File "/usr/local/lib/python3.11/site-packages/uvicorn/main.py", line 418, in main
+2026-01-26T14:46:35.796353836Z     run(
+2026-01-26T14:46:35.796357646Z   File "/usr/local/lib/python3.11/site-packages/uvicorn/main.py", line 587, in run
+2026-01-26T14:46:35.796499859Z     server.run()
+2026-01-26T14:46:35.796503529Z   File "/usr/local/lib/python3.11/site-packages/uvicorn/server.py", line 62, in run
+2026-01-26T14:46:35.796608912Z     return asyncio.run(self.serve(sockets=sockets))
+2026-01-26T14:46:35.796653313Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.796659813Z   File "/usr/local/lib/python3.11/asyncio/runners.py", line 190, in run
+2026-01-26T14:46:35.796753365Z     return runner.run(main)
+2026-01-26T14:46:35.796757945Z            ^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.796766665Z   File "/usr/local/lib/python3.11/asyncio/runners.py", line 118, in run
+2026-01-26T14:46:35.796874927Z     return self._loop.run_until_complete(task)
+2026-01-26T14:46:35.796878808Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.796881228Z   File "/usr/local/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+2026-01-26T14:46:35.797051921Z     return future.result()
+2026-01-26T14:46:35.797057001Z            ^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.797060171Z   File "/usr/local/lib/python3.11/site-packages/uvicorn/server.py", line 69, in serve
+2026-01-26T14:46:35.797130723Z     config.load()
+2026-01-26T14:46:35.797152433Z   File "/usr/local/lib/python3.11/site-packages/uvicorn/config.py", line 458, in load
+2026-01-26T14:46:35.797323837Z     self.loaded_app = import_from_string(self.app)
+2026-01-26T14:46:35.797331507Z                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.797337447Z   File "/usr/local/lib/python3.11/site-packages/uvicorn/importer.py", line 21, in import_from_string
+2026-01-26T14:46:35.797426029Z     module = importlib.import_module(module_str)
+2026-01-26T14:46:35.797437369Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.797439819Z   File "/usr/local/lib/python3.11/importlib/__init__.py", line 126, in import_module
+2026-01-26T14:46:35.797542051Z     return _bootstrap._gcd_import(name[level:], package, level)
+2026-01-26T14:46:35.797574492Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.797579022Z   File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+2026-01-26T14:46:35.797581462Z   File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+2026-01-26T14:46:35.797583883Z   File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+2026-01-26T14:46:35.797586212Z   File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+2026-01-26T14:46:35.797588563Z   File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+2026-01-26T14:46:35.797609533Z   File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+2026-01-26T14:46:35.797619953Z   File "/app/app/main.py", line 5, in <module>
+2026-01-26T14:46:35.797691555Z     from app.api.endpoints import auth, recruits, portfolios, cover_letters, health
+2026-01-26T14:46:35.797697445Z   File "/app/app/api/endpoints/recruits.py", line 5, in <module>
+2026-01-26T14:46:35.797782807Z     from app.schemas import schemas
+2026-01-26T14:46:35.797786957Z   File "/app/app/schemas/schemas.py", line 6, in <module>
+2026-01-26T14:46:35.797866309Z     class UserBase(BaseModel):
+2026-01-26T14:46:35.797870118Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_model_construction.py", line 182, in __new__
+2026-01-26T14:46:35.797991261Z     complete_model_class(
+2026-01-26T14:46:35.797996291Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_model_construction.py", line 491, in complete_model_class
+2026-01-26T14:46:35.798115354Z     schema = cls.__get_pydantic_core_schema__(cls, handler)
+2026-01-26T14:46:35.798182175Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.798186395Z   File "/usr/local/lib/python3.11/site-packages/pydantic/main.py", line 578, in __get_pydantic_core_schema__
+2026-01-26T14:46:35.798365669Z     return __handler(__source)
+2026-01-26T14:46:35.798375479Z            ^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.798379Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_schema_generation_shared.py", line 82, in __call__
+2026-01-26T14:46:35.798475671Z     schema = self._handler(__source_type)
+2026-01-26T14:46:35.798480471Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.798483302Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 468, in generate_schema
+2026-01-26T14:46:35.798685246Z     schema = self._generate_schema(obj)
+2026-01-26T14:46:35.798689996Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.798693036Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 700, in _generate_schema
+2026-01-26T14:46:35.798843339Z     schema = self._post_process_generated_schema(self._generate_schema_inner(obj))
+2026-01-26T14:46:35.79885041Z                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.79885317Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 722, in _generate_schema_inner
+2026-01-26T14:46:35.799036703Z     return self._model_schema(obj)
+2026-01-26T14:46:35.799043303Z            ^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.799047424Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 541, in _model_schema
+2026-01-26T14:46:35.799234348Z     {k: self._generate_md_field_schema(k, v, decorators) for k, v in fields.items()},
+2026-01-26T14:46:35.883840682Z     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.883863822Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 541, in <dictcomp>
+2026-01-26T14:46:35.884048516Z     {k: self._generate_md_field_schema(k, v, decorators) for k, v in fields.items()},
+2026-01-26T14:46:35.884053606Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.884056596Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 886, in _generate_md_field_schema
+2026-01-26T14:46:35.88423288Z     common_field = self._common_field_schema(name, field_info, decorators)
+2026-01-26T14:46:35.884286631Z                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.884292661Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 951, in _common_field_schema
+2026-01-26T14:46:35.884499396Z     schema = self._apply_annotations(
+2026-01-26T14:46:35.884503216Z              ^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.885029797Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 1654, in _apply_annotations
+2026-01-26T14:46:35.885042847Z     schema = get_inner_schema(source_type)
+2026-01-26T14:46:35.885045537Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.885048148Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_schema_generation_shared.py", line 82, in __call__
+2026-01-26T14:46:35.885051248Z     schema = self._handler(__source_type)
+2026-01-26T14:46:35.885053948Z              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.885056728Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 1633, in inner_handler
+2026-01-26T14:46:35.885244722Z     from_property = self._generate_schema_from_property(obj, obj)
+2026-01-26T14:46:35.885258432Z                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-01-26T14:46:35.885263372Z   File "/usr/local/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py", line 616, in _generate_schema_from_property
+2026-01-26T14:46:35.885477707Z     schema = get_schema(
+2026-01-26T14:46:35.885481427Z              ^^^^^^^^^^^
+2026-01-26T14:46:35.885485957Z   File "/usr/local/lib/python3.11/site-packages/pydantic/networks.py", line 390, in __get_pydantic_core_schema__
+2026-01-26T14:46:35.885600069Z     import_email_validator()
+2026-01-26T14:46:35.885604219Z   File "/usr/local/lib/python3.11/site-packages/pydantic/networks.py", line 354, in import_email_validator
+2026-01-26T14:46:35.885785093Z     raise ImportError('email-validator is not installed, run `pip install pydantic[email]`') from e
+2026-01-26T14:46:35.885795324Z ImportError: email-validator is not installed, run `pip install pydantic[email]`

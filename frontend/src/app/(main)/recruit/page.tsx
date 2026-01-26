@@ -19,6 +19,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { Sparkles, Flame, LayoutGrid, List, ArrowRight, Building, Calendar, MoreHorizontal, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { getApiUrl } from "@/lib/apiUtils";
 
 export default function RecruitPage() {
     const { isAuthenticated } = useAuthStore();
@@ -63,8 +64,8 @@ export default function RecruitPage() {
                 params.append('sort', 'popular');
             }
 
-            const endpoint = activeTab === 'recommend' ? '/api/recruits/recommend' : '/api/recruits';
-            const res = await fetch(`${endpoint}?${params.toString()}`);
+            const endpoint = activeTab === 'recommend' ? '/recruits/recommend' : '/recruits';
+            const res = await fetch(getApiUrl(`${endpoint}?${params.toString()}`));
             const data = await res.json();
 
             setRecruits(data.items || []);

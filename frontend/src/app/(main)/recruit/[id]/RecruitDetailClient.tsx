@@ -10,6 +10,7 @@ import { Calendar, Building, Briefcase, PenTool, Info, AlignLeft } from "lucide-
 import { useAuthStore } from "@/stores/useAuthStore";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { getApiUrl } from "@/lib/apiUtils";
 
 interface RecruitDetail extends Recruit {
     content: string;
@@ -30,7 +31,7 @@ export default function RecruitDetailPage({ params }: { params: Promise<{ id: st
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch(`/api/recruits/${id}`)
+        fetch(getApiUrl(`/recruits/${id}`))
             .then((res) => {
                 if (!res.ok) {
                     if (res.headers.get("content-type")?.includes("text/html")) {
@@ -50,7 +51,7 @@ export default function RecruitDetailPage({ params }: { params: Promise<{ id: st
             });
 
         if (isAuthenticated && id) {
-            fetch(`/api/cover-letters?recruitId=${id}`, { cache: 'no-store' })
+            fetch(getApiUrl(`/cover-letters?recruitId=${id}`), { cache: 'no-store' })
                 .then(res => res.ok ? res.json() : { items: [] })
                 .then(data => setExistingDocs(data.items || []))
                 .catch(err => console.error(err));
