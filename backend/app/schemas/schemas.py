@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 from typing import List, Optional
 from datetime import date, datetime
 
@@ -67,7 +67,7 @@ class PortfolioCreateRequest(PortfolioBase):
 class CoverLetterBase(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
-    recruit_id: int
+    recruitment_id: Optional[int] = Field(None, alias="recruitId")
 
 class CoverLetterCreate(CoverLetterBase):
     user_id: int
