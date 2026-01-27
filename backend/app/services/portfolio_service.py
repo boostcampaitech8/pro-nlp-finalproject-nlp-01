@@ -15,6 +15,16 @@ def create_portfolio(db: Session, portfolio: schemas.PortfolioCreate):
     db.refresh(db_portfolio)
     return db_portfolio
 
+def update_portfolio(db: Session, portfolio_id: int, user_id: int, portfolio_data: dict):
+    db_portfolio = get_portfolio(db, portfolio_id, user_id)
+    if not db_portfolio:
+        return None
+    for key, value in portfolio_data.items():
+        setattr(db_portfolio, key, value)
+    db.commit()
+    db.refresh(db_portfolio)
+    return db_portfolio
+
 def delete_portfolio(db: Session, portfolio_id: int, user_id: int):
     db_portfolio = db.query(models.Portfolio).filter(models.Portfolio.id == portfolio_id, models.Portfolio.user_id == user_id).first()
     if not db_portfolio:

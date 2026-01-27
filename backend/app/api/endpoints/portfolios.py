@@ -39,6 +39,20 @@ async def get_portfolio(
         raise HTTPException(status_code=404, detail="Portfolio not found")
     return portfolio
 
+@router.patch("/{portfolio_id}", response_model=schemas.Portfolio)
+async def update_portfolio(
+    portfolio_id: int,
+    portfolio: schemas.PortfolioCreateRequest,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    updated_portfolio = portfolio_service.update_portfolio(
+        db, portfolio_id, current_user.id, portfolio.model_dump(exclude_unset=True)
+    )
+    if not updated_portfolio:
+        raise HTTPException(status_code=404, detail="Portfolio not found or unauthorized")
+    return updated_portfolio
+
 @router.delete("/{portfolio_id}")
 async def delete_portfolio(
     portfolio_id: int, 
