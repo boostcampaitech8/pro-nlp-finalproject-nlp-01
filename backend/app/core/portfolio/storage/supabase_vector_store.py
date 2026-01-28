@@ -14,21 +14,32 @@ class SupabaseVectorStore:
         self.connection_string = os.getenv("SUPABASE_URL")
         if not self.connection_string:
             raise ValueError("SUPABASE_URL environment variable is not set")
-
-        # Use the same model as the original pipeline for consistency
-        self.embedding_model = HuggingFaceEmbeddings(
-            model_name="jhgan/ko-sroberta-multitask",
-            model_kwargs={'device': 'cpu'},
-            encode_kwargs={'normalize_embeddings': True}
-        )
         
         self.table_name = table_name
-        self.vector_store = PGVector(
-            embeddings=self.embedding_model,
-            collection_name=table_name,
-            connection=self.connection_string,
-            use_jsonb=True,
-        )
+        self._embedding_model = None
+        self._vector_store = None
+
+    @property
+    def embedding_model(self):
+        if not self._embedding_model:
+            # Model download happens here, on first access
+            self._embedding_model = HuggingFaceEmbeddings(
+                model_name="jhgan/ko-sroberta-multitask",
+                model_kwargs={'device': 'cpu'},
+                encode_kwargs={'normalize_embeddings': True}
+            )
+        return self._embedding_model
+
+    @property
+    def vector_store(self):
+        if not self._vector_store:
+            self._vector_store = PGVector(
+                embeddings=self.embedding_model,
+                collection_name=self.table_name,
+                connection=self.connection_string,
+                use_jsonb=True,
+            )
+        return self._vector_store
 
     async def add_documents(self, documents: List[Document]):
         """

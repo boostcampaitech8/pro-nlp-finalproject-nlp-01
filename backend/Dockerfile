@@ -17,6 +17,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 ENV PYTHONPATH=/app
-ENV PORT=8000
+# PORT env var is injected by Cloud Run (default 8080)
 
-CMD alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+CMD alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
