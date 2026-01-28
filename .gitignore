@@ -9,78 +9,7 @@ Thumbs.db
 *.swp
 *.swo
 
-# --- Secrets & Environment (Recursive) ---
+# --- Secrets Fallback (Just in case) ---
 .env
 .env.*
 !.env.example
-**/.env
-**/.env.*
-!**/.env.example
-
-# --- Python ---
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# --- Virtual Environments ---
-.venv/
-venv/
-llm-pipeline/portfolios/venv/
-ENV/
-
-# --- Node.js / Frontend ---
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# --- Next.js ---
-.next/
-out/
-build/
-.vercel
-*.tsbuildinfo
-next-env.d.ts
-coverage/
-
-# --- Database ---
-*.db
-*.sqlite3
-
-# --- LLM Pipeline Data / Notebooks ---
-llm-pipeline/notebooks/extracted_readmes/
-llm-pipeline/notebooks/extracted_notion_data/
-llm-pipeline/notebooks/extracted_notion_data_v2/
-llm-pipeline/notebooks/ocr_results/
-llm-pipeline/notebooks/results/
-llm-pipeline/notebooks/tessdata
-llm-pipeline/portfolios/data/
-llm-pipeline/recruit/data/
-
-# --- Misc ---
-*.log

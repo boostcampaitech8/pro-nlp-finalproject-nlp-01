@@ -1,0 +1,38 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+
+# --- Virtual Environments ---
+.venv/
+venv/
+portfolios/venv/
+ENV/
+
+# --- Environment Variables ---
+.env
+.env.*
+!.env.example
+
+# --- Jupypter Notebooks ---
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# --- Data / Results ---
+notebooks/extracted_readmes/
+notebooks/extracted_notion_data/
+notebooks/extracted_notion_data_v2/
+notebooks/ocr_results/
+notebooks/results/
+notebooks/tessdata
+portfolios/data/
+recruit/data/
+
+# --- OS / Misc ---
+.DS_Store
+*.log
