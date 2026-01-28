@@ -22,4 +22,4 @@ psycopg[binary]
 pypdf
 pdfplumber
 pillow
-surya-ocr
+
