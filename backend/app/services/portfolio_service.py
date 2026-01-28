@@ -14,14 +14,6 @@ from app.models.models import Portfolio, PortfolioJobQuery, ProcessingStatus
 from app.db.database import AsyncSessionLocal
 from app.schemas import schemas
 
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from app.core.portfolio.extractors.file_extractor import FileExtractor
-from app.core.portfolio.extractors.notion_extractor import NotionExtractor
-from app.core.portfolio.extractors.github_extractor import GitHubExtractor
-from app.core.portfolio.processors.llm_refiner import LLMRefiner
-from app.core.portfolio.storage.supabase_vector_store import SupabaseVectorStore
-from langchain_core.documents import Document
-
 logger = logging.getLogger(__name__)
 
 UPLOAD_DIR = Path("/tmp/uploads")
@@ -38,29 +30,58 @@ async def process_portfolio_task(portfolio_id: int, source: str, p_type: str):
 class PortfolioService:
     def __init__(self, db: AsyncSession):
         self.db = db
-        self._file_extractor = FileExtractor()
-        self._notion_extractor = NotionExtractor()
-        self._github_extractor = GitHubExtractor()
-        self._llm_refiner = LLMRefiner()
-        self._vector_store = SupabaseVectorStore()
-        self._text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=500,
-            chunk_overlap=50,
-            separators=["\n\n", "\n", ".", " "]
-        )
+        self._file_extractor = None
+        self._notion_extractor = None
+        self._github_extractor = None
+        self._llm_refiner = None
+        self._vector_store = None
+        self._text_splitter = None
 
     @property
-    def file_extractor(self): return self._file_extractor
+    def file_extractor(self):
+        if not self._file_extractor:
+            from app.core.portfolio.extractors.file_extractor import FileExtractor
+            self._file_extractor = FileExtractor()
+        return self._file_extractor
+
     @property
-    def notion_extractor(self): return self._notion_extractor
+    def notion_extractor(self):
+        if not self._notion_extractor:
+            from app.core.portfolio.extractors.notion_extractor import NotionExtractor
+            self._notion_extractor = NotionExtractor()
+        return self._notion_extractor
+
     @property
-    def github_extractor(self): return self._github_extractor
+    def github_extractor(self):
+        if not self._github_extractor:
+            from app.core.portfolio.extractors.github_extractor import GitHubExtractor
+            self._github_extractor = GitHubExtractor()
+        return self._github_extractor
+
     @property
-    def llm_refiner(self): return self._llm_refiner
+    def llm_refiner(self):
+        if not self._llm_refiner:
+            from app.core.portfolio.processors.llm_refiner import LLMRefiner
+            self._llm_refiner = LLMRefiner()
+        return self._llm_refiner
+
     @property
-    def vector_store(self): return self._vector_store
+    def vector_store(self):
+        if not self._vector_store:
+            from app.core.portfolio.storage.supabase_vector_store import SupabaseVectorStore
+            self._vector_store = SupabaseVectorStore()
+        return self._vector_store
+
     @property
-    def text_splitter(self): return self._text_splitter
+    def text_splitter(self):
+        if not self._text_splitter:
+            from langchain_text_splitters import RecursiveCharacterTextSplitter
+            self._text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=500,
+                chunk_overlap=50,
+                separators=["\n\n", "\n", ".", " "]
+            )
+        return self._text_splitter
 
     async def create_portfolio_from_file(self, user_id: int, title: str, file: UploadFile, background_tasks: BackgroundTasks):
         file_ext = Path(file.filename).suffix
@@ -76,7 +97,7 @@ class PortfolioService:
         )
         self.db.add(portfolio)
         await self.db.commit()
-        # Instead of refresh, we re-fetch with selectinload to avoid lazy loading issues
+        # Re-fetch with selectinload
         stmt = select(Portfolio).where(Portfolio.id == portfolio.id).options(selectinload(Portfolio.job_queries))
         result = await self.db.execute(stmt)
         portfolio = result.scalar_one()
@@ -225,6 +246,7 @@ class PortfolioService:
 
                 # 4. Vector Embedding
                 all_docs = []
+                from langchain_core.documents import Document
                 for p_record in new_portfolios:
                     desc = p_record.description or ""
                     if not desc: continue
