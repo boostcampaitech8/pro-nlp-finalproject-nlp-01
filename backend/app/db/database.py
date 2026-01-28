@@ -10,7 +10,10 @@ from dotenv import load_dotenv
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-load_dotenv()
+try:
+    load_dotenv()
+except Exception:
+    pass
 
 from sqlalchemy.pool import NullPool
 
