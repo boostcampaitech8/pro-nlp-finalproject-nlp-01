@@ -41,7 +41,14 @@ python main.py --user user1 --init
 # 이후 실행 (초기화 불필요)
 python main.py --user user1
 python main.py --user user2
+
+# 실수로 venv portfolio 폴더꺼 사용했음
+llm-pipeline/portfolios/venv/Scripts/python llm-pipeline/self_introduction/generate_from_chroma.py --user_id unknown_user
+
+llm-pipeline/portfolios/venv/Scripts/python llm-pipeline/self_introduction/generate_from_chroma.py --user_id unknown_user --save
+
 ```
+
 
 ### 특정 문항만 생성
 
