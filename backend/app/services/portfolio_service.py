@@ -9,13 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.models.models import Portfolio, PortfolioJobQuery, ProcessingStatus
-from app.core.portfolio.extractors.file_extractor import FileExtractor
-from app.core.portfolio.extractors.notion_extractor import NotionExtractor
-from app.core.portfolio.extractors.github_extractor import GitHubExtractor
-from app.core.portfolio.processors.llm_refiner import LLMRefiner
-from app.core.portfolio.storage.supabase_vector_store import SupabaseVectorStore
-from langchain_core.documents import Document
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # Standalone function for background task to ensure fresh session
 from app.db.database import AsyncSessionLocal
@@ -248,6 +241,7 @@ class PortfolioService:
                             "tech_stack": p_record.tech_stack,
                             "chunk_index": i
                         }
+                        from langchain_core.documents import Document
                         all_docs.append(Document(page_content=chunk, metadata=metadata))
             
                 if all_docs:

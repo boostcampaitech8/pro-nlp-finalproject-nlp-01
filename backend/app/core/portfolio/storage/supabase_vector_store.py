@@ -1,13 +1,14 @@
+import os
 import requests
-from langchain_core.embeddings import Embeddings
-from langchain_postgres import PGVector
-from langchain_core.documents import Document
+from typing import List, Optional
 
-class NaverClovaEmbeddings(Embeddings):
+class NaverClovaEmbeddings:
     """
     Custom LangChain Embeddings implementation for Naver Clova Studio Embedding v2.
     """
     def __init__(self, api_key: str, base_url: str = None):
+        from langchain_core.embeddings import Embeddings
+        # We don't strictly need to inherit if we implement the protocol
         self.api_key = api_key
         # Default to Clova Studio standard endpoint if not provided
         self.base_url = base_url or "https://clovastudio.stream.ntruss.com"
@@ -80,6 +81,7 @@ class SupabaseVectorStore:
     @property
     def vector_store(self):
         if not self._vector_store:
+            from langchain_postgres import PGVector
             self._vector_store = PGVector(
                 embeddings=self.embedding_model,
                 collection_name=self.table_name,
@@ -88,10 +90,12 @@ class SupabaseVectorStore:
             )
         return self._vector_store
 
-    async def add_documents(self, documents: List[Document]):
+    async def add_documents(self, documents):
         """
         Adds documents to the Supabase vector store.
         """
+        from langchain_core.documents import Document
+        # documents is List[Document]
         await self.vector_store.aadd_documents(documents)
 
     async def similarity_search(self, query: str, k: int = 4) -> List[Document]:

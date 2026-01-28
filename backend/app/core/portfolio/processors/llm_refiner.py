@@ -4,7 +4,7 @@ import os
 from typing import Optional, List, Literal
 from pydantic import BaseModel, Field
 
-from google import genai
+
 
 
 # ---------- refined schemas ---------- #
@@ -67,6 +67,7 @@ class LLMRefiner:
             print(f"Warning: {api_key_env} or GOOGLE_API_KEY not set.")
             self.client = None
         else:
+            from google import genai
             self.model = model
             self.client = genai.Client(api_key=api_key)
 
