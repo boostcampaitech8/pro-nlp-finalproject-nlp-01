@@ -9,122 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.models.models import Portfolio, PortfolioJobQuery, ProcessingStatus
-from app.core.portfolio.extractors.file_extractor import FileExtractor
-from app.core.portfolio.extractors.notion_extractor import NotionExtractor
-from app.core.portfolio.extractors.github_extractor import GitHubExtractor
-from app.core.portfolio.processors.llm_refiner import LLMRefiner
-from app.core.portfolio.storage.supabase_vector_store import SupabaseVectorStore
-from langchain_core.documents import Document
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-
-UPLOAD_DIR = Path("uploads")
-UPLOAD_DIR.mkdir(exist_ok=True)
-
-class PortfolioService:
-    def __init__(self, db: AsyncSession):
-        self.db = db
-        self.file_extractor = FileExtractor()
-        self.notion_extractor = NotionExtractor()
-        self.github_extractor = GitHubExtractor()
-        self.llm_refiner = LLMRefiner()
-        self.vector_store = SupabaseVectorStore() 
-        
-        self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=500,
-            chunk_overlap=50,
-            separators=["\n\n", "\n", ".", " "]
-        )
-
-    async def create_portfolio_from_file(
-        self, 
-        user_id: int, 
-        title: str, 
-        file: UploadFile, 
-        background_tasks: BackgroundTasks
-    ) -> Portfolio:
-        """
-        1. Save file to disk
-        2. Create PENDING portfolio record
-        3. Trigger background processing
-        """
-        # Save file
-        file_ext = Path(file.filename).suffix
-        file_name = f"{uuid.uuid4()}{file_ext}"
-        file_path = UPLOAD_DIR / file_name
-        
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-            
-        # Create DB record
-        portfolio = Portfolio(
-            title=title,
-            type="file",
-            source_url=str(file_path),
-            user_id=user_id,
-            processing_status=ProcessingStatus.PENDING
-        )
-        self.db.add(portfolio)
-        await self.db.commit()
-        await self.db.refresh(portfolio)
-
-        # Trigger background task
-        background_tasks.add_task(self.process_portfolio, portfolio.id, str(file_path), "file")
-        
-        return portfolio
-
-    async def create_portfolio_from_notion(
-        self,
-        user_id: int,
-        title: str,
-        notion_url: str,
-        background_tasks: BackgroundTasks
-    ) -> Portfolio:
-        """
-        1. Create PENDING portfolio record for Notion
-        2. Trigger background processing
-        """
-        portfolio = Portfolio(
-            title=title,
-            type="notion",
-            source_url=notion_url,
-            user_id=user_id,
-            processing_status=ProcessingStatus.PENDING
-        )
-        self.db.add(portfolio)
-        await self.db.commit()
-        await self.db.refresh(portfolio)
-
-        background_tasks.add_task(self.process_portfolio, portfolio.id, notion_url, "notion")
-        
-        return portfolio
-    
-    async def process_portfolio(self, portfolio_id: int, source: str, p_type: str):
-        """
-        Background Task:
-        1. Extract Text
-        2. Refine (LLM)
-        3. Save structured data to DB
-        4. Embed chunks to Vector DB
-        5. Update Status
-        """
-        # Re-fetch portfolio in a new session or usage context if needed
-        # Since this is a method on the service which holds 'db', 
-        # but 'db' session might be closed after the request finishes? 
-        # CRITICAL: BackgroundTasks run after response, so the dependency injection session is closed.
-        # We need a fresh session mechanism here. 
-        # Typically services shouldn't hold db session if they run in background context detached from request.
-        # However, for simplicity, we assume the caller handles this or we need a session factory here.
-        # BUT, standard pattern in FastAPI with BackgroundTasks is tricky with async sessions.
-        # Usage of 'self.db' here will likely fail if the request is done.
-        
-        # FIX: We will strictly rely on `self.db` being available only if we are carefully managing it,
-        # otherwise we should pass a session factory. 
-        # Given the current architecture (Service injected with Depends(get_db)), 
-        # we cannot use self.db in background task. 
-        # So we actually need to implement this as a standalone function that creates its own session,
-        # OR the service needs to accept session_factory.
-        pass
-
 # Standalone function for background task to ensure fresh session
 from app.db.database import AsyncSessionLocal
 
@@ -138,6 +22,7 @@ class PortfolioService:
         self.db = db
         self.file_extractor = FileExtractor()
         self.notion_extractor = NotionExtractor()
+        self.github_extractor = GitHubExtractor()
         self.llm_refiner = LLMRefiner()
         self.vector_store = SupabaseVectorStore() 
         self.text_splitter = RecursiveCharacterTextSplitter(
@@ -145,6 +30,7 @@ class PortfolioService:
             chunk_overlap=50,
             separators=["\n\n", "\n", ".", " "]
         )
+
 
     async def create_portfolio_from_file(self, user_id: int, title: str, file: UploadFile, background_tasks: BackgroundTasks):
         file_ext = Path(file.filename).suffix

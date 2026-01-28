@@ -1,9 +1,15 @@
+import time
+print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Starting main.py import...")
+
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+
+print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Importing endpoints...")
 from app.api.endpoints import auth, recruits, portfolios, cover_letters, health
 
+print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Initializing FastAPI app...")
 app = FastAPI(
     title="Pro-NLP AI Recruitment Platform API",
     description="AI 기반 채용 플랫폼의 프론트엔드-백엔드 협업을 위한 표준 API 규격서입니다.",
