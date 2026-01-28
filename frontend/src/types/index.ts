@@ -22,12 +22,17 @@ export interface Portfolio {
 
     // Flattened Project Data
     extractedSummary?: string;
+    extracted_summary?: string;
     extractedJobTitle?: string;
+    extracted_job_title?: string;
     projectName?: string;
+    project_name?: string;
     period?: string;
     role?: string;
     description?: string;
-    techStack?: string[]; // Assuming backend sends JSON array or string
+    techStack?: string[];
+    tech_stack?: string[];
+    source_url?: string;
 }
 
 export interface CoverLetter {

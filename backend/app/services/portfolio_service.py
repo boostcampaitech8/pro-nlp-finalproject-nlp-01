@@ -145,6 +145,35 @@ class PortfolioService:
         background_tasks.add_task(process_portfolio_task, portfolio.id, notion_url, "notion")
         return portfolio
 
+    async def save_verified_portfolio(self, user_id: int, req: schemas.PortfolioCreateRequest):
+        """Save a portfolio that has been reviewed and verified by the user."""
+        portfolio = models.Portfolio(
+            **req.model_dump(),
+            user_id=user_id,
+            processing_status=models.ProcessingStatus.COMPLETED
+        )
+        self.db.add(portfolio)
+        await self.db.commit()
+        await self.db.refresh(portfolio)
+
+        # 2. Add to Vector Store for RAG
+        try:
+            from langchain_core.documents import Document
+            desc = portfolio.description or ""
+            if desc:
+                metadata = {
+                    "portfolio_id": portfolio.id,
+                    "type": "project",
+                    "project_name": portfolio.project_name,
+                    "tech_stack": portfolio.tech_stack,
+                    "chunk_index": 0
+                }
+                await self.vector_store.add_documents([Document(page_content=desc, metadata=metadata)])
+        except Exception as e:
+            print(f"Error embedding manually saved portfolio: {e}")
+
+        return portfolio
+
     async def analyze_portfolio_source(self, source: str, p_type: str):
         """Extract and Refine without saving to DB (for preview)."""
         logger.info(f"Analyzing source for preview: {source} ({p_type})")
@@ -279,6 +308,8 @@ def get_portfolios(db: Session, user_id: int):
 
 def create_portfolio(db: Session, portfolio: schemas.PortfolioCreate):
     db_portfolio = Portfolio(**portfolio.model_dump())
+    # If explicitly saved from UI, we mark it COMPLETED since it's already "reviewed"
+    db_portfolio.processing_status = ProcessingStatus.COMPLETED
     db.add(db_portfolio)
     db.commit()
     db.refresh(db_portfolio)

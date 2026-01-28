@@ -23,12 +23,11 @@ async def list_portfolios(
 @router.post("", response_model=schemas.Portfolio, status_code=201)
 async def create_portfolio(
     portfolio: schemas.PortfolioCreateRequest,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(deps.get_current_user)
 ):
-    portfolio_data = portfolio.model_dump()
-    internal_portfolio = schemas.PortfolioCreate(**portfolio_data, user_id=current_user.id)
-    return portfolio_service.create_portfolio(db, internal_portfolio)
+    service = PortfolioService(db)
+    return await service.save_verified_portfolio(current_user.id, portfolio)
 
 @router.post("/upload", response_model=schemas.Portfolio, status_code=201)
 async def upload_portfolio(

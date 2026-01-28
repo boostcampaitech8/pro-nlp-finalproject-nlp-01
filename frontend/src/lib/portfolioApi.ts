@@ -5,6 +5,8 @@ export interface PortfolioApi {
     uploadFile: (file: File) => Promise<Portfolio>;
     importNotion: (url: string, title?: string) => Promise<Portfolio>;
     importGithub: (url: string, title?: string) => Promise<Portfolio>;
+    analyzePortfolio: (source: string, type: string) => Promise<any>;
+    createPortfolio: (data: Partial<Portfolio>) => Promise<Portfolio>;
     fetchAll: () => Promise<{ items: Portfolio[] }>;
 }
 
@@ -70,6 +72,40 @@ export const portfolioApi: PortfolioApi = {
         if (!res.ok) {
             const errorData = await res.json().catch(() => ({}));
             throw new Error(errorData.detail || "GitHub import failed");
+        }
+
+        return res.json();
+    },
+
+    /**
+     * Analyze a portfolio source (preview only).
+     */
+    analyzePortfolio: async (source: string, type: string): Promise<any> => {
+        const res = await fetchWithAuth(getApiUrl("/portfolios/analyze"), {
+            method: "POST",
+            body: JSON.stringify({ source, type }),
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.detail || "Analysis failed");
+        }
+
+        return res.json();
+    },
+
+    /**
+     * Create a portfolio from processed data.
+     */
+    createPortfolio: async (data: Partial<Portfolio>): Promise<Portfolio> => {
+        const res = await fetchWithAuth(getApiUrl("/portfolios"), {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.detail || "Creation failed");
         }
 
         return res.json();

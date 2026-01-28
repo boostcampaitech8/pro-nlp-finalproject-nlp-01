@@ -46,6 +46,13 @@ class PortfolioBase(BaseModel):
     type: str
     source_url: Optional[str] = None
     content: Optional[str] = None
+    extracted_summary: Optional[str] = None
+    extracted_job_title: Optional[str] = None
+    project_name: Optional[str] = None
+    period: Optional[str] = None
+    role: Optional[str] = None
+    description: Optional[str] = None
+    tech_stack: Optional[List[str]] = None
 
 class PortfolioCreate(PortfolioBase):
     user_id: int
