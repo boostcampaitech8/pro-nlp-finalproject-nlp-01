@@ -55,7 +55,7 @@ logger.info(f"Async engine target: {async_tag}")
 
 # asyncpg handles SSL differently (via connect_args or 'ssl' param)
 async_connect_args = {"statement_cache_size": 0}
-if "supabase.com" in ASYNC_DATABASE_URL:
+if "supabase.co" in ASYNC_DATABASE_URL or "supabase.com" in ASYNC_DATABASE_URL:
     async_connect_args["ssl"] = "require"
 
 async_engine = create_async_engine(
