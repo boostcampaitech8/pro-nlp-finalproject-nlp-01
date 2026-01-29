@@ -57,7 +57,8 @@ async def clear_database(
     db = Depends(get_async_db)  # Use dependency for session
 ):
     """
-    Clear all recruitment and recommendation data.
+    Clear ALL database tables (users, portfolios, recruitments, cover letters, recommendations).
+    WARNING: This will delete everything!
     """
     # Security check
     ADMIN_SECRET = os.getenv("ADMIN_SECRET", "nlp-final-admin-secret")
@@ -66,16 +67,45 @@ async def clear_database(
 
     try:
         from sqlalchemy import text
-        # Order matters due to foreign keys (delete recommendations first)
+        
+        # Order matters due to foreign keys - delete children first
+        # 1. Delete recommendations (references both portfolios and recruitments)
         await db.execute(text("DELETE FROM recommendations"))
+        
+        # 2. Delete cover_letters (references users and recruitments)
+        await db.execute(text("DELETE FROM cover_letters"))
+        
+        # 3. Delete portfolio_job_queries (references portfolios)
+        await db.execute(text("DELETE FROM portfolio_job_queries"))
+        
+        # 4. Delete portfolios (references users)
+        await db.execute(text("DELETE FROM portfolios"))
+        
+        # 5. Delete recruitments (no dependencies)
         await db.execute(text("DELETE FROM recruitments"))
         
-        # Clear vector embeddings (portfolio and recruitment)
+        # 6. Delete users (parent of portfolios and cover_letters)
+        await db.execute(text("DELETE FROM users"))
+        
+        # 7. Clear vector embeddings (portfolio and recruitment)
         await db.execute(text("DELETE FROM langchain_pg_embedding"))
         await db.execute(text("DELETE FROM langchain_pg_collection"))
         
         await db.commit()
-        return {"message": "Recruitments, Recommendations, and Vector Embeddings cleared successfully."}
+        
+        return {
+            "message": "All database tables cleared successfully.",
+            "cleared_tables": [
+                "recommendations",
+                "cover_letters", 
+                "portfolio_job_queries",
+                "portfolios",
+                "recruitments",
+                "users",
+                "langchain_pg_embedding",
+                "langchain_pg_collection"
+            ]
+        }
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to clear DB: {str(e)}")
