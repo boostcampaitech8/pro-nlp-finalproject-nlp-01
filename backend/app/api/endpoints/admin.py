@@ -57,7 +57,8 @@ async def clear_database(
     db = Depends(get_async_db)  # Use dependency for session
 ):
     """
-    Clear ALL database tables (users, portfolios, recruitments, cover letters, recommendations).
+    Clear ALL database tables by DROPPING them and Re-creating them.
+    This ensures schema updates (like JSON -> Vector) are applied.
     WARNING: This will delete everything!
     """
     # Security check
@@ -67,8 +68,10 @@ async def clear_database(
 
     try:
         from sqlalchemy import text
-        
-        # 1. Get all tables in the public schema except alembic_version
+        from app.db.database import async_engine, Base
+        import app.models.models # Ensure models are loaded
+
+        # 1. Get all tables in the public schema except alembic_version and spatial_ref_sys
         get_tables_query = text("""
             SELECT tablename 
             FROM pg_tables 
@@ -78,22 +81,21 @@ async def clear_database(
         result = await db.execute(get_tables_query)
         tables = [row[0] for row in result.all()]
         
-        if not tables:
-            return {"message": "No tables found to clear.", "cleared_tables": []}
+        if tables:
+            # 2. Drop tables with CASCADE
+            for t in tables:
+                await db.execute(text(f'DROP TABLE IF EXISTS public."{t}" CASCADE'))
+            await db.commit()
+        
+        # 3. Re-create tables with updated schema
+        async with async_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
             
-        # 2. Dynamic truncate with CASCADE
-        # Quoting table names to handle any special characters
-        table_list_str = ", ".join([f'public."{t}"' for t in tables])
-        truncate_query = text(f"TRUNCATE TABLE {table_list_str} CASCADE")
-        
-        await db.execute(truncate_query)
-        await db.commit()
-        
         return {
-            "message": "All public database tables (except alembic_version) cleared successfully.",
-            "cleared_count": len(tables),
-            "cleared_tables": tables
+            "message": "All database tables dropped and re-created successfully.",
+            "dropped_tables": tables,
+            "schema_updated": True
         }
     except Exception as e:
         await db.rollback()
-        raise HTTPException(status_code=500, detail=f"Failed to clear DB: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to reset DB: {str(e)}")

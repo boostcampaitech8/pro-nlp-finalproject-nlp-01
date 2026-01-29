@@ -33,8 +33,8 @@ class Project(BaseModel):
         None, description="아래 섹션 템플릿을 따르는 멀티라인 문자열"
     )
     job_queries: List[QueryItem] = Field(
-        default_factory=list, 
-        description="이 프로젝트에 특화된 A/B/C 타입 채용 공고 검색 쿼리 3개"
+        ..., 
+        description="이 프로젝트에 특화된 A/B/C 타입 채용 공고 검색 쿼리 3개 (필수)"
     )
 
     @model_validator(mode='before')

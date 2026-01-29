@@ -556,19 +556,34 @@ class PortfolioService:
                     self.db.add(new_p)
                     new_portfolios.append(new_p)
                 
-                for q in combined_result.job_queries.queries:
+                # 4. Save Job Queries (using first project's queries for the main portfolio record logic if needed, 
+                # OR actually the loop above already attached queries to NEW portfolios. 
+                # This block seems to be trying to attach queries to the ORIGINAL portfolio (portfolio_id).
+                # Since we decided (line 517) that 'portfolio' becomes project 0, we should add queries from project 0.
+                
+                # However, the loop above (lines 530-557) created new portfolios for projects[1:]. 
+                # Ideally, we should add queries to 'portfolio' (which is p0) here too.
+                
+                # Check line 365 in save_verified_portfolios: it adds queries to ALL portfolios.
+                # Here, 'portfolio' is p0. So we should add p0's queries.
+                
+                # Clear existing queries first if any?
+                # portfolio is existing record.
+                
+                for jq in p0.job_queries:
                     # Pre-embed the job query for faster matching
                     q_emb = None
+                    # Use existing embedding if available? No, QueryItem has no embedding field.
                     try:
-                        q_emb = await self.vector_store.get_embedding(q.query)
+                        q_emb = await self.vector_store.get_embedding(jq.query)
                     except Exception as e:
                         logger.error(f"Failed to pre-embed job query: {e}")
 
                     portfolio.job_queries.append(
                         PortfolioJobQuery(
-                            type=q.type,
-                            query_text=q.query,
-                            evidence=q.evidence,
+                            type=jq.type,
+                            query_text=jq.query,
+                            evidence=jq.evidence,
                             embedding=q_emb
                         )
                     )

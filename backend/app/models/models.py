@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Date, JSON, Table, Enum as SqEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from pgvector.sqlalchemy import Vector
 from app.db.database import Base
 import enum
 
@@ -44,7 +45,7 @@ class Recruitment(Base):
     required_qualifications = Column(Text, nullable=True)
     preferred_qualifications = Column(Text, nullable=True)
     tags = Column(JSON, nullable=True)  # List of strings
-    embedding = Column(JSON, nullable=True)  # Unified 1:1 embedding storage
+    embedding = Column(Vector(1024), nullable=True)  # Unified 1:1 embedding storage
     view_count = Column(Integer, default=0) # View count for popularity sorting
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -70,7 +71,7 @@ class Portfolio(Base):
     role = Column(String, nullable=True)
     description = Column(Text, nullable=True) # Refined Description for Embedding
     tech_stack = Column(JSON, nullable=True) # List of strings
-    embedding = Column(JSON, nullable=True)  # Native vector storage (List of floats)
+    embedding = Column(Vector(1024), nullable=True)  # Native vector storage (List of floats)
 
     owner = relationship("User", back_populates="portfolios")
     job_queries = relationship("PortfolioJobQuery", back_populates="portfolio", cascade="all, delete-orphan")
@@ -83,7 +84,7 @@ class PortfolioJobQuery(Base):
     portfolio_id = Column(Integer, ForeignKey("portfolios.id"))
     type = Column(String, nullable=True) # A, B, C
     query_text = Column(String, nullable=True)
-    embedding = Column(JSON, nullable=True) # Pre-calculated embedding
+    embedding = Column(Vector(1024), nullable=True) # Pre-calculated embedding
     evidence = Column(JSON, nullable=True) # List of strings
 
     portfolio = relationship("Portfolio", back_populates="job_queries")

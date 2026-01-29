@@ -145,6 +145,49 @@ export default function PortfolioDetailClient({ params }: { params: Promise<{ id
                         )}
                     </div>
 
+                    {/* Job Queries Section */}
+                    {portfolio.job_queries && portfolio.job_queries.length > 0 && (
+                        <div className="space-y-4 pt-6 border-t border-slate-100">
+                            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                <Sparkles className="h-4 w-4 text-purple-500" /> AI 채용 검색 전략
+                            </h3>
+                            <div className="grid gap-4">
+                                {portfolio.job_queries.map((q, i) => (
+                                    <div key={i} className="p-4 rounded-xl border border-slate-200 bg-white shadow-sm flex flex-col gap-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant={q.type === 'A' ? 'default' : q.type === 'B' ? 'secondary' : 'outline'}
+                                                    className={q.type === 'C' ? "border-purple-200 text-purple-600 bg-purple-50" : ""}
+                                                >
+                                                    Type {q.type}
+                                                </Badge>
+                                                <span className="text-xs text-slate-500 font-medium">
+                                                    {q.type === 'A' ? '핵심 포지션 (Main)' : q.type === 'B' ? '확장 포지션 (Sub)' : '도전 포지션 (Challenge)'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <p className="text-slate-800 font-bold mb-1">검색 쿼리</p>
+                                            <p className="text-slate-700 bg-slate-50 p-2 rounded-md border border-slate-100 text-sm">{q.query_text}</p>
+                                        </div>
+                                        {q.evidence && q.evidence.length > 0 && (
+                                            <div>
+                                                <p className="text-xs text-slate-500 font-bold mb-1">추론 근거</p>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {q.evidence.map((ev, j) => (
+                                                        <span key={j} className="inline-block bg-slate-50 text-slate-600 text-[11px] px-2 py-1 rounded border border-slate-100">
+                                                            {ev}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
 
                     <div className="space-y-4 pt-6 border-t border-slate-100">
                         <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
