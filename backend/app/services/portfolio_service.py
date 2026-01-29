@@ -370,9 +370,17 @@ class PortfolioService:
         result = await self.db.execute(stmt)
         portfolios = result.scalars().all()
         
-        # Add each to vector store - REMOVED (Legacy RAG table)
-        # We rely on direct embeddings in Portfolio/PortfolioJobQuery tables.
-        
+        # 4. Trigger Global Profile Update (Incremental Learning)
+        # We can update profile for each project or aggregate. Updating per project ensures detail.
+        for project in ai_result.user_data.projects:
+             await self._update_user_global_profile(
+                user_id=user_id,
+                project_name=project.project_name,
+                role=project.role or "",
+                tech_stack=", ".join(project.tech_stack) if project.tech_stack else "",
+                description=project.description_for_embedding or ""
+            )
+
         return portfolios
         
         return portfolios
@@ -570,6 +578,26 @@ class PortfolioService:
                 from app.services.recruit_service import precompute_recommendations_for_portfolio
                 await precompute_recommendations_for_portfolio(self.db, portfolio_id)
 
+                # 6. Trigger Global Profile Update (Incremental Learning)
+                # First Project (p0)
+                await self._update_user_global_profile(
+                    user_id=portfolio.user_id,
+                    project_name=p0.project_name,
+                    role=p0.role or "",
+                    tech_stack=", ".join(p0.tech_stack) if p0.tech_stack else "",
+                    description=p0.description_for_embedding or ""
+                )
+                
+                # Subsequent Projects
+                for proj in projects[1:]:
+                     await self._update_user_global_profile(
+                        user_id=portfolio.user_id,
+                        project_name=proj.project_name,
+                        role=proj.role or "",
+                        tech_stack=", ".join(proj.tech_stack) if proj.tech_stack else "",
+                        description=proj.description_for_embedding or ""
+                    )
+
         except Exception as e:
             logger.error(f"Processing Failed for Portfolio {portfolio_id}: {e}")
             stmt = select(Portfolio).where(Portfolio.id == portfolio_id)
@@ -578,6 +606,38 @@ class PortfolioService:
             if portfolio:
                 portfolio.processing_status = ProcessingStatus.FAILED
                 await self.db.commit()
+
+    async def _update_user_global_profile(self, user_id: int, project_name: str, role: str, tech_stack: str, description: str):
+        """
+        Helper to trigger global profile update.
+        """
+        try:
+            from app.models.models import User
+            stmt = select(User).where(User.id == user_id)
+            res = await self.db.execute(stmt)
+            user = res.scalar_one_or_none()
+            
+            if not user: return
+
+            # Prepare Info
+            new_info = f"프로젝트명: {project_name}\n역할: {role}\n기술스택: {tech_stack}\n내용: {description}"
+            
+            # Call LLM
+            updated_profile = await self.llm_refiner.update_global_user_profile(
+                current_summary=user.profile_summary or "",
+                current_job_title=user.desired_job_title or "",
+                new_project_info=new_info
+            )
+            
+            # Update User
+            user.profile_summary = updated_profile.get("summary", user.profile_summary)
+            user.desired_job_title = updated_profile.get("job_title", user.desired_job_title)
+            
+            await self.db.commit()
+            logger.info(f"Updated global profile for User {user_id}")
+            
+        except Exception as e:
+            logger.error(f"Failed to update global profile for user {user_id}: {e}")
 
 # --- Legacy Sync Functions ---
 def get_portfolios(db: Session, user_id: int):

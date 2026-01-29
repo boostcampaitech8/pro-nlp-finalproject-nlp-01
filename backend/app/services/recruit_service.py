@@ -237,11 +237,15 @@ async def precompute_recommendations_for_portfolio(db: AsyncSession, portfolio_i
         if not db_q.query_text: continue
         if db_q.embedding is not None:
              # Use pre-calculated embedding directly
-             initial_results = await indexer.search_by_vector(db, db_q.embedding, k=10)
+             initial_results = await indexer.search_by_vector(db, db_q.embedding, k=3)
         else:
              # Fallback: Generate embedding and search
-             initial_results = await indexer.search(db, db_q.query_text, k=10)
-        refined_results = await matcher.rerank_with_ncp(db_q.query_text, initial_results, top_n=5)
+             initial_results = await indexer.search(db, db_q.query_text, k=3)
+        
+        # Optimization: Skip local reranking to reduce API calls. 
+        # We rely on Vector Score for initial candidate selection (Top 10)
+        # and then use Global Reranker for final ordering.
+        refined_results = initial_results 
         
         for doc in refined_results:
             uid = doc.metadata.get('id')
@@ -330,7 +334,29 @@ async def global_rerank_recommendations(db: AsyncSession, user_id: int):
     if not user: return
 
     # Global Query: Use profile summary + desired job title
-    global_query = f"{user.desired_job_title or '개발자'} {user.profile_summary or ''}"[:500]
+    global_query = ""
+    if user.profile_summary:
+        global_query = f"{user.desired_job_title or '개발자'} {user.profile_summary}"[:500]
+    
+    # Fallback to latest portfolio if user profile is empty
+    if not global_query or len(global_query) < 10:
+        port_stmt = select(Portfolio).where(Portfolio.user_id == user_id).order_by(Portfolio.created_at.desc()).limit(1)
+        port_res = await db.execute(port_stmt)
+        latest_port = port_res.scalar_one_or_none()
+        
+        if latest_port:
+            techs = ""
+            if latest_port.tech_stack:
+                # Handle JSON list or string
+                if isinstance(latest_port.tech_stack, list):
+                    techs = ", ".join(latest_port.tech_stack)
+                else:
+                    techs = str(latest_port.tech_stack)
+                    
+            global_query = f"{latest_port.role or '개발자'} {techs} {latest_port.description or ''}"[:500]
+    
+    if not global_query:
+        global_query = "개발자"
 
     # 2. Fetch ALL existing recommendations for this user
     # Join Portfolio to filter by user_id

@@ -233,3 +233,59 @@ class LLMRefiner:
                     ]
                 )
             )
+
+    async def update_global_user_profile(self, current_summary: str, current_job_title: str, new_project_info: str) -> dict:
+        """
+        Incrementally update the user's global profile summary and job title based on new project experience.
+        """
+        system_prompt = """
+당신은 커리어 컨설턴트입니다.
+사용자의 '기존 프로필 요약'과 '새로운 프로젝트 경험'을 받아서, 이를 통합하여 **더욱 전문적이고 포괄적인 새로운 프로필 요약**을 작성하세요.
+
+**작성 규칙:**
+1. **상호 보완적 통합**: 기존 내용에 새로운 경험을 자연스럽게 녹여내세요. 단순히 덧붙이지 말고 문단을 재구성하세요.
+2. **직무명(Job Title) 업데이트**: 새로운 경험이 기존 직무보다 상위 레벨이거나 다른 분야라면, 가장 적합한 직무명을 제안하세요. (예: 백엔드 개발자 -> 풀스택 개발자, 주니어 -> 시니어 등)
+3. **핵심 역량 강조**: 사용자의 기술 스택과 성과를 바탕으로 강점을 부각하세요.
+4. **분량**: 3~5문장 내외로 간결하고 임팩트 있게 작성하세요.
+5. **어조**: 신뢰감 있고 전문적인 어조("~함", "~임" 또는 "~합니다" 체)를 사용하세요.
+
+**출력 형식 (JSON):**
+{
+    "summary": "새롭게 작성된 프로필 요약",
+    "job_title": "업데이트된 희망 직무명"
+}
+"""
+        user_prompt = f"""
+[기존 프로필]
+직무: {current_job_title or '미설정'}
+요약: {current_summary or '없음'}
+
+[새로 추가된 프로젝트 경험]
+{new_project_info}
+"""
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ]
+
+        # Simple schema for this call
+        schema = {
+            "type": "object",
+            "properties": {
+                "summary": {"type": "string"},
+                "job_title": {"type": "string"}
+            },
+            "required": ["summary", "job_title"]
+        }
+
+        try:
+            response_text = await self._call_ncp(messages, response_schema=schema)
+            import json
+            return json.loads(response_text)
+        except Exception as e:
+            logger.error(f"Failed to update global profile: {e}")
+            # Fallback: Just append raw info or keep existing
+            return {
+                "summary": (current_summary + "\n\n[New] " + new_project_info[:100] + "...") if current_summary else new_project_info[:200],
+                "job_title": current_job_title
+            }
