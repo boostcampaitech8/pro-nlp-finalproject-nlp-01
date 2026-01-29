@@ -123,7 +123,7 @@ class LLMRefiner:
         if not self.api_key:
             raise RuntimeError("NCP API helper not initialized (missing API Key).")
 
-            system_prompt = f"""
+        system_prompt = f"""
 너는 한국어 포트폴리오 텍스트를 (1) user1_data JSON으로 구조화하고,
 동시에 (2) 기업 공고 검색 쿼리(A/B/C) 3개를 생성하는 도구야.
 

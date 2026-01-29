@@ -1,6 +1,11 @@
 import time
 print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Starting main.py import...")
 
+import logging
+
+# Suppress pdfminer logs
+logging.getLogger("pdfminer").setLevel(logging.ERROR)
+
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
