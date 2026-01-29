@@ -290,6 +290,16 @@ class PortfolioService:
 
         # 2. Add to Vector Store for RAG - REMOVED (We use direct DB embeddings now)
         # The embedding is already stored in the Portfolio.embedding column.
+
+        # 3. Trigger Global Profile Update (Incremental Learning)
+        await self._update_user_global_profile(
+            user_id=user_id,
+            project_name=req.project_name,
+            role=req.role or "",
+            tech_stack=", ".join(req.tech_stack) if req.tech_stack else "",
+            description=req.description or ""
+        )
+
         return portfolio
     
     async def save_verified_portfolios_from_ai(self, user_id: int, ai_result, original_title: str, p_type: str, source_url: str = None):
