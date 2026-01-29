@@ -188,10 +188,40 @@ C: 프로젝트 요약(목적/기능 + 기여)
 ========================
 출력 형식
 ========================
-반드시 CombinedResult 스키마(JSON)로만 출력:
+반드시 아래 JSON 예시와 정확히 동일한 구조(키 이름, 데이터 타입)로 출력하라:
 {{
-  "user_data": ...,
-  "job_queries": ...
+  "user_data": {{
+    "profile": {{ "user_id": null, "name": "홍길동", "job_title": "백엔드 개발자", "summary": "..." }},
+    "projects": [
+      {{
+        "project_name": "프로젝트 A",
+        "period": "2023.01 - 2023.06",
+        "role": "백엔드 개발 및 인프라 구축",
+        "tech_stack": ["Python", "Django", "AWS"],
+        "description_for_embedding": "..."
+      }}
+    ],
+    "skills": ["Python", "AWS", "Docker"]
+  }},
+  "job_queries": {{
+    "queries": [
+      {{
+        "type": "A",
+        "query": "Python, Django, AWS 기반의 대규모 트래픽 처리 백엔드 개발자",
+        "evidence": ["Python 및 AWS 사용 경험", "대규모 트래픽 처리 프로젝트"]
+      }},
+      {{
+        "type": "B",
+        "query": "...",
+        "evidence": ["..."]
+      }},
+      {{
+        "type": "C",
+        "query": "...",
+        "evidence": ["..."]
+      }}
+    ]
+  }}
 }}
 
 [TEXT]
