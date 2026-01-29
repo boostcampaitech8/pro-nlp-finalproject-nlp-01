@@ -4,6 +4,7 @@ import subprocess
 import sys
 import os
 from pathlib import Path
+from app.db.database import get_async_db
 
 router = APIRouter()
 
@@ -52,3 +53,27 @@ def trigger_crawling(background_tasks: BackgroundTasks, secret: str):
     
     background_tasks.add_task(run_crawler_script)
     return {"message": "Crawling started in background", "script_path": str(SCRAPER_SCRIPT)}
+
+@router.delete("/clear", status_code=200)
+async def clear_database(
+    secret: str,
+    db = Depends(get_async_db)  # Use dependency for session
+):
+    """
+    Clear all recruitment and recommendation data.
+    """
+    # Security check
+    ADMIN_SECRET = os.getenv("ADMIN_SECRET", "nlp-final-admin-secret")
+    if secret != ADMIN_SECRET:
+        raise HTTPException(status_code=403, detail="Invalid admin secret")
+
+    try:
+        from sqlalchemy import text
+        # Order matters due to foreign keys (delete recommendations first)
+        await db.execute(text("DELETE FROM recommendations"))
+        await db.execute(text("DELETE FROM recruitments"))
+        await db.commit()
+        return {"message": "Recruitments and Recommendations cleared successfully."}
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to clear DB: {str(e)}")

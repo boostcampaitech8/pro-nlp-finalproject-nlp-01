@@ -23,11 +23,15 @@ async def list_portfolios(
 @router.post("", response_model=schemas.Portfolio, status_code=201)
 async def create_portfolio(
     portfolio: schemas.PortfolioCreateRequest,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(deps.get_current_user)
 ):
     service = PortfolioService(db)
-    return await service.save_verified_portfolio(current_user.id, portfolio)
+    saved_portfolio = await service.save_verified_portfolio(current_user.id, portfolio)
+    # Trigger background recommendation update
+    background_tasks.add_task(recruit_service.run_bg_recalc_for_user, current_user.id)
+    return saved_portfolio
 
 @router.post("/upload", response_model=schemas.Portfolio, status_code=201)
 async def upload_portfolio(
@@ -84,6 +88,7 @@ async def get_portfolio(
 async def update_portfolio(
     portfolio_id: int,
     portfolio: schemas.PortfolioUpdateRequest,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(deps.get_current_user)
 ):
@@ -92,6 +97,9 @@ async def update_portfolio(
     )
     if not updated_portfolio:
         raise HTTPException(status_code=404, detail="Portfolio not found or unauthorized")
+    
+    # Trigger background recommendation update
+    background_tasks.add_task(recruit_service.run_bg_recalc_for_user, current_user.id)
     return updated_portfolio
 
 @router.delete("/{portfolio_id}")

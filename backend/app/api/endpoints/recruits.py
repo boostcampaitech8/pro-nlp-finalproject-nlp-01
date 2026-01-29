@@ -11,17 +11,24 @@ router = APIRouter()
 
 @router.get("", response_model=schemas.RecruitmentListResponse)
 async def list_recruits(
+    background_tasks: BackgroundTasks,
     page: int = 1, 
     limit: int = 10, 
     category: Optional[str] = None, 
     keyword: Optional[str] = None,
     location: Optional[str] = None,
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_async_db),
+    current_user: Optional[models.User] = Depends(deps.get_current_user_optional)
 ):
     skip = (page - 1) * limit
     items, total = await recruit_service.get_recruitments(
         db, skip=skip, limit=limit, category=category, keyword=keyword, location=location
     )
+    
+    # Pre-compute recommendations in background if user is logged in
+    if current_user:
+        background_tasks.add_task(recruit_service.run_bg_recalc_for_user, current_user.id)
+        
     return {
         "items": items,
         "meta": {

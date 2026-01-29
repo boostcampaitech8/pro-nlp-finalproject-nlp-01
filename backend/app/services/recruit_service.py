@@ -212,3 +212,33 @@ async def bulk_precompute_recommendations(db: AsyncSession):
             logger.error(f"Failed to pre-compute for portfolio {pid}: {e}")
     
     return len(portfolio_ids)
+
+async def trigger_user_recommendation_update(db: AsyncSession, user_id: int):
+    """
+    Helper to trigger recommendation update for a user's latest portfolio.
+    Used in background tasks.
+    """
+    try:
+        from app.models.models import Portfolio
+        # Find latest portfolio
+        stmt = select(Portfolio).where(Portfolio.user_id == user_id).order_by(Portfolio.created_at.desc()).limit(1)
+        result = await db.execute(stmt)
+        portfolio = result.scalar_one_or_none()
+        
+        if portfolio:
+            logger.info(f"Triggering background recommendation update for User {user_id}, Portfolio {portfolio.id}")
+            await precompute_recommendations_for_portfolio(db, portfolio.id)
+        else:
+            logger.info(f"No portfolio found for User {user_id} to update recommendations.")
+            
+    except Exception as e:
+        logger.error(f"Background recommendation update failed for User {user_id}: {e}")
+
+async def run_bg_recalc_for_user(user_id: int):
+    """
+    Standalone background task entry point.
+    Creates a new DB session and triggers recommendation update.
+    """
+    from app.db.database import AsyncSessionLocal
+    async with AsyncSessionLocal() as db:
+        await trigger_user_recommendation_update(db, user_id)

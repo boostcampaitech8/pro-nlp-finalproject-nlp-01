@@ -177,5 +177,19 @@ class LLMRefiner:
 
         except Exception as e:
             logger.error(f"NCP LLM Generation Failed: {e}")
-            logger.error(f"Raw Response: {locals().get('response_text', 'No response')}")
-            raise e
+            raw_response = locals().get('response_text', 'No response')
+            logger.error(f"Raw Response: {raw_response}")
+            
+            # Fallback if AI fails: Return minimal structure instead of crashing
+            return CombinedResult(
+                user_data=UserData(
+                    profile=Profile(summary="AI 분석에 실패했습니다. (원문 참조)"),
+                    projects=[
+                        Project(
+                            project_name="추출 실패", 
+                            description_for_embedding=f"AI 응답 오류: {str(e)}\n\n원문 내용:\n{text[:500]}..."
+                        )
+                    ]
+                ),
+                job_queries=JobQueryResult(queries=[])
+            )
