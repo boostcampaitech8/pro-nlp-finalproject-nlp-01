@@ -6,7 +6,7 @@ from langchain_core.documents import Document
 from pathlib import Path
 from typing import Optional, List
 
-from fastapi import UploadFile, BackgroundTasks
+from fastapi import UploadFile, BackgroundTasks, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.models.models import Portfolio, PortfolioJobQuery, ProcessingStatus
 from app.db.database import AsyncSessionLocal
 from app.schemas import schemas
+from app.services import recruit_service
 
 logger = logging.getLogger(__name__)
 
@@ -95,66 +96,132 @@ class PortfolioService:
         return self._text_splitter
 
     async def create_portfolio_from_file(self, user_id: int, title: str, file: UploadFile, background_tasks: BackgroundTasks):
+        """
+        Upload a file, extract text, analyze with AI, and save all projects.
+        Returns the first portfolio created (for backward compatibility).
+        """
+        logger.info(f"Creating portfolio from file for user {user_id}: {title}")
+        
+        # 1. Save file
         file_ext = Path(file.filename).suffix
         file_name = f"{uuid.uuid4()}{file_ext}"
         file_path = UPLOAD_DIR / file_name
         
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
+        
+        try:
+            # 2. Extract text
+            text = self.file_extractor.extract(str(file_path))
             
-        portfolio = Portfolio(
-            title=title, type="file", source_url=str(file_path),
-            user_id=user_id, processing_status=ProcessingStatus.PENDING
-        )
-        self.db.add(portfolio)
-        await self.db.commit()
-        # Re-fetch with selectinload
-        stmt = select(Portfolio).where(Portfolio.id == portfolio.id).options(selectinload(Portfolio.job_queries))
-        result = await self.db.execute(stmt)
-        portfolio = result.scalar_one()
-
-        background_tasks.add_task(process_portfolio_task, portfolio.id, str(file_path), "file")
-        return portfolio
+            if not text or text.startswith("[Error]"):
+                raise HTTPException(status_code=500, detail=f"Text extraction failed: {text}")
+            
+            # 3. AI Analysis
+            ai_result = await self.llm_refiner.extract_user_data_and_queries(text)
+            
+            if not ai_result.user_data.projects:
+                raise HTTPException(status_code=500, detail="No projects extracted from portfolio")
+            
+            # 4. Save all projects as separate Portfolio records
+            portfolios = await self.save_verified_portfolios_from_ai(
+                user_id=user_id,
+                ai_result=ai_result,
+                original_title=title,
+                p_type="file",
+                source_url=str(file_path)
+            )
+            
+            # 5. Trigger background recommendation update
+            background_tasks.add_task(recruit_service.run_bg_recalc_for_user, user_id)
+            
+            # Return first portfolio for backward compatibility
+            return portfolios[0] if portfolios else None
+            
+        except Exception as e:
+            logger.error(f"Portfolio creation failed: {e}")
+            # Clean up file on error
+            if file_path.exists():
+                file_path.unlink()
+            raise
 
     async def create_portfolio_from_github(self, user_id: int, title: str, github_url: str, background_tasks: BackgroundTasks) -> Portfolio:
-        logger.info(f"Creating portfolio for user {user_id}: {title} ({github_url})")
+        """
+        Import from GitHub, extract text, analyze with AI, and save all projects.
+        Returns the first portfolio created (for backward compatibility).
+        """
+        logger.info(f"Creating portfolio from GitHub for user {user_id}: {title} ({github_url})")
         
-        portfolio = Portfolio(
-            title=title,
-            type="github",
-            source_url=github_url,
-            user_id=user_id,
-            processing_status=ProcessingStatus.PENDING
-        )
-        self.db.add(portfolio)
         try:
-            await self.db.commit()
-            # Re-fetch with selectinload
-            stmt = select(Portfolio).where(Portfolio.id == portfolio.id).options(selectinload(Portfolio.job_queries))
-            result = await self.db.execute(stmt)
-            portfolio = result.scalar_one()
+            # 1. Extract text from GitHub
+            text = self.github_extractor.extract(github_url)
+            
+            if not text or text.startswith("[Error]"):
+                raise HTTPException(status_code=500, detail=f"GitHub extraction failed: {text}")
+            
+            # 2. AI Analysis
+            ai_result = await self.llm_refiner.extract_user_data_and_queries(text)
+            
+            if not ai_result.user_data.projects:
+                raise HTTPException(status_code=500, detail="No projects extracted from GitHub")
+            
+            # 3. Save all projects as separate Portfolio records
+            portfolios = await self.save_verified_portfolios_from_ai(
+                user_id=user_id,
+                ai_result=ai_result,
+                original_title=title,
+                p_type="github",
+                source_url=github_url
+            )
+            
+            # 4. Trigger background recommendation update
+            background_tasks.add_task(recruit_service.run_bg_recalc_for_user, user_id)
+            
+            # Return first portfolio for backward compatibility
+            return portfolios[0] if portfolios else None
+            
         except Exception as e:
-            logger.error(f"Error during portfolio commit: {e}")
-            await self.db.rollback()
-            raise e
-
-        background_tasks.add_task(process_portfolio_task, portfolio.id, github_url, "github")
-        return portfolio
+            logger.error(f"GitHub portfolio creation failed: {e}")
+            raise
 
     async def create_portfolio_from_notion(self, user_id: int, title: str, notion_url: str, background_tasks: BackgroundTasks) -> Portfolio:
-        portfolio = Portfolio(
-            title=title, type="notion", source_url=notion_url,
-            user_id=user_id, processing_status=ProcessingStatus.PENDING
-        )
-        self.db.add(portfolio)
-        await self.db.commit()
-        # Re-fetch with selectinload
-        stmt = select(Portfolio).where(Portfolio.id == portfolio.id).options(selectinload(Portfolio.job_queries))
-        result = await self.db.execute(stmt)
-        portfolio = result.scalar_one()
+        """
+        Import from Notion, extract text, analyze with AI, and save all projects.
+        Returns the first portfolio created (for backward compatibility).
+        """
+        logger.info(f"Creating portfolio from Notion for user {user_id}: {title} ({notion_url})")
         
-        background_tasks.add_task(process_portfolio_task, portfolio.id, notion_url, "notion")
-        return portfolio
+        try:
+            # 1. Extract text from Notion
+            text = self.notion_extractor.extract(notion_url)
+            
+            if not text or text.startswith("[Error]"):
+                raise HTTPException(status_code=500, detail=f"Notion extraction failed: {text}")
+            
+            # 2. AI Analysis
+            ai_result = await self.llm_refiner.extract_user_data_and_queries(text)
+            
+            if not ai_result.user_data.projects:
+                raise HTTPException(status_code=500, detail="No projects extracted from Notion")
+            
+            # 3. Save all projects as separate Portfolio records
+            portfolios = await self.save_verified_portfolios_from_ai(
+                user_id=user_id,
+                ai_result=ai_result,
+                original_title=title,
+                p_type="notion",
+                source_url=notion_url
+            )
+            
+            # 4. Trigger background recommendation update
+            background_tasks.add_task(recruit_service.run_bg_recalc_for_user, user_id)
+            
+            # Return first portfolio for backward compatibility
+            return portfolios[0] if portfolios else None
+            
+        except Exception as e:
+            logger.error(f"Notion portfolio creation failed: {e}")
+            raise
 
     async def save_verified_portfolio(self, user_id: int, req: schemas.PortfolioCreateRequest):
         """Save a portfolio that has been reviewed and verified by the user.
