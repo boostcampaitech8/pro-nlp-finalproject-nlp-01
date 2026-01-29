@@ -123,54 +123,75 @@ class LLMRefiner:
         if not self.api_key:
             raise RuntimeError("NCP API helper not initialized (missing API Key).")
 
-        system_prompt = f"""
-너는 한국어 포트폴리오 텍스트를 분석하여 구조화된 JSON 데이터를 생성하는 전문가야.
-반드시 아래 JSON 스키마(CombinedResult)에 맞춰서 정확한 JSON 문자열만 응답해. 마크다운 코드 블록(```json)이나 사족을 붙이지 마.
+            system_prompt = f"""
+너는 한국어 포트폴리오 텍스트를 (1) user1_data JSON으로 구조화하고,
+동시에 (2) 기업 공고 검색 쿼리(A/B/C) 3개를 생성하는 도구야.
 
-[스키마 설명]
-1. user_data (사용자 정보)
-  - profile: user_id, name, job_title, summary (원문에 없으면 null)
-  - projects: 프로젝트 리스트 (아래 상세 규칙 참고)
-  - skills: 핵심 역량 키워드 리스트
-2. job_queries (공고 검색 쿼리)
-  - queries: 3개의 검색 쿼리 객체 (A, B, C 유형)
-    - type: "A" | "B" | "C"
-    - query: 검색 쿼리 문장 (80~140자)
-    - evidence: 근거 구절 리스트
+========================
+(1) user1_data 생성 규칙
+========================
+- 텍스트에 등장하는 모든 프로젝트를 각각 구조화하여 projects 배열에 담아라.
+- 텍스트에 근거한 내용만 작성(추측/과장/확장 금지)
+- 원문에 없는 profile 값(user_id/name/job_title/summary)은 null
+- period/role/description_for_embedding이 없으면 null
+- role은 1문장으로 짧게 (괄호로 길게 나열 금지)
+- tech_stack은 원문에 등장한 기술명만 배열로
+- skills는 원문 근거 있는 핵심 역량 키워드 0~8개(없으면 빈 배열)
 
-[Project 구조 생성 규칙]
-- description_for_embedding 필드는 반드시 멀티라인 문자열(String)이어야 함. (리스트 X)
-- project_name 키를 정확히 사용할 것. (title X)
-- 아래 형식을 지켜야 함:
-  [문제-해결 매핑]
-  1) 문제: ...
-     - 해결: ...
-     - 결과: ...
-  [전체 성과]
-  - ...
+description_for_embedding 형식(반드시 그대로):
+- 멀티라인 문자열이며 아래 헤더를 그대로 사용해라.
+- '문제 상황'과 '해결 과정'이 연결되도록 작성해라(각 해결 과정에 어떤 문제를 해결하는지 포함).
 
-[Query 생성 규칙]
-- A유형: 기술 스택 + 핵심 역량
-- B유형: 문제 해결 중심
-- C유형: 프로젝트 요약 (목적 + 기여)
+[문제-해결 매핑]
+1) 문제: ...
+   - 해결:
+     - ...
+     - ...
+   - 결과: ... (원문에 있을 때만)
 
-[입력 텍스트]
-{text}
+2) 문제: ...
+   - 해결:
+     - ...
+   - 결과: ... (원문에 있을 때만)
 
-[출력 예시]
+[전체 성과]
+- ... (원문에 있을 때만)
+- 없으면: - 미기재
+
+추가 규칙:
+- 원문에 없는 도메인/기술/수치(TPS, %, ms, PSNR 등) 생성 금지
+
+========================
+(2) 공고 검색 쿼리 생성 규칙
+========================
+- 아래에서 만든 user_data.projects[0] 내용을 근거로 쿼리를 만들어라.
+- 추측/과장 금지: user_data에 없는 기술/도메인/수치 절대 생성하지 마.
+- 쿼리 3개를 정확히 생성(A,B,C).
+- 각 query는 한 문장, 80~140자 내.
+- evidence에는 user_data(특히 projects[0])에서 근거가 된 구절을 1~3개 짧게 그대로 넣어.
+
+쿼리 유형:
+A: 기술 스택 + 핵심 역량
+- 예시 스타일: "Python, FastAPI, Redis, Kafka 기반의 대용량 트래픽 처리 및 비동기 시스템 아키텍처 설계 경험"
+B: 문제 해결 중심(어떤 문제를 어떻게 해결)
+- 예시 스타일: "10,000 TPS 이상의 고부하 상황에서 대기열 시스템 구현 및 응답 지연 문제를 해결한 백엔드 개발자"
+C: 프로젝트 요약(목적/기능 + 기여)
+- 예시 스타일: "이커머스 선착순 시스템 및 결제 모듈 리팩토링 경험, 유량 제어 및 DB 부하 최적화 역량"
+
+- A, B, C 쿼리는 서로 표현과 관점이 겹치지 않도록 작성하라.
+  (A는 기술 중심, B는 문제 중심, C는 프로젝트 맥락 중심)
+
+========================
+출력 형식
+========================
+반드시 CombinedResult 스키마(JSON)로만 출력:
 {{
-  "user_data": {{
-    "profile": {{ "name": "...", ... }},
-    "projects": [ ... ],
-    "skills": [ ... ]
-  }},
-  "job_queries": {{
-    "queries": [
-       {{ "type": "A", "query": "...", "evidence": ["..."] }},
-       ...
-    ]
-  }}
+  "user_data": ...,
+  "job_queries": ...
 }}
+
+[TEXT]
+{text}
 """
         # NCP handles large context well, but let's be safe.
         # messages construction
