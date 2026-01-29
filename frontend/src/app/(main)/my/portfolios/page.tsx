@@ -152,7 +152,7 @@ export default function PortfoliosPage() {
                                     <div className="flex items-center gap-4">
                                         <div className="text-left">
                                             <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
-                                                {group.portfolios.map(p => p.project_name || p.projectName).filter(Boolean).join(', ') || group.originalTitle}
+                                                {group.portfolios.map(p => p.project_name || p.projectName).filter(Boolean).join(', ')}
                                             </h3>
                                             <p className="text-sm text-slate-500 font-medium">
                                                 {group.portfolios.length}개 프로젝트 • {new Date(group.createdAt).toLocaleDateString()}
