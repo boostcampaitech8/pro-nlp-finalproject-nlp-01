@@ -66,6 +66,9 @@ class RecruitMatcher:
                 else:
                     logger.error(f"NCP API Error: {res_json}")
                     return ""
+        except httpx.HTTPStatusError as e:
+            logger.error(f"NCP API HTTP Error: {e.response.status_code} - {e.response.text}")
+            return ""
         except Exception as e:
             logger.error(f"NCP API Call Failed: {e}")
             return ""
