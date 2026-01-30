@@ -22,21 +22,21 @@ class PortfolioService:
     @property
     def file_extractor(self):
         if not self._file_extractor:
-            from jobs.core.portfolio.extractors.file_extractor import FileExtractor
+            from common.extractors.file_extractor import FileExtractor
             self._file_extractor = FileExtractor()
         return self._file_extractor
 
     @property
     def notion_extractor(self):
         if not self._notion_extractor:
-            from jobs.core.portfolio.extractors.notion_extractor import NotionExtractor
+            from common.extractors.notion_extractor import NotionExtractor
             self._notion_extractor = NotionExtractor()
         return self._notion_extractor
 
     @property
     def github_extractor(self):
         if not self._github_extractor:
-            from jobs.core.portfolio.extractors.github_extractor import GitHubExtractor
+            from common.extractors.github_extractor import GitHubExtractor
             self._github_extractor = GitHubExtractor()
         return self._github_extractor
 

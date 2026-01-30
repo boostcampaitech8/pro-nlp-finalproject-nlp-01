@@ -183,11 +183,11 @@ class PortfolioService:
         text = ""
         try:
             if type == "notion":
-                from jobs.core.portfolio.extractors.notion_extractor import NotionExtractor
+                from common.extractors.notion_extractor import NotionExtractor
                 extractor = NotionExtractor()
                 text = extractor.extract(source)
             elif type == "github":
-                from jobs.core.portfolio.extractors.github_extractor import GitHubExtractor
+                from common.extractors.github_extractor import GitHubExtractor
                 extractor = GitHubExtractor()
                 text = extractor.extract(source)
             else:
@@ -213,7 +213,7 @@ class PortfolioService:
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
                 
-            from jobs.core.portfolio.extractors.file_extractor import FileExtractor
+            from common.extractors.file_extractor import FileExtractor
             extractor = FileExtractor()
             text = extractor.extract(str(file_path))
             
