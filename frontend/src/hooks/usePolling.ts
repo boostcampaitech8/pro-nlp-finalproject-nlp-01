@@ -8,33 +8,34 @@ export function usePolling<T>(
 ) {
     const [data, setData] = useState<T | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<any>(null);
+    const [error, setError] = useState<unknown>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    const fetchData = async () => {
-        try {
-            const res = await fetchWithAuth(getApiUrl(endpoint));
-            if (!res.ok) throw new Error("Failed to fetch");
-            const result = await res.json();
-            setData(result);
-            return result;
-        } catch (err) {
-            setError(err);
-            return null;
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
+        let isMounted = true;
+        const fetchData = async () => {
+            try {
+                const res = await fetchWithAuth(getApiUrl(endpoint));
+                if (!res.ok) throw new Error("Failed to fetch");
+                const result = await res.json();
+                if (isMounted) setData(result);
+                return result;
+            } catch (err) {
+                if (isMounted) setError(err);
+                return null;
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
         // Initial fetch
         fetchData().then((result) => {
-             if (result && stopCondition && stopCondition(result)) {
+            if (result && stopCondition && stopCondition(result)) {
                 // Already done, don't poll
                 return;
             }
-             // Start polling
-             intervalRef.current = setInterval(async () => {
+            // Start polling
+            intervalRef.current = setInterval(async () => {
                 const newData = await fetchData();
                 if (newData && stopCondition && stopCondition(newData)) {
                     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -43,9 +44,10 @@ export function usePolling<T>(
         });
 
         return () => {
+            isMounted = false;
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-    }, [endpoint, intervalMs]);
+    }, [endpoint, intervalMs, stopCondition]);
 
     return { data, loading, error };
 }

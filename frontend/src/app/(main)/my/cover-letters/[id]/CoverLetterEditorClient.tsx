@@ -89,7 +89,8 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
 
     // Polling logic for AI generation result
     const [pollingTarget, setPollingTarget] = useState<string>("");
-    const { data: polledResult, loading: isPollLoading } = usePolling<any>(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: polledResult } = usePolling<any>(
         pollingTarget,
         3000,
         (data) => data.processingStatus === 'COMPLETED' || data.processingStatus === 'FAILED'
@@ -105,9 +106,9 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
                 setGapAnalysis(prev => ({ ...prev, ...polledResult.gap_analysis }));
             }
 
-            // Find the updated item
-            // Note: polledResult should be the full CoverLetter object
-            const activeQuestionContent = questions.find(q => q.id === activeAiQuestionId)?.question || "";
+            // Find the updated question text to match
+            const targetQuestion = questions.find(q => q.id === activeAiQuestionId);
+            const activeQuestionContent = targetQuestion?.question || "";
             const generatedItem = polledResult.items?.find((i: CoverLetterItem) => i.question === activeQuestionContent);
 
             if (generatedItem) {
@@ -136,7 +137,7 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
             setIsGenerating(false);
             setActiveAiQuestionId(null);
         }
-    }, [polledResult, activeAiQuestionId]);
+    }, [polledResult, activeAiQuestionId, questions]);
 
 
 
