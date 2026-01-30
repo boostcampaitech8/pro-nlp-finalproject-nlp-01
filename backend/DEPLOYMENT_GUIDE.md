@@ -100,7 +100,28 @@ The project uses a dynamic deployment strategy based on GitHub Branches.
     - If `develop`: Deploys to Vercel Prod.
     - If others: Deploys to Vercel Preview.
 
-## 7. Troubleshooting
+## 7. GitHub Secrets Configuration
+
+Workflows require the following Secrets to be set in your GitHub repository:
+
+| Secret Name | Description | Required |
+| :--- | :--- | :--- |
+| `GCP_PROJECT_ID` | GCP Project ID | Yes |
+| `GCP_SA_KEY` | GCP Service Account Key (JSON) | Yes |
+| `VERCEL_TOKEN` | Vercel API Token | Yes |
+| `VERCEL_ORG_ID` | Vercel Org ID | Yes |
+| `VERCEL_PROJECT_ID` | Vercel Project ID | Yes |
+| `GCP_PREVIEW_BACKEND_URL` | **Preview Backend URL** (e.g., `https://pro-nlp-backend-preview-...`) | No (Defaults to Prod) |
+| `NCP_API_KEY` | Naver Cloud Platform API Key (for Jobs) | Yes |
+
+> [!TIP]
+> **Separating Environments**: To have your Preview Frontend talk to your Preview Backend:
+> 1. Push to a feature branch (this creates `pro-nlp-backend-preview` on Cloud Run).
+> 2. Copy the URL of the `pro-nlp-backend-preview` service.
+> 3. Add it as `GCP_PREVIEW_BACKEND_URL` in GitHub Secrets.
+> 4. Future Preview deployments will automatically point to this URL.
+
+## 8. Troubleshooting
 
 - **ImportError: No module named 'common'**: ensure `PYTHONPATH=/app` is set and `COPY common/ ./common/` exists in Dockerfile.
 - **DB Connection**: Ensure `DATABASE_URL` is correct. If using Supabase, `backend` uses `asyncpg` (auto-configured in code) but `jobs` uses the same. Use Transaction Pooler (port 6543) for best performance in serverless.
