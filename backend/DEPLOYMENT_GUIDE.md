@@ -112,7 +112,19 @@ Workflows require the following Secrets to be set in your GitHub repository:
 | `VERCEL_ORG_ID` | Vercel Org ID | Yes |
 | `VERCEL_PROJECT_ID` | Vercel Project ID | Yes |
 | `GCP_PREVIEW_BACKEND_URL` | **Preview Backend URL** (e.g., `https://pro-nlp-backend-preview-...`) | No (Defaults to Prod) |
+| `GCP_PREVIEW_KAKAO_REDIRECT_URI` | **Preview Kakao Redirect URI** (e.g., `https://...-final.vercel.app/auth/kakao/callback`) | No (Defaults to known preview branch) |
+| `KAKAO_REST_API_KEY` | Kakao REST API Key | Yes |
+| `KAKAO_CLIENT_SECRET` | Kakao Client Secret | Yes |
+| `KAKAO_REDIRECT_URI` | **Production Kakao Redirect URI** | Yes |
 | `NCP_API_KEY` | Naver Cloud Platform API Key (for Jobs) | Yes |
+
+> [!IMPORTANT]
+> **Kakao Login 설정**:
+> 1. [Kakao Developers](https://developers.kakao.com/) 콘솔의 **내 애플리케이션 > 제품 설정 > 카카오 로그인**으로 이동합니다.
+> 2. **Redirect URI** 항목에 다음 주소들을 모두 추가해야 합니다:
+>    - 프로덕션: `https://pro-nlp-finalproject-nlp-01.vercel.app/auth/kakao/callback`
+>    - 프리뷰 (현재 브랜치): `https://pro-nlp-finalproject-nlp-01-pileuszu-nlp-01-final.vercel.app/auth/kakao/callback`
+>    - 로컬 테스트: `http://localhost:3000/auth/kakao/callback`
 
 > [!TIP]
 > **Separating Environments**: To have your Preview Frontend talk to your Preview Backend:

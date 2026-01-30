@@ -36,11 +36,18 @@ jobs:
             echo "BACKEND_SERVICE=pro-nlp-backend" >> $GITHUB_OUTPUT
             echo "JOB_SERVICE=pro-nlp-jobs" >> $GITHUB_OUTPUT
             echo "IMAGE_TAG=latest" >> $GITHUB_OUTPUT
+            echo "KAKAO_REDIRECT_URI=https://pro-nlp-finalproject-nlp-01.vercel.app/auth/kakao/callback" >> $GITHUB_OUTPUT
           else
             echo "ENV_TYPE=preview" >> $GITHUB_OUTPUT
             echo "BACKEND_SERVICE=pro-nlp-backend-preview" >> $GITHUB_OUTPUT
             echo "JOB_SERVICE=pro-nlp-jobs-preview" >> $GITHUB_OUTPUT
             echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_OUTPUT
+            if [[ -n "${{ secrets.GCP_PREVIEW_KAKAO_REDIRECT_URI }}" ]]; then
+              echo "KAKAO_REDIRECT_URI=${{ secrets.GCP_PREVIEW_KAKAO_REDIRECT_URI }}" >> $GITHUB_OUTPUT
+            else
+              # Default preview URL for the main feature branch if secret is missing
+              echo "KAKAO_REDIRECT_URI=https://pro-nlp-finalproject-nlp-01-pileuszu-nlp-01-final.vercel.app/auth/kakao/callback" >> $GITHUB_OUTPUT
+            fi
           fi
 
       - name: Google Auth
@@ -78,6 +85,8 @@ jobs:
             PYTHONPATH=/app
             GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
             KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }}
+            KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
+            KAKAO_REDIRECT_URI=${{ steps.env-vars.outputs.KAKAO_REDIRECT_URI }}
             NCP_CLOVASTUDIO_API_KEY=${{ secrets.NCP_CLOVASTUDIO_API_KEY }}
             NCP_CLOVASTUDIO_BASE_URL=${{ secrets.NCP_CLOVASTUDIO_BASE_URL }}
           flags: '--min-instances=0 --max-instances=5 --memory=1Gi --cpu=1 --timeout=300s --allow-unauthenticated'
