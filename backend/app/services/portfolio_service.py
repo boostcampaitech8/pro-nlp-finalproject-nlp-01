@@ -145,7 +145,11 @@ class PortfolioService:
         return result.scalars().all()
 
     async def get_portfolio(self, portfolio_id: int, user_id: int):
-        stmt = select(Portfolio).where(Portfolio.id == portfolio_id, Portfolio.user_id == user_id)
+        stmt = (
+            select(Portfolio)
+            .options(selectinload(Portfolio.job_queries))
+            .where(Portfolio.id == portfolio_id, Portfolio.user_id == user_id)
+        )
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 

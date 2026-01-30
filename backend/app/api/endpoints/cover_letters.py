@@ -20,7 +20,7 @@ async def list_cover_letters(
     items = await service.get_cover_letters(user_id=current_user.id, recruitment_id=recruitId)
     return {"items": items}
 
-@router.post("", response_model=schemas.CoverLetter, status_code=201)
+@router.post("", response_model=schemas.CoverLetterDetail, status_code=201)
 async def create_cover_letter(
     cl: schemas.CoverLetterCreateRequest,
     db: AsyncSession = Depends(get_async_db),
@@ -32,7 +32,7 @@ async def create_cover_letter(
     internal_cl = schemas.CoverLetterCreate(**cl_data, user_id=current_user.id)
     return await service.create_cover_letter(internal_cl)
 
-@router.get("/{cl_id}", response_model=schemas.CoverLetter)
+@router.get("/{cl_id}", response_model=schemas.CoverLetterDetail)
 async def get_cover_letter(
     cl_id: int, 
     db: AsyncSession = Depends(get_async_db),
@@ -44,7 +44,7 @@ async def get_cover_letter(
         raise HTTPException(status_code=404, detail="Cover letter not found or unauthorized")
     return db_cl
 
-@router.patch("/{cl_id}", response_model=schemas.CoverLetter)
+@router.patch("/{cl_id}", response_model=schemas.CoverLetterDetail)
 async def update_cover_letter(
     cl_id: int, 
     cl: schemas.CoverLetterUpdateRequest, 
@@ -71,7 +71,7 @@ async def delete_cover_letter(
         raise HTTPException(status_code=404, detail="Cover letter not found or unauthorized")
     return {"success": True, "message": "Cover letter deleted"}
 
-@router.post("/generate", response_model=schemas.CoverLetter)
+@router.post("/generate", response_model=schemas.CoverLetterDetail)
 async def generate_cover_letter(
     req: schemas.CoverLetterGenerateRequest,
     db: AsyncSession = Depends(get_async_db),

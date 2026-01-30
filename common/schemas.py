@@ -72,7 +72,7 @@ class PortfolioJobQuery(PortfolioJobQueryCreate):
     id: int
     model_config = ConfigDict(from_attributes=True)
 
-class Portfolio(PortfolioBase):
+class PortfolioSummary(PortfolioBase):
     id: int
     user_id: int
     created_at: datetime
@@ -85,14 +85,19 @@ class Portfolio(PortfolioBase):
     role: Optional[str] = None
     description: Optional[str] = None
     tech_stack: Optional[List[str]] = None
-
-    # Relationship
-    job_queries: List[PortfolioJobQuery] = []
     
     model_config = ConfigDict(from_attributes=True)
 
+# Legacy alias for backward compatibility or simple usage
+class Portfolio(PortfolioSummary):
+    pass
+
+class PortfolioDetail(PortfolioSummary):
+    # Relationship
+    job_queries: List[PortfolioJobQuery] = []
+
 class PortfolioListResponse(BaseModel):
-    items: List[Portfolio]
+    items: List[PortfolioSummary]
     model_config = ConfigDict(from_attributes=True)
 
 class PortfolioCreateRequest(PortfolioBase):
@@ -135,20 +140,25 @@ class CoverLetterItem(CoverLetterItemBase):
 class CoverLetterCreate(CoverLetterBase):
     user_id: int
 
-class CoverLetter(CoverLetterBase):
+class CoverLetterSummary(CoverLetterBase):
     id: int
     user_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
     
+    model_config = ConfigDict(from_attributes=True)
+
+# Legacy alias for backward compatibility
+class CoverLetter(CoverLetterSummary):
+    pass
+
+class CoverLetterDetail(CoverLetterSummary):
     gap_analysis: Optional[dict] = None
     job_analysis: Optional[dict] = None
     items: List[CoverLetterItem] = []
-    
-    model_config = ConfigDict(from_attributes=True)
 
 class CoverLetterListResponse(BaseModel):
-    items: List[CoverLetter]
+    items: List[CoverLetterSummary]
     model_config = ConfigDict(from_attributes=True)
 
 class CoverLetterCreateRequest(CoverLetterBase):
@@ -168,3 +178,7 @@ class CoverLetterGenerateRequest(BaseModel):
     portfolioIds: List[int]
     question: str
     tone: str = "professional"
+
+class RecruitmentDetail(Recruitment):
+    # If we need recommendations or letters in detail view
+    pass

@@ -15,7 +15,11 @@ class CoverLetterService:
         return result.scalars().all()
 
     async def get_cover_letter(self, cl_id: int, user_id: int):
-        stmt = select(models.CoverLetter).where(models.CoverLetter.id == cl_id, models.CoverLetter.user_id == user_id)
+        stmt = (
+            select(models.CoverLetter)
+            .options(selectinload(models.CoverLetter.items))
+            .where(models.CoverLetter.id == cl_id, models.CoverLetter.user_id == user_id)
+        )
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
