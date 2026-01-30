@@ -6,13 +6,15 @@ export function proxy(request: NextRequest) {
     const host = request.headers.get('host');
     const productionDomain = 'pro-nlp-finalproject-nlp-01.vercel.app';
 
-    // 0. 도메인 체크 (이전 배포 주소 및 브랜치 미리보기 주소를 최신 프로덕션으로 리다이렉트)
+    // 0. 도메인 체크 (Preview URL 허용, 그 외의 커스텀 도메인이나 예전 배포만 메인으로 리다이렉트)
+    // Vercel Preview URL은 보통 '*-git-*.vercel.app' 형태이므로 'vercel.app'을 포함하면 허용합니다.
     if (
         process.env.NODE_ENV === 'production' &&
         host &&
         host !== productionDomain &&
         !host.includes('localhost') &&
-        !host.includes('127.0.0.1')
+        !host.includes('127.0.0.1') &&
+        !host.endsWith('.vercel.app') // Vercel Preview 도메인은 허용
     ) {
         const url = request.nextUrl.clone();
         url.host = productionDomain;
