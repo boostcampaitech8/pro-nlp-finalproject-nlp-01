@@ -166,6 +166,7 @@ jobs:
             --set-env-vars "DATABASE_URL=${{ steps.env-vars.outputs.DB_URL }}" \
             --set-env-vars "PYTHONPATH=/app" \
             --set-env-vars "GOOGLE_API_KEY=${{ steps.env-vars.outputs.G_API_KEY }}" \
+            --set-env-vars "NCP_CLOVASTUDIO_API_KEY=${{ steps.env-vars.outputs.NCP_KEY }}" \
             --set-env-vars "NCP_CLOVASTUDIO_BASE_URL=${{ steps.env-vars.outputs.NCP_BASE }}" \
             --set-env-vars "ENV=${{ steps.env-vars.outputs.ENV_TYPE }}" \
             --set-env-vars "INTERNAL_API_SECRET=${{ secrets.INTERNAL_API_SECRET }}" \
