@@ -112,7 +112,7 @@ export function RecruitInfoPanel({
                                             )}
                                         </div>
 
-                                        {recruit.tags && recruit.tags.length > 0 && (
+                                        {recruit.tags && Array.isArray(recruit.tags) && recruit.tags.length > 0 && (
                                             <div className="flex flex-wrap gap-2 pt-4">
                                                 {recruit.tags.map((tag, i) => (
                                                     <Badge key={i} variant="secondary" className="bg-slate-100 text-slate-500 hover:bg-slate-200 border-none px-3 py-1 font-bold text-[11px] rounded-lg">#{tag}</Badge>

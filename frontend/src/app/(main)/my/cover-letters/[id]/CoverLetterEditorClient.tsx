@@ -131,7 +131,7 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
                     setGapAnalysis(prev => ({ ...prev, ...polledResult.gap_analysis }));
                 }
 
-                if (polledResult.items?.length > 0) {
+                if (polledResult.items && Array.isArray(polledResult.items) && polledResult.items.length > 0) {
                     setQuestions(polledResult.items.map((item: CoverLetterItem) => ({
                         id: item.id || Date.now() + Math.random(),
                         question: item.question,
@@ -158,7 +158,7 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
                     const res = await fetchWithAuth(getApiUrl(`/cover-letters/${id}`));
                     const data = await res.json();
                     setTitle(data.title);
-                    if (data.items?.length > 0) {
+                    if (data.items && Array.isArray(data.items) && data.items.length > 0) {
                         setQuestions(data.items.map((item: CoverLetterItem) => ({
                             id: item.id || Date.now() + Math.random(),
                             question: item.question,
@@ -166,7 +166,7 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
                             key_points: item.key_points,
                             suggested_improvements: item.suggested_improvements
                         })));
-                    } else if (data.questions?.length > 0) {
+                    } else if (data.questions && Array.isArray(data.questions) && data.questions.length > 0) {
                         setQuestions(data.questions);
                     }
 

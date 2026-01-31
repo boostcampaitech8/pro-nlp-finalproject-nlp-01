@@ -42,7 +42,8 @@ class NotificationBroadcaster:
             
             async for message in pubsub.listen():
                 if message["type"] == "message":
-                    yield message["data"]
+                    # SSE format requires "data: " prefix and double newline
+                    yield f"data: {message['data']}\n\n"
         except Exception as e:
             logger.error(f"Redis subscription error for user {user_id}: {e}")
         finally:

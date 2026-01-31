@@ -130,13 +130,17 @@ class RecruitIndexer:
             
             await db.flush() # Get the ID for metadata
             
-            # 2. Generate Embedding for 1:1 Storage
-            doc = self.preprocess_recruitment(item)
-            try:
-                embedding = await self.vector_store.get_embedding(doc.page_content)
-                db_recruit.embedding = embedding
-            except Exception as e:
-                logger.error(f"Failed to generate embedding for recruitment {db_recruit.id}: {e}")
+            # 2. Generate Embedding for 1:1 Storage (Only if new or missing embedding)
+            if not db_recruit.embedding:
+                try:
+                    doc = self.preprocess_recruitment(item)
+                    embedding = await self.vector_store.get_embedding(doc.page_content)
+                    db_recruit.embedding = embedding
+                    logger.info(f"Generated embedding for recruitment {db_recruit.id}")
+                except Exception as e:
+                    logger.error(f"Failed to generate embedding for recruitment {db_recruit.id}: {e}")
+            else:
+                logger.info(f"Skipping embedding generation for existing recruitment {db_recruit.id}")
             
         await db.commit()
         return len(data_list)
