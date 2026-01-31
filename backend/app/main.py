@@ -25,7 +25,8 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Initialize Database - Create tables and heal enums
+# Initialize Database EARLY - Create tables and heal enums
+# Do this BEFORE importing/including any other modules that might use models
 from common.db_init import init_db
 init_db()
 

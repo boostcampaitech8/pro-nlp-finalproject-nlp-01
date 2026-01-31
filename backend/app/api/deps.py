@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status, Header
+from fastapi import Depends, HTTPException, status, Header, Query
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
@@ -15,7 +15,7 @@ async def get_internal_secret_optional(
     return x_internal_secret
 
 async def get_current_user(
-    token: Optional[str] = None,
+    token: Optional[str] = Query(None),
     auth_token: Optional[str] = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ) -> models.User:
@@ -42,7 +42,7 @@ async def get_current_user(
     return user
 
 async def get_current_user_optional(
-    token: Optional[str] = None,
+    token: Optional[str] = Query(None),
     auth_token: Optional[str] = Depends(OAuth2PasswordBearer(tokenUrl="auth/token", auto_error=False)),
     db: Session = Depends(get_db)
 ) -> Optional[models.User]:

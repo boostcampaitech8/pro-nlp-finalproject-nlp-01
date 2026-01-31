@@ -19,7 +19,8 @@ export function StatusBadge({ status, className, showIcon = true, variant = 'def
     const isCardTag = variant === 'card-tag';
 
     // Base styles for the tag variant (tilted, floating)
-    const cardTagStyles = isCardTag ? "absolute top-4 -left-1 -rotate-6 z-10 px-3 py-1 shadow-md scale-110" : "";
+    // Positioned at top-right, tilted opposite way (reversed angle), and increased shadow/offset
+    const cardTagStyles = isCardTag ? "absolute -top-1.5 -right-3 rotate-6 z-10 px-4 py-1.5 shadow-xl scale-110 rounded-lg whitespace-nowrap" : "";
 
     if (normalizedStatus === 'PENDING' || normalizedStatus === 'PROCESSING') {
         return (

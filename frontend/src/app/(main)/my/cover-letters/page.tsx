@@ -145,11 +145,17 @@ export default function CoverLettersPage() {
                                     transition={{ delay: index * 0.05 }}
                                 >
                                     <Card className={cn(
-                                        "relative flex flex-col transition-all duration-500 ease-in-out group border-slate-200 bg-white h-full min-h-[300px] overflow-hidden rounded-2xl ring-4 ring-transparent hover:ring-blue-500/5 shadow-sm",
+                                        "relative flex flex-col transition-all duration-500 ease-in-out group border-slate-200 bg-white h-full min-h-[300px] overflow-visible rounded-2xl ring-4 ring-transparent hover:ring-blue-500/5 shadow-sm",
                                         expired && "opacity-75 grayscale-[0.3]",
                                         isSelectionMode ? "cursor-pointer border-blue-100 shadow-sm" : "hover:shadow-xl hover:-translate-y-1.5",
                                         isSelected && "ring-2 ring-blue-500 border-blue-500 bg-blue-50/10 shadow-lg shadow-blue-500/5 hover:ring-blue-500/20"
                                     )} onClick={() => isSelectionMode && toggleSelection(cl.id)}>
+
+                                        {/* Status Tag */}
+                                        <StatusBadge
+                                            status={cl.processing_status || cl.processingStatus || cl.status || 'COMPLETED'}
+                                            variant="card-tag"
+                                        />
 
                                         {/* Whole Card Link (Active only in normal mode) */}
                                         {!isSelectionMode && (

@@ -101,7 +101,7 @@ export default function PortfoliosPage() {
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}
                             >
-                                <Card className="flex flex-col h-full hover:shadow-xl transition-all duration-500 ease-in-out border-slate-200 hover:-translate-y-1.5 bg-white group overflow-hidden rounded-2xl shadow-sm ring-4 ring-transparent hover:ring-blue-500/5">
+                                <Card className="flex flex-col h-full hover:shadow-xl transition-all duration-500 ease-in-out border-slate-200 hover:-translate-y-1.5 bg-white group overflow-visible rounded-2xl shadow-sm ring-4 ring-transparent hover:ring-blue-500/5">
                                     <CardHeader className="pb-4 relative">
                                         <StatusBadge
                                             status={portfolio.processingStatus || portfolio.processing_status || 'PENDING'}
