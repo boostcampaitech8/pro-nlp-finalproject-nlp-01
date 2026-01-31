@@ -34,10 +34,13 @@ class NotificationService:
             # We assume the caller commits later or we rely on session flush
             
             # 2. Trigger Real-time Event
+            target_url = f"{settings.BACKEND_URL}/api/notifications/trigger-internal"
+            logger.info(f"Attempting to trigger notification at: {target_url}")
+            
             async with httpx.AsyncClient() as client:
                 try:
-                    await client.post(
-                        f"{settings.BACKEND_URL}/api/notifications/trigger-internal",
+                    response = await client.post(
+                        target_url,
                         json={
                             "user_id": user_id,
                             "type": notification_type,
@@ -50,6 +53,7 @@ class NotificationService:
                         },
                         timeout=5.0
                     )
+                    logger.info(f"Notification trigger response: {response.status_code} - {response.text}")
                 except Exception as ex:
                     logger.warning(f"Failed to trigger real-time notification: {ex}")
             

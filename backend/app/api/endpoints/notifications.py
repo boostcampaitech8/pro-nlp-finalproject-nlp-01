@@ -87,7 +87,16 @@ async def trigger_notification_internal(
     """
     Internal endpoint called by Cloud Run Jobs to trigger real-time notification.
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    # Debug logging
+    masked_received = x_internal_secret[:3] + "***" if x_internal_secret and len(x_internal_secret) > 3 else "***"
+    masked_expected = settings.INTERNAL_API_SECRET[:3] + "***" if len(settings.INTERNAL_API_SECRET) > 3 else "***"
+    logger.info(f"Notification Internal Trigger: Received Secret={masked_received}, Expected={masked_expected}")
+
     if x_internal_secret != settings.INTERNAL_API_SECRET:
+        logger.warning(f"Notification trigger auth failed. Received: {x_internal_secret}, Expected: {settings.INTERNAL_API_SECRET}")
         raise HTTPException(status_code=403, detail="Invalid internal secret")
     
     user_id = payload.get("user_id")

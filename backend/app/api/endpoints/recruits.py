@@ -95,7 +95,23 @@ async def trigger_indexing(
     Authorized via X-Internal-Secret header.
     """
     from common.config import settings
+    import logging
+    logger = logging.getLogger(__name__)
+
+    # Debug logging for 403 investigation
+    logger.info(f"Trigger Index Auth Check:")
+    logger.info(f"Received Secret Length: {len(internal_secret) if internal_secret else 'None'}")
+    logger.info(f"Expected Secret Length: {len(settings.INTERNAL_API_SECRET)}")
+    
+    if internal_secret:
+        masked_received = internal_secret[:3] + "***" if len(internal_secret) > 3 else "***"
+        logger.info(f"Received Secret (Masked): {masked_received}")
+    
+    masked_expected = settings.INTERNAL_API_SECRET[:3] + "***" if len(settings.INTERNAL_API_SECRET) > 3 else "***"
+    logger.info(f"Expected Secret (Masked): {masked_expected}")
+
     if internal_secret != settings.INTERNAL_API_SECRET:
+        logger.warning(f"Internal secret mismatch. Received: {internal_secret}, Expected: {settings.INTERNAL_API_SECRET}") # Be careful with this in prod, but needed for debug
         raise HTTPException(status_code=403, detail="Not authorized for internal trigger")
         
     from app.services.job_service import job_service
