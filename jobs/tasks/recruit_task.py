@@ -54,13 +54,14 @@ async def run_scraper(db):
     crawler = RecruitmentCrawler(target_pages=3) # Crawl first 3 pages
     
     try:
-        # Fetch existing URLs to avoid analyzing same jobs again
-        stmt = select(Recruitment.link)
+        # Fetch existing identifiers (Company + Title) to avoid analyzing same jobs again
+        # URL matching can be flaky due to query params or protocol changes
+        stmt = select(Recruitment.company, Recruitment.title)
         res = await db.execute(stmt)
-        existing_links = res.scalars().all()
-        existing_url_set = set(existing_links)
+        existing_rows = res.all()
+        existing_identifiers = {(row.company, row.title) for row in existing_rows}
         
-        results = await crawler.crawl_and_parse(exclude_urls=list(existing_url_set))
+        results = await crawler.crawl_and_parse(exclude_identifiers=existing_identifiers)
         logger.info(f"Crawler returned {len(results)} items. Syncing with database...")
         
         new_count = 0
