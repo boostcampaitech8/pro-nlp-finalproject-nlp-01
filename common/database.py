@@ -1,74 +1,58 @@
 import os
 import logging
-from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine import make_url
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-
-
-# Setup basic logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 from sqlalchemy.pool import NullPool
 from common.config import settings
 
+# Setup basic logging
+# logging.basicConfig(level=logging.INFO) # Removing to avoid interfering with app logger
+logger = logging.getLogger(__name__)
+
+# 1. Base URL Parsing
 raw_url = settings.DATABASE_URL
+url = make_url(raw_url)
 
-# Handle legacy 'postgres://' prefix
-if raw_url.startswith("postgres://"):
-    raw_url = raw_url.replace("postgres://", "postgresql://", 1)
+# Handle legacy 'postgres' driver name
+if url.drivername == "postgres":
+    url = url.set(drivername="postgresql")
 
-# Enforce sslmode=require for Supabase Pooler (port 6543) if not present
-if "supabase.com:6543" in raw_url and "sslmode=" not in raw_url:
-    separator = "&" if "?" in raw_url else "?"
-    raw_url += f"{separator}sslmode=require"
+# 2. Sync Engine Configuration
+# Supabase Pooler (6543) needs sslmode=require
+sync_url = url
+if "supabase.com" in (sync_url.host or "") or "supabase.co" in (sync_url.host or ""):
+    if sync_url.port == 6543:
+        sync_url = sync_url.update_query_dict({"sslmode": "require"})
 
-DATABASE_URL = raw_url
-# Use a safer logging that won't crash if URL is weird
-try:
-    url_tag = DATABASE_URL.split('@')[-1].split('?')[0]
-except Exception:
-    url_tag = "unknown"
-logger.info(f"Initializing database engines... (Target: {url_tag})")
-
-# Sync Engine
-engine = create_engine(DATABASE_URL, poolclass=NullPool)
+logger.info(f"Sync engine target: {sync_url.host}:{sync_url.port}")
+engine = create_engine(sync_url, poolclass=NullPool)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Async Engine setup
-# asyncpg (used by asyncpg driver) does not support 'sslmode' in the query string.
-# We must strip it for the async URL but keep it for the sync URL.
-if "postgresql+asyncpg://" not in DATABASE_URL:
-    ASYNC_DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
-else:
-    ASYNC_DATABASE_URL = DATABASE_URL
+# 3. Async Engine Configuration
+# Use postgresql+asyncpg driver
+async_url = url.set(drivername="postgresql+asyncpg")
 
-# Clean ASYNC_DATABASE_URL of 'sslmode'
-if "?" in ASYNC_DATABASE_URL:
-    base_url, query_str = ASYNC_DATABASE_URL.split("?", 1)
-    # Filter out sslmode
-    params = [p for p in query_str.split("&") if not p.startswith("sslmode=")]
-    ASYNC_DATABASE_URL = base_url + ("?" + "&".join(params) if params else "")
+# asyncpg does not use 'sslmode' query param, but 'ssl' in connect_args or query.
+# We'll strip sslmode from query and use connect_args for SSL.
+query = dict(async_url.query)
+query.pop("sslmode", None)
+async_url = async_url.set(query=query)
 
-try:
-    async_tag = ASYNC_DATABASE_URL.split('@')[-1].split('?')[0]
-except Exception:
-    async_tag = "unknown"
-logger.info(f"Async engine target: {async_tag}")
+logger.info(f"Async engine target: {async_url.host}:{async_url.port}")
 
-# asyncpg handles SSL differently (via connect_args or 'ssl' param)
 async_connect_args = {"statement_cache_size": 0}
-# Supabase requires SSL for the pooler (6543) and usually for direct (5432) on cloud
-if "supabase.co" in ASYNC_DATABASE_URL or "supabase.com" in ASYNC_DATABASE_URL:
+if "supabase.com" in (async_url.host or "") or "supabase.co" in (async_url.host or ""):
     async_connect_args["ssl"] = "require"
 
 async_engine = create_async_engine(
-    ASYNC_DATABASE_URL,
+    async_url,
     poolclass=NullPool,
     connect_args=async_connect_args
 )
-AsyncSessionLocal = sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)
+AsyncSessionLocal = async_sessionmaker(async_engine, expire_on_commit=False)
 
 Base = declarative_base()
 

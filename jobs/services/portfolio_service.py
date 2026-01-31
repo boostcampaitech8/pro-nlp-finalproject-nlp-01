@@ -297,7 +297,7 @@ class PortfolioService:
         Specialized task for 'Preview/Analysis' only.
         """
         try:
-            stmt = select(Portfolio).where(Portfolio.id == portfolio_id)
+            stmt = select(Portfolio).where(Portfolio.id == portfolio_id).options(selectinload(Portfolio.job_queries))
             result = await self.db.execute(stmt)
             portfolio = result.scalar_one_or_none()
             
