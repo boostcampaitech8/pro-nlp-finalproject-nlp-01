@@ -34,7 +34,7 @@ export function NotificationBell() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80 max-h-[400px] overflow-y-auto">
-                <div className="flex items-center justify-between px-4 py-2 border-b">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100">
                     <span className="text-sm font-semibold">알림</span>
                     {unreadCount > 0 && <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{unreadCount}</span>}
                 </div>
@@ -45,7 +45,7 @@ export function NotificationBell() {
                         <DropdownMenuItem
                             key={n.id}
                             className={cn(
-                                "flex flex-col items-start gap-1 p-4 cursor-pointer focus:bg-slate-50",
+                                "flex flex-col items-start gap-1 p-4 cursor-pointer focus:bg-slate-50 border-b border-slate-50 last:border-0",
                                 !n.is_read && "bg-blue-50/50"
                             )}
                             onClick={() => {
@@ -63,7 +63,7 @@ export function NotificationBell() {
                         </DropdownMenuItem>
                     ))
                 )}
-                <div className="p-2 border-t text-center">
+                <div className="p-2 border-t border-slate-100 text-center">
                     <Link href="/my/notifications" className="text-xs text-slate-400 hover:text-slate-600">
                         전체 알림 보기
                     </Link>
