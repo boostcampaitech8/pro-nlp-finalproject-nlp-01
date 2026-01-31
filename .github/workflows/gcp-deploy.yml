@@ -94,28 +94,6 @@ jobs:
             echo "NO_TOKEN=${{ secrets.NOTION_TOKEN }}" >> $GITHUB_OUTPUT
           fi
 
-      # In 'Deploy Backend Service' step:
-          env_vars: |
-            DATABASE_URL=${{ steps.env-vars.outputs.DB_URL }}
-            SECRET_KEY=${{ steps.env-vars.outputs.SEC_KEY }}
-            ALGORITHM=HS256
-            PYTHONPATH=/app
-            GOOGLE_API_KEY=${{ steps.env-vars.outputs.G_API_KEY }}
-            KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }}
-            KAKAO_CLIENT_SECRET=${{ steps.env-vars.outputs.K_SECRET }}
-            KAKAO_REDIRECT_URI=${{ steps.env-vars.outputs.K_REDIRECT }}
-            NCP_CLOVASTUDIO_API_KEY=${{ steps.env-vars.outputs.NCP_KEY }}
-            NCP_CLOVASTUDIO_BASE_URL=${{ steps.env-vars.outputs.NCP_BASE }}
-            REDIS_URL=${{ steps.env-vars.outputs.REDIS_URL }}
-            ENV=${{ steps.env-vars.outputs.ENV_TYPE }}
-            GCP_PROJECT_ID=${{ env.PROJECT_ID }}
-            GCP_REGION=${{ env.REGION }}
-            CLOUD_RUN_JOB_NAME=${{ steps.env-vars.outputs.JOB_SERVICE }}
-            INTERNAL_API_SECRET=${{ secrets.INTERNAL_API_SECRET }}
-            GITHUB_TOKEN=${{ steps.env-vars.outputs.GH_TOKEN }}
-            NOTION_TOKEN=${{ steps.env-vars.outputs.NO_TOKEN }}
-            GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}
-            BACKEND_URL=${{ steps.env-vars.outputs.BACKEND_URL }}
 
       - name: Google Auth
         uses: google-github-actions/auth@v2
