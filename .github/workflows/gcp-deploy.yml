@@ -135,6 +135,7 @@ jobs:
             INTERNAL_API_SECRET=${{ secrets.INTERNAL_API_SECRET }}
             GITHUB_TOKEN=${{ steps.env-vars.outputs.GH_TOKEN }}
             NOTION_TOKEN=${{ steps.env-vars.outputs.NO_TOKEN }}
+            GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}
           flags: '--min-instances=0 --max-instances=5 --memory=1Gi --cpu=1 --timeout=300s --allow-unauthenticated'
 
       - name: Update Cloud Run Job
@@ -153,6 +154,7 @@ jobs:
             --set-env-vars "INTERNAL_API_SECRET=${{ secrets.INTERNAL_API_SECRET }}" \
             --set-env-vars "GITHUB_TOKEN=${{ steps.env-vars.outputs.GH_TOKEN }}" \
             --set-env-vars "NOTION_TOKEN=${{ steps.env-vars.outputs.NO_TOKEN }}" \
+            --set-env-vars "GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}" \
             || gcloud run jobs create ${{ steps.env-vars.outputs.JOB_SERVICE }} \
             --image ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ steps.env-vars.outputs.JOB_SERVICE }}:${{ steps.env-vars.outputs.IMAGE_TAG }} \
             --region ${{ env.REGION }} \
@@ -165,4 +167,5 @@ jobs:
             --set-env-vars "ENV=${{ steps.env-vars.outputs.ENV_TYPE }}" \
             --set-env-vars "INTERNAL_API_SECRET=${{ secrets.INTERNAL_API_SECRET }}" \
             --set-env-vars "GITHUB_TOKEN=${{ steps.env-vars.outputs.GH_TOKEN }}" \
-            --set-env-vars "NOTION_TOKEN=${{ steps.env-vars.outputs.NO_TOKEN }}"
+            --set-env-vars "NOTION_TOKEN=${{ steps.env-vars.outputs.NO_TOKEN }}" \
+            --set-env-vars "GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}"

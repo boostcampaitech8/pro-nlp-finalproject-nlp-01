@@ -16,6 +16,7 @@ langchain-core>=0.2.10
 langchain-text-splitters>=0.2.0
 google-genai
 google-cloud-vision
+google-cloud-storage
 
 # Utils
 pypdf

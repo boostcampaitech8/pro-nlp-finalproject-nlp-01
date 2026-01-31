@@ -1,6 +1,7 @@
 import os
 import logging
 import httpx
+import uuid
 from typing import List, Dict, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -8,6 +9,7 @@ from sqlalchemy.orm import selectinload
 
 from common.models import Portfolio, PortfolioJobQuery, ProcessingStatus
 from common import schemas
+from common.gcs_utils import gcs_utils
 from jobs.services.notification_service import NotificationService
 
 logger = logging.getLogger(__name__)
@@ -64,12 +66,7 @@ class PortfolioService:
 
     async def process_portfolio_logic(self, portfolio_id: int):
         """
-        Core logic for processing a portfolio:
-        1. Extract text based on type
-        2. Refine with LLM (extract projects)
-        3. Save projects as separate Portfolio records (if multiple) or update existing
-        4. Generate embeddings
-        5. Trigger subsequent updates
+        Core logic for processing a portfolio.
         """
         try:
             # Fetch Portfolio with queries
@@ -88,8 +85,19 @@ class PortfolioService:
             source = portfolio.source_url
             p_type = portfolio.type
             
+            # Download from GCS if needed
+            if source.startswith("gs://"):
+                local_file_name = os.path.basename(source)
+                local_path = os.path.join("/tmp/downloads", f"{uuid.uuid4()}_{local_file_name}")
+                source = gcs_utils.download_file(source, local_path)
+                logger.info(f"Downloaded GCS file to {source} for processing")
+
             if p_type == "file":
                 text = self.file_extractor.extract(source)
+                # Cleanup local download
+                if source != portfolio.source_url and os.path.exists(source):
+                    try: os.remove(source)
+                    except: pass
             elif p_type == "notion":
                 text = self.notion_extractor.extract(source)
             elif p_type == "github":
@@ -112,19 +120,18 @@ class PortfolioService:
                 portfolio.extracted_summary = user_data.profile.summary
                 portfolio.extracted_job_title = user_data.profile.job_title
                 portfolio.processing_status = ProcessingStatus.REVIEW_REQUIRED
-                await self._create_notification(
+                await NotificationService.create_and_notify(
+                    db=self.db,
                     user_id=portfolio.user_id,
                     title="포트폴리오 분석 완료",
                     message=f"[{portfolio.project_name}] AI 분석이 완료되었습니다. 내용을 검토해 주세요.",
-                    link=f"/my/portfolios/{portfolio.id}"
+                    link=f"/my/portfolios/{portfolio.id}",
+                    notification_type="PORTFOLIO_READY"
                 )
                 await self.db.commit()
             else:
                 base_title = portfolio.title
                 p0 = projects[0]
-                
-                # Update logic: If multiple projects found, the original record becomes Project 0
-                # and new records are created for Project 1..N.
                 
                 # P0 Embedding
                 desc0 = p0.description_for_embedding or ""
@@ -146,19 +153,16 @@ class PortfolioService:
                 portfolio.embedding = embedding0
 
                 # 4. Save Portfolios
-                # p0: Main Portfolio (the one which was analyzing)
                 await NotificationService.create_and_notify(
                     db=self.db,
                     user_id=portfolio.user_id,
-                    title=f"포트폴리오 분석 완료",
+                    title="포트폴리오 분석 완료",
                     message=f"[{portfolio.project_name}] AI 분석이 완료되었습니다. 내용을 검토해 주세요.",
                     link=f"/my/portfolios/{portfolio.id}",
                     notification_type="PORTFOLIO_READY"
                 )
                 
                 # Add Job Queries for p0 to main portfolio
-                # Note: This appends. Since it's a new extraction, effectively we might want to clear old ones if re-running.
-                # But for now assuming clean run.
                 for jq in p0.job_queries:
                     q_emb = None
                     try:
@@ -228,20 +232,15 @@ class PortfolioService:
                 await self.db.commit()
                 logger.info(f"Successfully processed portfolio {portfolio.id} split into {len(new_portfolios)} entries")
 
-                # 5. Trigger Post-Processing (Recommendations & Profile Update) inside JOB context
-                # We do this for ALL created portfolios
-                
-                # Import here to avoid circular dependency at top level if any
+                # 5. Trigger Post-Processing
                 from jobs.services.recruit_service import precompute_recommendations_for_portfolio
 
                 for p in new_portfolios:
-                    # 5a. Recommendations
                     try:
                         await precompute_recommendations_for_portfolio(self.db, p.id)
                     except Exception as e:
                         logger.error(f"Post-processing (Recs) failed for {p.id}: {e}")
 
-                    # 5b. Global Profile Update
                     try:
                          await self._update_user_global_profile(
                             user_id=p.user_id,
@@ -255,10 +254,7 @@ class PortfolioService:
 
         except Exception as e:
             logger.error(f"Processing Failed for Portfolio {portfolio_id}: {e}")
-            # Ensure session is usable by rolling back the failed transaction
             await self.db.rollback()
-            
-            # Re-fetch to fail status in a fresh transaction state
             try:
                 stmt = select(Portfolio).where(Portfolio.id == portfolio_id)
                 result = await self.db.execute(stmt)
@@ -271,9 +267,6 @@ class PortfolioService:
             raise
 
     async def _update_user_global_profile(self, user_id: int, project_name: str, role: str, tech_stack: str, description: str):
-        """
-        Helper to trigger global profile update.
-        """
         try:
             from common.models import User
             stmt = select(User).where(User.id == user_id)
@@ -282,17 +275,14 @@ class PortfolioService:
             
             if not user: return
 
-            # Prepare Info
             new_info = f"프로젝트명: {project_name}\n역할: {role}\n기술스택: {tech_stack}\n내용: {description}"
             
-            # Call LLM
             updated_profile = await self.llm_refiner.update_global_user_profile(
                 current_summary=user.profile_summary or "",
                 current_job_title=user.desired_job_title or "",
                 new_project_info=new_info
             )
             
-            # Update User
             user.profile_summary = updated_profile.get("summary", user.profile_summary)
             user.desired_job_title = updated_profile.get("job_title", user.desired_job_title)
             
@@ -302,12 +292,9 @@ class PortfolioService:
         except Exception as e:
             logger.error(f"Failed to update global profile for user {user_id}: {e}")
 
-
     async def run_analysis_extraction(self, portfolio_id: int):
         """
         Specialized task for 'Preview/Analysis' only.
-        Extracts text and runs AI refinement, but DOES NOT generate embeddings
-        or trigger post-processing recommendations.
         """
         try:
             stmt = select(Portfolio).where(Portfolio.id == portfolio_id)
@@ -321,12 +308,23 @@ class PortfolioService:
             portfolio.processing_status = ProcessingStatus.PROCESSING
             await self.db.commit()
 
+            # 1. Extract
             source = portfolio.source_url
             p_type = portfolio.type
             
-            # 1. Extract
+            # Download from GCS if needed
+            if source.startswith("gs://"):
+                local_file_name = os.path.basename(source)
+                local_path = os.path.join("/tmp/downloads", f"analyze_{uuid.uuid4()}_{local_file_name}")
+                source = gcs_utils.download_file(source, local_path)
+                logger.info(f"Downloaded GCS file (Analysis) to {source} for processing")
+
             if p_type == "file":
                 text = self.file_extractor.extract(source)
+                # Cleanup
+                if source != portfolio.source_url and os.path.exists(source):
+                    try: os.remove(source)
+                    except: pass
             elif p_type == "notion":
                 text = self.notion_extractor.extract(source)
             elif p_type == "github":
@@ -340,7 +338,7 @@ class PortfolioService:
             portfolio.content = self._sanitize_text(text)
             await self.db.commit()
 
-            # 2. Refine (AI Pipeline) - Reuse existing refiner
+            # 2. Refine (AI Pipeline)
             combined_result = await self.llm_refiner.extract_user_data_and_queries(text)
             user_data = combined_result.user_data
             projects = user_data.projects
@@ -353,7 +351,6 @@ class PortfolioService:
                 portfolio.description = p0.description_for_embedding
                 portfolio.tech_stack = p0.tech_stack
                 
-                # Add Job Queries
                 for jq in p0.job_queries:
                     portfolio.job_queries.append(
                         PortfolioJobQuery(
@@ -365,25 +362,23 @@ class PortfolioService:
             
             portfolio.extracted_summary = user_data.profile.summary
             portfolio.extracted_job_title = user_data.profile.job_title
-            
             portfolio.processing_status = ProcessingStatus.REVIEW_REQUIRED
             
-            await self._create_notification(
+            await NotificationService.create_and_notify(
+                db=self.db,
                 user_id=portfolio.user_id,
                 title="포트폴리오 분석 완료",
-                message=f"[{portfolio.project_name or '새 포트폴리오'}] 분석이 완료되었습니다. 검토를 진행해 주세요.",
-                link=f"/my/portfolios/{portfolio.id}"
+                message=f"[{portfolio.project_name or '새 포트폴리오'}] 분석이 완료되었습니다. 내용을 검토해 주세요.",
+                link=f"/my/portfolios/{portfolio.id}",
+                notification_type="PORTFOLIO_READY"
             )
             await self.db.commit()
-            logger.info(f"Analysis (Extraction + Refinement) completed for Portfolio {portfolio_id}")
+            logger.info(f"Analysis completed for Portfolio {portfolio_id}")
 
         except Exception as e:
             logger.error(f"Analysis extraction failed for Portfolio {portfolio_id}: {e}")
-            # Ensure session is usable by rolling back
             await self.db.rollback()
-            
             try:
-                # Mark as failed in a fresh state
                 stmt = select(Portfolio).where(Portfolio.id == portfolio_id)
                 result = await self.db.execute(stmt)
                 portfolio = result.scalar_one_or_none()
@@ -393,4 +388,3 @@ class PortfolioService:
             except Exception as final_e:
                 logger.error(f"Final failure state update failed (Analysis): {final_e}")
             raise
-

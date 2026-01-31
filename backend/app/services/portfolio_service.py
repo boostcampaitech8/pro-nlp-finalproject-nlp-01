@@ -14,6 +14,7 @@ from common.models import Portfolio, ProcessingStatus
 from common.database import AsyncSessionLocal
 from common import schemas
 from app.services.job_service import job_service
+from common.gcs_utils import gcs_utils
 
 logger = logging.getLogger(__name__)
 
@@ -37,15 +38,20 @@ class PortfolioService:
         file_name = f"{uuid.uuid4()}{file_ext}"
         file_path = UPLOAD_DIR / file_name
         
+        # Save locally temporarily
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
         try:
-            # 1. Save placeholder Portfolio record
+            # 2. Upload to GCS
+            remote_path = f"portfolios/{user_id}/{file_name}"
+            gs_uri = gcs_utils.upload_file(str(file_path), remote_path)
+            
+            # 3. Save placeholder Portfolio record with GCS URI
             portfolio = Portfolio(
                 project_name=title, # Placeholder
                 type="file",
-                source_url=str(file_path),
+                source_url=gs_uri,
                 user_id=user_id,
                 processing_status=ProcessingStatus.PENDING
             )
@@ -53,9 +59,13 @@ class PortfolioService:
             await self.db.commit()
             await self.db.refresh(portfolio)
             
-            # 2. Trigger background job
+            # 4. Trigger background job
             job_service.trigger_job(task="portfolio_extraction", target_id=portfolio.id)
             
+            # Clean up local file after upload
+            if file_path.exists():
+                file_path.unlink()
+                
             return portfolio
             
         except Exception as e:
@@ -118,26 +128,20 @@ class PortfolioService:
     async def save_verified_portfolio(self, user_id: int, req: schemas.PortfolioCreateRequest):
         """
         Save a portfolio that has been reviewed by the user.
-        Note: The heavy embedding parts are now triggered as post-save updates if needed,
-        but typically the AI already generated them.
         """
         logger.info(f"Saving verified portfolio for user {user_id}: {req.project_name}")
         
-        # We can still save metadata directly
         data = req.model_dump(exclude={"job_queries"})
         portfolio = Portfolio(
             **data,
             user_id=user_id,
             processing_status=ProcessingStatus.COMPLETED
         )
-        # Note: Embedding and job_queries should ideally come from the request if already generated
-        # or we trigger a light job to update them.
         
         self.db.add(portfolio)
         await self.db.commit()
         await self.db.refresh(portfolio)
         
-        # Trigger any post-save heavy updates (e.g. global profile update)
         job_service.trigger_job(task="recruit_update", target_id=user_id)
         
         return portfolio
@@ -180,7 +184,6 @@ class PortfolioService:
     async def analyze_portfolio_source(self, user_id: int, source: str, p_type: str):
         """
         Asynchronous analysis of a portfolio source for preview.
-        Offloads the extraction to a Cloud Run Job.
         """
         logger.info(f"Analyzing portfolio source asynchronously: {source} ({p_type})")
         
@@ -214,7 +217,6 @@ class PortfolioService:
     async def analyze_portfolio_file(self, user_id: int, file: UploadFile):
         """
         Asynchronous analysis of an uploaded file.
-        Offloads extraction to a Cloud Run Job.
         """
         logger.info(f"Analyzing portfolio file asynchronously: {file.filename}")
         
@@ -222,15 +224,20 @@ class PortfolioService:
         file_name = f"analyze_{uuid.uuid4()}{file_ext}"
         file_path = UPLOAD_DIR / file_name
         
+        # Save locally temporarily
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
         try:
-            with open(file_path, "wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
+            # 2. Upload to GCS
+            remote_path = f"analysis/{user_id}/{file_name}"
+            gs_uri = gcs_utils.upload_file(str(file_path), remote_path)
             
-            # 1. Create placeholder
+            # 3. Create placeholder with GCS URI
             portfolio = Portfolio(
                 project_name=f"Analysis: {file.filename}",
                 type="file",
-                source_url=str(file_path),
+                source_url=gs_uri,
                 user_id=user_id,
                 processing_status=ProcessingStatus.PENDING
             )
@@ -238,7 +245,7 @@ class PortfolioService:
             await self.db.commit()
             await self.db.refresh(portfolio)
             
-            # 2. Trigger job
+            # 4. Trigger job
             success = job_service.trigger_job(task="portfolio_analysis", target_id=portfolio.id)
             
             if not success:
@@ -246,13 +253,15 @@ class PortfolioService:
                 await self.db.commit()
                 return {"error": "Failed to trigger analysis job (Infrastructure error)", "success": False}
                 
+            # Clean up local file
+            if file_path.exists():
+                file_path.unlink()
+                
             return {"portfolio_id": portfolio.id, "status": "PENDING", "success": True}
+            
         except Exception as e:
              logger.error(f"Async file analysis trigger failed: {e}")
              await self.db.rollback()
              if file_path.exists():
                  file_path.unlink()
              return {"error": str(e), "success": False}
-
-
-

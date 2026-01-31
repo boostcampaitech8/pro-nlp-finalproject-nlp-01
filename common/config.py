@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     GCP_PROJECT_ID: Optional[str] = os.getenv("GCP_PROJECT_ID")
     GCP_REGION: str = os.getenv("GCP_REGION", "asia-northeast3")
     CLOUD_RUN_JOB_NAME: str = os.getenv("CLOUD_RUN_JOB_NAME", "pro-nlp-jobs")
+    GCS_BUCKET_NAME: str = os.getenv("GCS_BUCKET_NAME", "")
 
     # AI / LLM Keys
     NCP_CLOVASTUDIO_API_KEY: str = os.getenv("NCP_CLOVASTUDIO_API_KEY", "")
