@@ -292,6 +292,31 @@ class PortfolioService:
         except Exception as e:
             logger.error(f"Failed to update global profile for user {user_id}: {e}")
 
+    async def update_user_profile_from_portfolio(self, portfolio_id: int):
+        """
+        Public method to trigger profile update from a specific portfolio.
+        Used by the 'profile_update' task.
+        """
+        try:
+            stmt = select(Portfolio).where(Portfolio.id == portfolio_id)
+            result = await self.db.execute(stmt)
+            portfolio = result.scalar_one_or_none()
+            
+            if not portfolio:
+                logger.error(f"Portfolio {portfolio_id} not found for profile update")
+                return
+
+            await self._update_user_global_profile(
+                user_id=portfolio.user_id,
+                project_name=portfolio.project_name,
+                role=portfolio.role or "",
+                tech_stack=", ".join(portfolio.tech_stack) if portfolio.tech_stack else "",
+                description=portfolio.description or ""
+            )
+        except Exception as e:
+            logger.error(f"Profile update task failed for portfolio {portfolio_id}: {e}")
+            raise
+
     async def run_analysis_extraction(self, portfolio_id: int):
         """
         Specialized task for 'Preview/Analysis' only.

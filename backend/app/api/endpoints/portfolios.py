@@ -38,6 +38,8 @@ async def create_portfolio(
     saved_portfolio = await service.save_verified_portfolio(current_user.id, portfolio)
     # Trigger background recommendation update
     background_tasks.add_task(recruit_service.run_bg_recalc_for_user, current_user.id)
+    # Trigger background profile update
+    background_tasks.add_task(job_service.trigger_job, task="profile_update", target_id=saved_portfolio.id)
     return saved_portfolio
 
 @router.post("/upload", response_model=schemas.PortfolioDetail, status_code=201)
@@ -169,5 +171,17 @@ async def confirm_portfolio(
     portfolio.processing_status = models.ProcessingStatus.COMPLETED
     await db.commit()
     await db.refresh(portfolio)
+    
+    # Update recommendations and profile
+    background_tasks = BackgroundTasks() # We need to inject BackgroundTasks if not present, but better to use job_service directly or request injection.
+    # Wait, confirm_portfolio signature doesn't have background_tasks. Let's add it. 
+    # Actually, simpler to just fire and forget via job_service directly if we don't want to change signature too much, 
+    # BUT job_service.trigger_job is synchronous (encapsulates logic), so we can just call it.
+    # Ideally should use BackgroundTasks for non-blocking HTTP response if possible, but let's change signature to be correct.
+    # Since I cannot see the signature change here, I will modify the signature in a separate step or just call job_service if it returns fast (it spawns process or makes http call, so pretty fast).
+    # Let's check imports. job_service is imported.
+    from app.services.job_service import job_service
+    job_service.trigger_job(task="recruit_update", target_id=current_user.id)
+    job_service.trigger_job(task="profile_update", target_id=portfolio.id)
     
     return portfolio

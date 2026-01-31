@@ -20,7 +20,7 @@ logger = logging.getLogger("run_job")
 
 # Import actual tasks
 try:
-    from jobs.tasks.portfolio_task import process_portfolio
+    from jobs.tasks.portfolio_task import process_portfolio, run_profile_update
     from jobs.tasks.cover_letter_task import process_cover_letter
     from jobs.tasks.recruit_task import process_recruitments
 except ImportError as e:
@@ -48,6 +48,12 @@ async def main():
                 logger.error("Portfolio ID is required for portfolio_extraction")
                 return
             await process_portfolio(args.id)
+            
+        elif args.task == "profile_update":
+            if not args.id:
+                logger.error("Portfolio ID is required for profile_update")
+                return
+            await run_profile_update(args.id)
             
         elif args.task == "portfolio_analysis":
             if not args.id:
