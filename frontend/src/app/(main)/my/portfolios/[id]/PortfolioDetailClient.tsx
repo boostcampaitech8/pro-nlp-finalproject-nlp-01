@@ -102,7 +102,7 @@ export default function PortfolioDetailClient({ params }: { params: Promise<{ id
                 <ArrowLeft className="h-4 w-4 mr-2" /> 목록으로 돌아가기
             </Button>
 
-            <Card className="shadow-lg border-slate-200 bg-white overflow-hidden">
+            <Card className="shadow-lg border-slate-200 bg-white overflow-visible relative">
                 <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-8">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">

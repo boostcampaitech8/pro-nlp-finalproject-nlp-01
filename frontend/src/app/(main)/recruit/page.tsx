@@ -19,7 +19,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { Sparkles, Flame, LayoutGrid, List, ArrowRight, Building, Calendar, MoreHorizontal, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { getApiUrl } from "@/lib/apiUtils";
+import { recruitApi } from "@/lib/recruitApi";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function RecruitPage() {
@@ -75,19 +75,7 @@ export default function RecruitPage() {
                 params.append('sort', 'popular');
             }
 
-            const endpoint = activeTab === 'recommend' ? '/recruits/recommend' : '/recruits';
-
-            const headers: HeadersInit = {
-                'Content-Type': 'application/json',
-            };
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
-            }
-
-            const res = await fetch(getApiUrl(`${endpoint}?${params.toString()}`), {
-                headers
-            });
-            const data = await res.json();
+            const data = await recruitApi.fetchRecruits(params, activeTab);
 
             setRecruits(data.items || []);
             setTotalPages(data.meta?.totalPages || 1);
@@ -96,7 +84,7 @@ export default function RecruitPage() {
         } finally {
             setLoading(false);
         }
-    }, [activeTab, currentPage, itemsPerPage, selectedCategory, selectedTechs, debouncedSearchQuery, token]);
+    }, [activeTab, currentPage, itemsPerPage, selectedCategory, selectedTechs, debouncedSearchQuery]);
 
     useEffect(() => {
         fetchRecruits();
@@ -131,11 +119,18 @@ export default function RecruitPage() {
                                     transition={{ delay: index * 0.05 }}
                                 >
                                     <Link href={`/recruit/${recruit.id}`} prefetch={false} className="block h-full group">
-                                        <Card className="flex flex-col h-full hover:shadow-xl transition-all duration-500 ease-in-out hover:-translate-y-1.5 cursor-pointer border-slate-200 bg-white rounded-2xl overflow-hidden ring-4 ring-transparent hover:ring-blue-500/5 shadow-sm">
+                                        <Card className="relative flex flex-col h-full hover:shadow-xl transition-all duration-500 ease-in-out hover:-translate-y-1.5 cursor-pointer border-slate-200 bg-white rounded-2xl overflow-visible ring-4 ring-transparent hover:ring-blue-500/5 shadow-sm">
+                                            {/* Recommendation Badge */}
+                                            {recruit.reason && (
+                                                <div className="absolute -top-1.5 -right-3 rotate-6 z-10 px-4 py-1.5 bg-blue-600 border border-blue-400 text-white text-[10px] font-bold shadow-xl scale-110 rounded-lg whitespace-nowrap backdrop-blur-sm ring-2 ring-white/20 flex items-center gap-1.5">
+                                                    <Sparkles className="h-3 w-3 fill-white" />
+                                                    AI 추천
+                                                </div>
+                                            )}
                                             <CardHeader className="pb-4">
                                                 <div className="flex justify-between items-start mb-2">
                                                     <Badge variant="outline" className="bg-slate-50 text-slate-400 border-slate-100 text-[10px] font-black uppercase tracking-widest px-2 py-0.5">
-                                                        JOB OPENING
+                                                        {activeTab === 'recommend' ? 'SMART MATCHING' : 'JOB OPENING'}
                                                     </Badge>
                                                 </div>
                                                 <CardTitle className="line-clamp-1 text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors duration-300 mb-1">{recruit.title}</CardTitle>
