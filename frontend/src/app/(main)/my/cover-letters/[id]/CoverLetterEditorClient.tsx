@@ -234,6 +234,11 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
 
     // --- AI Studio Logic ---
     const runAiGeneration = async () => {
+        if (!linkedRecruit?.id) {
+            alert("연결된 채용 공고 정보를 불러오지 못했습니다. 페이지를 새로고침하거나 잠시 후 다시 시도해주세요.");
+            return;
+        }
+
         setIsGenerating(true);
         try {
             const allQuestions = questions.map(q => q.question).filter(q => q.trim() !== "");
