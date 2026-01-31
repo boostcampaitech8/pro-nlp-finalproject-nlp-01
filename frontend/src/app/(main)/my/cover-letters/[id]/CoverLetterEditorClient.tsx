@@ -103,6 +103,10 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
     );
 
     const handleConfirm = async () => {
+        if (isNew) {
+            alert("먼저 저장해 주세요.");
+            return;
+        }
         try {
             const res = await fetchWithAuth(getApiUrl(`/cover-letters/${id}/confirm`), {
                 method: 'PATCH',
@@ -262,6 +266,10 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
             // Assuming data contains the cover letter ID
             if (data.id) {
                 setPollingTarget(`/cover-letters/${data.id}`);
+                // Fix: Redirect to the real ID so subsequent actions (like Confirm) work
+                if (isNew) {
+                    router.replace(`/my/cover-letters/${data.id}`);
+                }
             } else {
                 throw new Error("Invalid response from server");
             }
@@ -300,7 +308,7 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
                                     </Badge>
                                 )}
                                 <StatusBadge
-                                    status={status || 'COMPLETED'}
+                                    status={status || 'PENDING'}
                                 />
                                 <Button
                                     variant="outline"
