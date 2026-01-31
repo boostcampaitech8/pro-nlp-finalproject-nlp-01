@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { MessageCircle, ArrowRight } from "lucide-react";
-import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function LoginPage() {
     const [loading, setLoading] = useState(false);

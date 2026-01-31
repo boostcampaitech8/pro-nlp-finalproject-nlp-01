@@ -23,7 +23,7 @@ import { recruitApi } from "@/lib/recruitApi";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function RecruitPage() {
-    const { isAuthenticated, token } = useAuthStore();
+    const { isAuthenticated } = useAuthStore();
     const [recruits, setRecruits] = useState<Recruit[]>([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');

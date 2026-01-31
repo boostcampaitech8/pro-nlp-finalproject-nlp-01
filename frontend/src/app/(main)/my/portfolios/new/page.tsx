@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Github, Upload, Loader2 } from "lucide-react";
 import { portfolioApi } from "@/lib/portfolioApi";
-import { Portfolio } from "@/types";
 import { useToast } from "@/components/ui/toast-context";
 
 export default function NewPortfolioPage() {

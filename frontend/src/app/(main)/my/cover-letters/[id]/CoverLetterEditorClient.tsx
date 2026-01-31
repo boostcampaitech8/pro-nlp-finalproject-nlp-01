@@ -31,14 +31,7 @@ interface QuestionItem {
     suggested_improvements?: string[];
 }
 
-interface Portfolio {
-    id: number;
-    title: string;
-    type: 'link' | 'file' | 'github';
-    description: string;
-    project_name?: string;
-    role?: string;
-}
+// Portfolio interface removed
 
 interface RecruitDetail {
     id: number;
@@ -80,7 +73,7 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
     const [loading, setLoading] = useState(!isNew);
     const [showRecruitPanel, setShowRecruitPanel] = useState(false);
     // const [portfolios, setPortfolios] = useState<Portfolio[]>([]); // Unused
-    const [selectedPortfolioIds, setSelectedPortfolioIds] = useState<number[]>([]);
+    // const [selectedPortfolioIds, setSelectedPortfolioIds] = useState<number[]>([]); // Unused
     const [panelTab, setPanelTab] = useState("recruit");
     const [status, setStatus] = useState<'PENDING' | 'PROCESSING' | 'REVIEW_REQUIRED' | 'COMPLETED' | 'FAILED' | null>(null);
 
@@ -244,7 +237,7 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
                     // mode: aiMode, // Removed to fix 422 Error (Backend schema doesn't support 'mode')
                     tone: aiTone,
                     recruit_id: linkedRecruit?.id,
-                    portfolio_ids: selectedPortfolioIds, // Standardized: snake_case
+                    // portfolio_ids: selectedPortfolioIds, // Unused
                     questions: allQuestions
                 })
             });
