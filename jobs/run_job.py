@@ -83,10 +83,8 @@ async def main():
             # This is often part of recruit_update, but can be separate if needed
             logger.info("Running dedicated indexing task...")
             from jobs.tasks.recruit_task import run_scraper
-            # For runner, we'd need a DB session
-            from common.database import AsyncSessionLocal
-            async with AsyncSessionLocal() as db:
-                await run_scraper(db)
+            # Scraper now manages its own DB sessions to prevent timeouts
+            await run_scraper()
         else:
             logger.error(f"Unknown task: {args.task}")
             
