@@ -251,7 +251,7 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    mode: aiMode,
+                    // mode: aiMode, // Removed to fix 422 Error (Backend schema doesn't support 'mode')
                     tone: aiTone,
                     recruit_id: linkedRecruit?.id,
                     portfolio_ids: selectedPortfolioIds, // Standardized: snake_case
@@ -340,15 +340,22 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
                                     <Trash2 className="h-4 w-4 mr-2" /> 삭제
                                 </Button>
                             )}
-                            {status === 'REVIEW_REQUIRED' && (
-                                <Button variant="brand" onClick={handleConfirm} className="rounded-md h-10 px-8 font-black shadow-lg shadow-blue-500/20 animate-bounce">
-                                    <Sparkles className="mr-2 h-4 w-4 fill-white" /> 이 내용으로 최종 확정
-                                </Button>
+
+                            {status === 'REVIEW_REQUIRED' ? (
+                                <>
+                                    <Button variant="outline" onClick={() => router.back()} className="border-slate-200 h-10 px-6 font-semibold">취소</Button>
+                                    <Button variant="brand" onClick={handleConfirm} className="rounded-md h-10 px-8 font-black shadow-lg shadow-blue-500/20 animate-bounce">
+                                        <Sparkles className="mr-2 h-4 w-4 fill-white" /> 이 내용으로 최종 확정
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    <Button variant="outline" onClick={() => router.back()} className="border-slate-200 h-10 px-6 font-semibold">취소</Button>
+                                    <Button variant="default" onClick={handleSave} className="rounded-md h-10 px-6 font-bold shadow-lg shadow-blue-500/20 bg-blue-600 hover:bg-blue-700">
+                                        <Save className="mr-2 h-4 w-4" /> 저장하기
+                                    </Button>
+                                </>
                             )}
-                            <Button variant="outline" onClick={() => router.back()} className="border-slate-200 h-10 px-6 font-semibold">취소</Button>
-                            <Button variant="default" onClick={handleSave} className="rounded-md h-10 px-6 font-bold shadow-lg shadow-blue-500/20 bg-blue-600 hover:bg-blue-700">
-                                <Save className="mr-2 h-4 w-4" /> 저장하기
-                            </Button>
                         </div>
                     </div>
 
