@@ -25,17 +25,9 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Initialize Database - Create tables if they don't exist
-from common.database import engine, Base
-from common import models
-import logging
-
-try:
-    logger.info("Syncing database schema...")
-    Base.metadata.create_all(bind=engine)
-    logger.info("Database schema sync complete.")
-except Exception as e:
-    logger.error(f"Failed to sync database schema: {e}")
+# Initialize Database - Create tables and heal enums
+from common.db_init import init_db
+init_db()
 
 # CORS configuration
 origins = [

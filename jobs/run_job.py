@@ -27,6 +27,10 @@ except ImportError as e:
     logger.error(f"Failed to import tasks: {e}")
     sys.exit(1)
 
+# Initialize Database - Create tables and heal enums
+from common.db_init import init_db
+init_db()
+
 async def main():
     parser = argparse.ArgumentParser(description="Cloud Run Job Runner")
     parser.add_argument("--task", type=str, required=True, help="Task to run")
