@@ -27,6 +27,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        # Re-checkout to ensure clean state
 
       - name: Set Environment Variables
         id: env-vars
