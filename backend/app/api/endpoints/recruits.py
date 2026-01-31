@@ -87,8 +87,10 @@ async def index_recruitments(
     """
     from app.services.job_service import job_service
     # We trigger a job instead of doing it inline
-    # Assuming 'recruit_indexing' task exists or reusing 'recruit_update'
-    job_service.trigger_job(task="recruit_indexing") 
+    success = job_service.trigger_job(task="recruit_indexing") 
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to trigger indexing job (Infrastructure error)")
+        
     return {"message": "Recruitment indexing job triggered"}
 
 @router.put("/{recruit_id}", response_model=schemas.Recruitment)

@@ -123,7 +123,9 @@ async def get_ai_recommendations(db: AsyncSession, user_id: int, portfolio_id: O
             
     if not recruitment_map and portfolio_id:
         logger.info(f"No recommendations for portfolio {portfolio_id}. Triggering job.")
-        job_service.trigger_job(task="recruit_update", target_id=user_id)
+        success = job_service.trigger_job(task="recruit_update", target_id=user_id)
+        if not success:
+            return {"items": [], "status": "ERROR", "error": "Failed to trigger recommendation update"}
         return {"items": [], "status": "PROCESSING"}
 
     final_results = []
@@ -151,7 +153,9 @@ async def get_ai_recommendations(db: AsyncSession, user_id: int, portfolio_id: O
     }
 
 async def run_bg_recalc_for_user(user_id: int):
-    job_service.trigger_job(task="recruit_update", target_id=user_id)
+    success = job_service.trigger_job(task="recruit_update", target_id=user_id)
+    if not success:
+        logger.error(f"Failed to trigger background recommendation update for user {user_id}")
 
 async def run_bg_inc_view_count(recruit_id: int):
     # This remains in backend as a light task or we can just call inc_view_count directly

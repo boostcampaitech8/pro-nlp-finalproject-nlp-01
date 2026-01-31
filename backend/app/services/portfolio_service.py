@@ -195,8 +195,13 @@ class PortfolioService:
             await self.db.refresh(portfolio)
             
             # 2. Trigger analysis job
-            job_service.trigger_job(task="portfolio_analysis", target_id=portfolio.id)
+            success = job_service.trigger_job(task="portfolio_analysis", target_id=portfolio.id)
             
+            if not success:
+                portfolio.processing_status = ProcessingStatus.FAILED
+                await self.db.commit()
+                return {"error": "Failed to trigger analysis job (Infrastructure error)", "success": False}
+                
             return {"portfolio_id": portfolio.id, "status": "PENDING", "success": True}
         except Exception as e:
             logger.error(f"Async analysis trigger failed: {e}")
@@ -230,8 +235,13 @@ class PortfolioService:
             await self.db.refresh(portfolio)
             
             # 2. Trigger job
-            job_service.trigger_job(task="portfolio_analysis", target_id=portfolio.id)
+            success = job_service.trigger_job(task="portfolio_analysis", target_id=portfolio.id)
             
+            if not success:
+                portfolio.processing_status = ProcessingStatus.FAILED
+                await self.db.commit()
+                return {"error": "Failed to trigger analysis job (Infrastructure error)", "success": False}
+                
             return {"portfolio_id": portfolio.id, "status": "PENDING", "success": True}
         except Exception as e:
              logger.error(f"Async file analysis trigger failed: {e}")

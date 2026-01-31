@@ -39,12 +39,17 @@ class AICoverLetterService:
         await db.refresh(cover_letter)
         
         # 3. Trigger Job
-        job_service.trigger_job(
+        success = job_service.trigger_job(
             task="cover_letter_generation", 
             target_id=cover_letter.id,
             question=generate_req.question,
             tone=generate_req.tone
         )
+        
+        if not success:
+            cover_letter.processing_status = models.ProcessingStatus.FAILED
+            await db.commit()
+            # We still return the object, but with FAILED status so polling sees it
         
         return cover_letter
 

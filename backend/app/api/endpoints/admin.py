@@ -16,7 +16,10 @@ def trigger_crawling(background_tasks: BackgroundTasks, secret: str):
     
     from app.services.job_service import job_service
     # Trigger the scraping job
-    job_service.trigger_job(task="recruit_update")
+    success = job_service.trigger_job(task="recruit_update")
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to trigger crawling job (Infrastructure error)")
+        
     return {"message": "Crawling job triggered successfully"}
 
 @router.delete("/clear", status_code=200)
