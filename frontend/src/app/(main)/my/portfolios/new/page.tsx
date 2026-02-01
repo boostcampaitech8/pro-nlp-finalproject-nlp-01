@@ -8,11 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Github, Upload, Loader2, BookOpen, Link, Settings, Database, ExternalLink, Library } from "lucide-react";
+import { ArrowLeft, Github, Upload, Loader2, BookOpen, Settings, Database, Library } from "lucide-react";
 import { portfolioApi } from "@/lib/portfolioApi";
 import { integrationApi, IntegrationRepo, UserIntegration } from "@/lib/integrationApi";
 import { useToast } from "@/components/ui/toast-context";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 
 export default function NewPortfolioPage() {
     const router = useRouter();
@@ -29,11 +29,7 @@ export default function NewPortfolioPage() {
     const [githubRepos, setGithubRepos] = useState<IntegrationRepo[]>([]);
     const [isLoadingRepos, setIsLoadingRepos] = useState(false);
 
-    useEffect(() => {
-        loadIntegrations();
-    }, []);
-
-    const loadIntegrations = async () => {
+    const loadIntegrations = useCallback(async () => {
         try {
             const data = await integrationApi.fetchIntegrations();
             setIntegrations(data);
@@ -43,9 +39,9 @@ export default function NewPortfolioPage() {
         } catch (err) {
             console.error("Failed to load integrations", err);
         }
-    };
+    }, []);
 
-    const loadGithubRepos = async () => {
+    const loadGithubRepos = useCallback(async () => {
         setIsLoadingRepos(true);
         try {
             const repos = await integrationApi.fetchGithubRepos();
@@ -55,7 +51,11 @@ export default function NewPortfolioPage() {
         } finally {
             setIsLoadingRepos(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        loadIntegrations();
+    }, [loadIntegrations]);
 
     const handleGithubConnect = () => {
         window.location.href = integrationApi.getGithubLoginUrl();
