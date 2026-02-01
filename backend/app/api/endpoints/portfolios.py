@@ -67,7 +67,7 @@ async def import_notion_portfolio(
     Import portfolio from a Notion URL.
     """
     service = PortfolioService(db)
-    return await service.create_portfolio_from_notion(current_user.id, payload.project_name, payload.source_url, background_tasks)
+    return await service.create_portfolio_from_notion(current_user.id, payload.project_name, payload.source_url)
 
 @router.post("/github", response_model=schemas.PortfolioDetail, status_code=201)
 async def import_github_portfolio(
@@ -80,7 +80,7 @@ async def import_github_portfolio(
     Import portfolio from a GitHub Repository or User Profile URL/ID.
     """
     service = PortfolioService(db)
-    return await service.create_portfolio_from_github(current_user.id, payload.project_name, payload.source_url, background_tasks)
+    return await service.create_portfolio_from_github(current_user.id, payload.project_name, payload.source_url)
 
 @router.post("/blog", response_model=schemas.PortfolioDetail, status_code=201)
 async def import_blog_portfolio(
