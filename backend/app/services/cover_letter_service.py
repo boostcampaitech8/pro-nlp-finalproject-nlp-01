@@ -9,7 +9,9 @@ class CoverLetterService:
         self.db = db
 
     async def get_cover_letters(self, user_id: int, recruitment_id: int = None):
-        stmt = select(models.CoverLetter).where(models.CoverLetter.user_id == user_id)
+        stmt = select(models.CoverLetter).where(models.CoverLetter.user_id == user_id).options(
+            selectinload(models.CoverLetter.recruitment)
+        )
         if recruitment_id:
             stmt = stmt.where(models.CoverLetter.recruitment_id == recruitment_id)
         result = await self.db.execute(stmt)
@@ -29,7 +31,15 @@ class CoverLetterService:
             db_cl = models.CoverLetter(**cl.model_dump())
             self.db.add(db_cl)
             await self.db.commit()
-            await self.db.refresh(db_cl)
+            
+            # Explicitly load relationships to prevent MissingGreenlet error
+            stmt = select(models.CoverLetter).where(models.CoverLetter.id == db_cl.id).options(
+                selectinload(models.CoverLetter.items),
+                selectinload(models.CoverLetter.recruitment)
+            )
+            result = await self.db.execute(stmt)
+            db_cl = result.scalar_one()
+            
             return db_cl
         except Exception as e:
             await self.db.rollback()

@@ -23,7 +23,8 @@ export const recruitApi: RecruitApi = {
 
         const res = await fetchWithAuth(url);
         if (!res.ok) {
-            throw new Error("Failed to fetch recruitments");
+            const error = await res.json().catch(() => ({}));
+            throw new Error(error.detail || "채용 공고 목록을 불러오는데 실패했습니다.");
         }
         return res.json() as Promise<RecruitListResponse>;
     },
@@ -31,7 +32,8 @@ export const recruitApi: RecruitApi = {
     getRecruit: async (id: string | number): Promise<Recruit & { content?: string }> => {
         const res = await fetchWithAuth(getApiUrl(`/recruits/${id}`));
         if (!res.ok) {
-            throw new Error("Failed to fetch recruitment detail");
+            const error = await res.json().catch(() => ({}));
+            throw new Error(error.detail || "채용 공고 상세 정보를 불러오는데 실패했습니다.");
         }
         return res.json();
     }

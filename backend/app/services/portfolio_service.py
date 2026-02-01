@@ -177,14 +177,22 @@ class PortfolioService:
         
         self.db.add(portfolio)
         await self.db.commit()
-        await self.db.refresh(portfolio)
+        
+        # Explicitly load relationships to prevent MissingGreenlet error
+        stmt = select(Portfolio).where(Portfolio.id == portfolio.id).options(
+            selectinload(Portfolio.job_queries)
+        )
+        result = await self.db.execute(stmt)
+        portfolio = result.scalar_one()
         
         job_service.trigger_job(task="recruit_update", target_id=user_id)
         
         return portfolio
 
     async def get_portfolios(self, user_id: int):
-        stmt = select(Portfolio).where(Portfolio.user_id == user_id)
+        stmt = select(Portfolio).where(Portfolio.user_id == user_id).options(
+            selectinload(Portfolio.job_queries)
+        )
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
