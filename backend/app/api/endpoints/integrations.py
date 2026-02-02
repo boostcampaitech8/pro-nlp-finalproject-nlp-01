@@ -25,7 +25,7 @@ async def list_integrations(
 async def get_github_auth_url(current_user: models.User = Depends(deps.get_current_user)):
     """Returns GitHub OAuth URL for frontend to redirect."""
     scope = "repo,read:user"
-    url = f"https://github.com/login/oauth/authorize?client_id={settings.GH_OAUTH_CLIENT_ID}&redirect_uri={settings.GH_OAUTH_REDIRECT_URI}&scope={scope}&state={current_user.id}"
+    url = f"https://github.com/login/oauth/authorize?client_id={settings.GH_OAUTH_CLIENT_ID}&redirect_uri={settings.GH_OAUTH_REDIRECT_URI}/api/integrations/github/callback&scope={scope}&state={current_user.id}"
     return {"url": url}
 
 @router.get("/github/login")
@@ -40,7 +40,7 @@ async def github_login(
         raise HTTPException(status_code=401, detail="Authentication required")
     
     scope = "repo,read:user"
-    url = f"https://github.com/login/oauth/authorize?client_id={settings.GH_OAUTH_CLIENT_ID}&redirect_uri={settings.GH_OAUTH_REDIRECT_URI}&scope={scope}&state={uid}"
+    url = f"https://github.com/login/oauth/authorize?client_id={settings.GH_OAUTH_CLIENT_ID}&redirect_uri={settings.GH_OAUTH_REDIRECT_URI}/api/integrations/github/callback&scope={scope}&state={uid}"
     return RedirectResponse(url)
 
 @router.get("/github/callback")
@@ -61,7 +61,7 @@ async def github_callback(
                 "client_id": settings.GH_OAUTH_CLIENT_ID,
                 "client_secret": settings.GH_OAUTH_CLIENT_SECRET,
                 "code": code,
-                "redirect_uri": settings.GH_OAUTH_REDIRECT_URI
+                "redirect_uri": f"{settings.GH_OAUTH_REDIRECT_URI}/api/integrations/github/callback"
             },
             headers={"Accept": "application/json"}
         )
@@ -144,6 +144,9 @@ async def list_github_repos(
 @router.get("/notion/auth-url")
 async def get_notion_auth_url(current_user: models.User = Depends(deps.get_current_user)):
     """Returns Notion OAuth URL for frontend to redirect."""
+    if not settings.NOTION_OAUTH_CLIENT_ID or settings.NOTION_OAUTH_CLIENT_ID == "0":
+        raise HTTPException(status_code=500, detail="Notion OAuth Client ID is not configured (received '0' or empty)")
+        
     url = f"https://api.notion.com/v1/oauth/authorize?client_id={settings.NOTION_OAUTH_CLIENT_ID}&response_type=code&owner=user&redirect_uri={settings.NOTION_OAUTH_REDIRECT_URI}/api/integrations/notion/callback&state={current_user.id}"
     return {"url": url}
 
@@ -156,6 +159,9 @@ async def notion_login(
     uid = user_id if user_id else (current_user.id if current_user else None)
     if not uid:
         raise HTTPException(status_code=401, detail="Authentication required")
+        
+    if not settings.NOTION_OAUTH_CLIENT_ID or settings.NOTION_OAUTH_CLIENT_ID == "0":
+        raise HTTPException(status_code=500, detail="Notion OAuth Client ID is not configured")
     
     url = f"https://api.notion.com/v1/oauth/authorize?client_id={settings.NOTION_OAUTH_CLIENT_ID}&response_type=code&owner=user&redirect_uri={settings.NOTION_OAUTH_REDIRECT_URI}/api/integrations/notion/callback&state={uid}"
     return RedirectResponse(url)

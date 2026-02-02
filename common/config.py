@@ -78,7 +78,9 @@ class Settings(BaseSettings):
     @field_validator("BACKEND_URL")
     @classmethod
     def validate_backend_url(cls, v: str) -> str:
-        if v and not v.startswith(("http://", "https://")):
+        if not v:
+            return "http://localhost:8000"
+        if not v.startswith(("http://", "https://")):
             return f"https://{v}"
         return v
 

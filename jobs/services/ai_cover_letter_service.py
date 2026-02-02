@@ -98,7 +98,7 @@ class AICoverLetterService:
                 
                 # Add delay between requests to avoid Rate Limit (429)
                 if i > 0:
-                    delay = 3 + random.uniform(0, 2)
+                    delay = 5 + random.uniform(2, 5)
                     logger.info(f"Sleeping for {delay:.2f}s to respect rate limits...")
                     await asyncio.sleep(delay)
 
@@ -169,7 +169,8 @@ class AICoverLetterService:
                     except Exception as e:
                         if "429" in str(e) or "Too Many Requests" in str(e):
                             if attempt < retries - 1:
-                                wait_time = (2 ** attempt) * 5 + random.uniform(0, 3) 
+                                # 지수 백오프 강화: 10초, 20초, 40초...
+                                wait_time = (2 ** attempt) * 10 + random.uniform(5, 10) 
                                 logger.warning(f"Rate limit hit for item {item.id}. Retrying in {wait_time:.2f}s... (Attempt {attempt+1}/{retries})")
                                 await asyncio.sleep(wait_time)
                                 continue

@@ -42,7 +42,7 @@ async def kakao_callback(
                 "grant_type": "authorization_code",
                 "client_id": settings.KAKAO_REST_API_KEY,
                 "client_secret": settings.KAKAO_CLIENT_SECRET,
-                "redirect_uri": actual_redirect_uri,
+                "redirect_uri": f"{actual_redirect_uri}/api/auth/kakao/callback",
                 "code": code,
             },
             headers={"Content-Type": "application/x-www-form-urlencoded;charset=utf-8"},

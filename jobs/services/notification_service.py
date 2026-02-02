@@ -35,6 +35,10 @@ class NotificationService:
             # We assume the caller commits later or we rely on session flush
             
             # 2. Trigger Real-time Event
+            if not settings.BACKEND_URL or not str(settings.BACKEND_URL).startswith("http"):
+                logger.warning(f"Skipping real-time notification broadcast: BACKEND_URL is empty or missing protocol ('{settings.BACKEND_URL}')")
+                return
+
             target_url = f"{settings.BACKEND_URL}/api/notifications/trigger-internal"
             logger.info(f"Attempting to trigger notification at: {target_url}")
             

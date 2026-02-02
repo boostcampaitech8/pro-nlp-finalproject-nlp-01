@@ -67,9 +67,9 @@ export function AiStudioModal({
                                 </Label>
                                 <div className="grid grid-cols-3 gap-4">
                                     {[
-                                        { id: 'draft', label: '완성형 초안', icon: <Wand2 className="h-6 w-6" />, desc: '풀 에피소드' },
-                                        { id: 'strategy', label: '뼈대 개요', icon: <LayoutList className="h-6 w-6" />, desc: '논리적 설계' },
-                                        { id: 'refine', label: '문장 정교화', icon: <MessageSquare className="h-6 w-6" />, desc: '어휘 최적화' }
+                                        { id: 'draft', label: '기본 스타일', icon: <Wand2 className="h-6 w-6" />, desc: '풀 에피소드' },
+                                        { id: 'strategy', label: '가이드라인 생성', icon: <LayoutList className="h-6 w-6" />, desc: '논리적 설계' },
+                                        { id: 'refine', label: '소제목 스타일', icon: <MessageSquare className="h-6 w-6" />, desc: '어휘 최적화' }
                                     ].map(mode => (
                                         <div key={mode.id} onClick={() => setAiMode(mode.id as AiMode)} className={cn("p-6 rounded-[2rem] border-4 transition-all cursor-pointer text-center space-y-3 group relative overflow-hidden", aiMode === mode.id ? "border-blue-600 bg-blue-50/50 shadow-lg shadow-blue-500/10" : "border-slate-50 bg-slate-50/50 hover:border-slate-100 hover:bg-white")}>
                                             <div className={cn("mx-auto h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-300", aiMode === mode.id ? "bg-blue-600 text-white shadow-xl shadow-blue-500/20 scale-110" : "bg-white text-slate-300 group-hover:bg-slate-100 group-hover:text-blue-500")}>{mode.icon}</div>
