@@ -9,8 +9,20 @@ logger = logging.getLogger(__name__)
 class GCSUtils:
     def __init__(self):
         self.bucket_name = settings.GCS_BUCKET_NAME
-        self.client = storage.Client(project=settings.GCP_PROJECT_ID) if self.bucket_name else None
-        self.bucket = self.client.bucket(self.bucket_name) if self.client else None
+        self._client = None
+        self._bucket = None
+
+    @property
+    def client(self):
+        if self._client is None and self.bucket_name:
+            self._client = storage.Client(project=settings.GCP_PROJECT_ID)
+        return self._client
+
+    @property
+    def bucket(self):
+        if self._bucket is None and self.client:
+            self._bucket = self.client.bucket(self.bucket_name)
+        return self._bucket
 
     def upload_file(self, local_path: str, remote_path: str) -> str:
         """
