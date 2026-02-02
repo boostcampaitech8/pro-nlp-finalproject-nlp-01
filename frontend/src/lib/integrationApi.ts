@@ -7,6 +7,12 @@ export interface IntegrationRepo {
     description: string | null;
 }
 
+export interface NotionPage {
+    id: string;
+    title: string;
+    url: string;
+}
+
 export interface UserIntegration {
     id: number;
     provider: string;
@@ -30,6 +36,19 @@ export const integrationApi = {
     fetchGithubRepos: async (): Promise<IntegrationRepo[]> => {
         const res = await fetchWithAuth(getApiUrl("/integrations/github/repos"));
         if (!res.ok) throw new Error("Failed to fetch Github repos");
+        return res.json();
+    },
+
+    getNotionAuthUrl: async (): Promise<string> => {
+        const res = await fetchWithAuth(getApiUrl("/integrations/notion/auth-url"));
+        if (!res.ok) throw new Error("Failed to get Notion auth URL");
+        const data = await res.json();
+        return data.url;
+    },
+
+    fetchNotionPages: async (): Promise<NotionPage[]> => {
+        const res = await fetchWithAuth(getApiUrl("/integrations/notion/pages"));
+        if (!res.ok) throw new Error("Failed to fetch Notion pages");
         return res.json();
     },
 

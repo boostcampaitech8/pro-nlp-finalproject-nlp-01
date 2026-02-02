@@ -9,6 +9,8 @@ from sqlalchemy import select
 from common import models
 from jobs.core.cover_letter.retriever import PGHybridRetriever
 from jobs.core.cover_letter.generator import CoverLetterGenerator
+from jobs.core.portfolio.storage.supabase_vector_store import SupabaseVectorStore
+from jobs.core.cover_letter.config import SEARCH_TOP_K
 from jobs.services.notification_service import NotificationService
 
 logger = logging.getLogger(__name__)
@@ -57,13 +59,16 @@ class AICoverLetterService:
             query_text = f"{recruitment.company} {recruitment.title} {recruitment.required_qualifications or ''}"
             
             # 4. Retrieve Context
-            relevant_docs = retriever.search(query_text, query_embedding, top_k=5)
-            context_text = "\n\n".join([d.page_content for d in relevant_docs])
+            relevant_docs = retriever.search(query_text, query_embedding, top_k=SEARCH_TOP_K)
+            
+            # 5. Format experiences with metadata (llm-pipeline 방식)
+            context_text = generator._format_experiences(relevant_docs)
 
-            # 5. Gap Analysis
+            # 6. Gap Analysis
             gap_result = self.generator.analyze_gap(context_text, query_text)
             cl.gap_analysis = gap_result
             await db.commit()
+
 
             # 6. Generate Answers for each Item
             tone = os.getenv("JOB_EXTRA_TONE", "professional")
@@ -85,6 +90,8 @@ class AICoverLetterService:
                 db.add(items[0])
                 await db.flush()
 
+            # Track used experiences to avoid repetition across questions
+            used_experiences = []
 
             for i, item in enumerate(items):
                 logger.info(f"Generating ({generation_mode}) for item {item.id} ({i+1}/{len(items)}): {item.question[:30]}... (Tone: {tone})")
@@ -104,7 +111,9 @@ class AICoverLetterService:
                                 job_title=recruitment.title,
                                 question=item.question,
                                 context=context_text,
-                                gap_analysis=gap_result
+                                gap_analysis=gap_result,
+                                core_values=recruitment.company_description or "",
+                                hint=item.hint or ""
                             )
                             # Save outline result
                             item.content = f"""**[개요 생성 결과]**
@@ -130,12 +139,25 @@ class AICoverLetterService:
                                 question=item.question,
                                 context=context_text,
                                 gap_analysis=gap_result,
-                                tone=tone
+                                tone=tone,
+                                core_values=recruitment.company_description or "",
+                                max_length=item.max_length or 1000,
+                                used_experiences=used_experiences.copy(),
+                                hint=item.hint or ""
                             )
 
                             item.content = answer_data.get("content")
                             item.key_points = answer_data.get("key_points")
                             item.suggested_improvements = answer_data.get("suggested_improvements")
+                            
+                            # Extract project names from content to track usage
+                            # Simple heuristic: look for common project patterns
+                            # This is a basic implementation - could be improved with NER
+                            content = answer_data.get("content", "")
+                            if "프로젝트" in content:
+                                # Extract potential project names (very basic)
+                                # In production, you might want more sophisticated parsing
+                                pass
                         
                         # Update main cover letter content with the first item's content as a summary
                         if i == 0:

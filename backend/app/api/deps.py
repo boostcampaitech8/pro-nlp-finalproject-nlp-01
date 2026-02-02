@@ -59,3 +59,16 @@ async def get_current_user_optional(
         
     user = db.query(models.User).filter(models.User.email == email).first()
     return user
+
+async def get_current_admin_user(
+    current_user: models.User = Depends(get_current_user)
+) -> models.User:
+    """
+    관리자 권한이 있는 사용자만 허용
+    """
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="관리자 권한이 필요합니다."
+        )
+    return current_user

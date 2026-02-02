@@ -154,8 +154,51 @@ async def run_scraper():
                     db.add(new_rec)
                     new_count += 1
             
+            
             await db.commit()
             logger.info(f"Sync complete. New: {new_count}, Updated: {updated_count}")
+            
+            # Phase 4: Generate embeddings for all recruitments without embeddings
+            logger.info("Generating embeddings for recruitments...")
+            from jobs.core.portfolio.storage.supabase_vector_store import ManualRAG
+            
+            rag = ManualRAG()
+            
+            # Fetch all recruitments without embeddings
+            stmt = select(Recruitment).where(Recruitment.embedding == None)
+            res = await db.execute(stmt)
+            recruitments_to_embed = res.scalars().all()
+            
+            logger.info(f"Found {len(recruitments_to_embed)} recruitments without embeddings")
+            
+            embedding_count = 0
+            for recruitment in recruitments_to_embed:
+                try:
+                    # Combine relevant text fields for embedding
+                    text_parts = [
+                        recruitment.company or "",
+                        recruitment.title or "",
+                        recruitment.category or "",
+                        recruitment.key_responsibilities or "",
+                        recruitment.required_qualifications or "",
+                        recruitment.preferred_qualifications or ""
+                    ]
+                    combined_text = " ".join([p for p in text_parts if p]).strip()
+                    
+                    if combined_text:
+                        # Generate embedding
+                        embedding = rag.get_embedding(combined_text)
+                        recruitment.embedding = embedding
+                        embedding_count += 1
+                        
+                        if embedding_count % 10 == 0:
+                            logger.info(f"Generated {embedding_count}/{len(recruitments_to_embed)} embeddings")
+                except Exception as e:
+                    logger.error(f"Failed to generate embedding for recruitment {recruitment.id}: {e}")
+                    continue
+            
+            await db.commit()
+            logger.info(f"Embedding generation complete. Generated {embedding_count} embeddings")
 
     except Exception as e:
         logger.error(f"Database sync failed: {e}")

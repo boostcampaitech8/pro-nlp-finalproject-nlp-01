@@ -18,6 +18,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
     name = Column(String, nullable=False)
+    is_admin = Column(Boolean, default=False, nullable=False)  # 관리자 권한
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # User Profile Fields (extracted from portfolios)
@@ -46,6 +47,7 @@ class Recruitment(Base):
     key_responsibilities = Column(Text, nullable=True)
     required_qualifications = Column(Text, nullable=True)
     preferred_qualifications = Column(Text, nullable=True)
+    company_description = Column(Text, nullable=True)  # 기업 인재상/핵심 가치
     tags = Column(JSON, nullable=True)  # List of strings
     embedding = Column(Vector(1024), nullable=True)  # Unified 1:1 embedding storage
     view_count = Column(Integer, default=0) # View count for popularity sorting
@@ -119,6 +121,8 @@ class CoverLetterItem(Base):
     question = Column(Text, nullable=False)
     content = Column(Text, nullable=True)
     category = Column(String, nullable=True) # motivation, growth, capability, etc.
+    hint = Column(Text, nullable=True)  # 작성 힌트/가이드
+    max_length = Column(Integer, nullable=True, default=1000)  # 글자 수 제한
     
     # AI Analysis
     key_points = Column(JSON, nullable=True) # List of strings

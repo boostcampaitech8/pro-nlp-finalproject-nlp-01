@@ -40,6 +40,7 @@ class RecruitmentBase(BaseModel):
     key_responsibilities: Optional[str] = None
     required_qualifications: Optional[str] = None
     preferred_qualifications: Optional[str] = None
+    company_description: Optional[str] = None  # 기업 인재상/핵심 가치
     tags: Optional[List[str]] = None
     reason: Optional[str] = None
     view_count: Optional[int] = 0
@@ -159,6 +160,8 @@ class CoverLetterItemBase(BaseModel):
     question: str
     content: Optional[str] = None
     category: Optional[str] = None
+    hint: Optional[str] = None  # 작성 힌트/가이드
+    max_length: Optional[int] = 1000  # 글자 수 제한
     key_points: Optional[List[str]] = None
     suggested_improvements: Optional[List[str]] = None
 

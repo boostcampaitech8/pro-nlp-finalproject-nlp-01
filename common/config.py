@@ -29,13 +29,18 @@ class Settings(BaseSettings):
     KAKAO_CLIENT_SECRET: str = os.getenv("KAKAO_CLIENT_SECRET", "")
     KAKAO_REDIRECT_URI: str = os.getenv("KAKAO_REDIRECT_URI", "")
 
-    # GitHub OAuth
-    GITHUB_CLIENT_ID: str = os.getenv("GITHUB_CLIENT_ID", "")
-    GITHUB_CLIENT_SECRET: str = os.getenv("GITHUB_CLIENT_SECRET", "")
-    GITHUB_REDIRECT_URI: str = os.getenv("GITHUB_REDIRECT_URI", "")
+    # GitHub OAuth (GH_ prefix to avoid GitHub Actions Secrets restriction)
+    GH_OAUTH_CLIENT_ID: str = os.getenv("GH_OAUTH_CLIENT_ID", os.getenv("GITHUB_CLIENT_ID", ""))  # Fallback for compatibility
+    GH_OAUTH_CLIENT_SECRET: str = os.getenv("GH_OAUTH_CLIENT_SECRET", os.getenv("GITHUB_CLIENT_SECRET", ""))
+    GH_OAUTH_REDIRECT_URI: str = os.getenv("GH_OAUTH_REDIRECT_URI", os.getenv("GITHUB_REDIRECT_URI", ""))
 
-    # Job Config
-    GITHUB_TOKEN: str = os.getenv("GITHUB_TOKEN", "")
+    # Notion OAuth
+    NOTION_OAUTH_CLIENT_ID: str = os.getenv("NOTION_OAUTH_CLIENT_ID", os.getenv("NOTION_CLIENT_ID", ""))
+    NOTION_OAUTH_CLIENT_SECRET: str = os.getenv("NOTION_OAUTH_CLIENT_SECRET", os.getenv("NOTION_CLIENT_SECRET", ""))
+    NOTION_OAUTH_REDIRECT_URI: str = os.getenv("NOTION_OAUTH_REDIRECT_URI", "")
+
+    # Job Config (GH_ prefix to avoid GitHub Actions Secrets restriction)
+    GH_API_TOKEN: str = os.getenv("GH_API_TOKEN", os.getenv("GITHUB_TOKEN", ""))  # Fallback for compatibility
     NOTION_TOKEN: str = os.getenv("NOTION_TOKEN", "")
 
     # DB Config

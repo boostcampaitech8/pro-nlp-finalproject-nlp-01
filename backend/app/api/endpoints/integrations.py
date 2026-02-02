@@ -25,7 +25,7 @@ async def list_integrations(
 async def get_github_auth_url(current_user: models.User = Depends(deps.get_current_user)):
     """Returns GitHub OAuth URL for frontend to redirect."""
     scope = "repo,read:user"
-    url = f"https://github.com/login/oauth/authorize?client_id={settings.GITHUB_CLIENT_ID}&redirect_uri={settings.GITHUB_REDIRECT_URI}&scope={scope}&state={current_user.id}"
+    url = f"https://github.com/login/oauth/authorize?client_id={settings.GH_OAUTH_CLIENT_ID}&redirect_uri={settings.GH_OAUTH_REDIRECT_URI}&scope={scope}&state={current_user.id}"
     return {"url": url}
 
 @router.get("/github/login")
@@ -40,7 +40,7 @@ async def github_login(
         raise HTTPException(status_code=401, detail="Authentication required")
     
     scope = "repo,read:user"
-    url = f"https://github.com/login/oauth/authorize?client_id={settings.GITHUB_CLIENT_ID}&redirect_uri={settings.GITHUB_REDIRECT_URI}&scope={scope}&state={uid}"
+    url = f"https://github.com/login/oauth/authorize?client_id={settings.GH_OAUTH_CLIENT_ID}&redirect_uri={settings.GH_OAUTH_REDIRECT_URI}&scope={scope}&state={uid}"
     return RedirectResponse(url)
 
 @router.get("/github/callback")
@@ -58,10 +58,10 @@ async def github_callback(
         res = await client.post(
             "https://github.com/login/oauth/access_token",
             data={
-                "client_id": settings.GITHUB_CLIENT_ID,
-                "client_secret": settings.GITHUB_CLIENT_SECRET,
+                "client_id": settings.GH_OAUTH_CLIENT_ID,
+                "client_secret": settings.GH_OAUTH_CLIENT_SECRET,
                 "code": code,
-                "redirect_uri": settings.GITHUB_REDIRECT_URI
+                "redirect_uri": settings.GH_OAUTH_REDIRECT_URI
             },
             headers={"Accept": "application/json"}
         )
@@ -141,6 +141,130 @@ async def list_github_repos(
             "description": r["description"]
         } for r in repos]
 
+@router.get("/notion/auth-url")
+async def get_notion_auth_url(current_user: models.User = Depends(deps.get_current_user)):
+    """Returns Notion OAuth URL for frontend to redirect."""
+    url = f"https://api.notion.com/v1/oauth/authorize?client_id={settings.NOTION_OAUTH_CLIENT_ID}&response_type=code&owner=user&redirect_uri={settings.NOTION_OAUTH_REDIRECT_URI}/api/integrations/notion/callback&state={current_user.id}"
+    return {"url": url}
+
+@router.get("/notion/login")
+async def notion_login(
+    user_id: int = None,
+    current_user: models.User = Depends(deps.get_current_user_optional)
+):
+    """Redirects to Notion for OAuth."""
+    uid = user_id if user_id else (current_user.id if current_user else None)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
+    url = f"https://api.notion.com/v1/oauth/authorize?client_id={settings.NOTION_OAUTH_CLIENT_ID}&response_type=code&owner=user&redirect_uri={settings.NOTION_OAUTH_REDIRECT_URI}/api/integrations/notion/callback&state={uid}"
+    return RedirectResponse(url)
+
+@router.get("/notion/callback")
+async def notion_callback(
+    code: str,
+    state: str,
+    db: AsyncSession = Depends(get_async_db)
+):
+    """Handles Notion OAuth callback."""
+    user_id = int(state)
+    
+    async with httpx.AsyncClient() as client:
+        # 1. Exchange code for token
+        import base64
+        auth_string = f"{settings.NOTION_OAUTH_CLIENT_ID}:{settings.NOTION_OAUTH_CLIENT_SECRET}"
+        encoded_auth = base64.b64encode(auth_string.encode()).decode()
+        
+        res = await client.post(
+            "https://api.notion.com/v1/oauth/token",
+            headers={
+                "Authorization": f"Basic {encoded_auth}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "grant_type": "authorization_code",
+                "code": code,
+                "redirect_uri": f"{settings.NOTION_OAUTH_REDIRECT_URI}/api/integrations/notion/callback"
+            }
+        )
+        
+        if res.status_code != 200:
+            raise HTTPException(status_code=400, detail=f"Failed to get Notion token: {res.text}")
+        
+        res_data = res.json()
+        access_token = res_data.get("access_token")
+        workspace_id = res_data.get("workspace_id")
+        
+        if not access_token:
+            raise HTTPException(status_code=400, detail="No access token received")
+        
+        # 2. Save or Update Integration
+        stmt = select(models.UserIntegration).where(
+            models.UserIntegration.user_id == user_id,
+            models.UserIntegration.provider == "notion"
+        )
+        result = await db.execute(stmt)
+        integration = result.scalar_one_or_none()
+        
+        if integration:
+            integration.access_token = access_token
+            integration.provider_user_id = workspace_id
+        else:
+            integration = models.UserIntegration(
+                user_id=user_id,
+                provider="notion",
+                access_token=access_token,
+                provider_user_id=workspace_id
+            )
+            db.add(integration)
+        
+        await db.commit()
+    
+    # Redirect back to frontend
+    frontend_url = f"{settings.BACKEND_URL.replace('api.', '').replace(':8000', ':3000')}/my/portfolios/new?connected=notion"
+    return RedirectResponse(frontend_url)
+
+@router.get("/notion/pages")
+async def list_notion_pages(
+    db: AsyncSession = Depends(get_async_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    """Lists accessible pages from the connected Notion workspace."""
+    stmt = select(models.UserIntegration).where(
+        models.UserIntegration.user_id == current_user.id,
+        models.UserIntegration.provider == "notion"
+    )
+    result = await db.execute(stmt)
+    integration = result.scalar_one_or_none()
+    
+    if not integration:
+        raise HTTPException(status_code=400, detail="Notion not connected")
+    
+    async with httpx.AsyncClient() as client:
+        res = await client.post(
+            "https://api.notion.com/v1/search",
+            headers={
+                "Authorization": f"Bearer {integration.access_token}",
+                "Notion-Version": "2022-06-28",
+                "Content-Type": "application/json"
+            },
+            json={
+                "filter": {"property": "object", "value": "page"},
+                "page_size": 100
+            }
+        )
+        
+        if res.status_code != 200:
+            raise HTTPException(status_code=res.status_code, detail="Failed to fetch pages from Notion")
+        
+        pages = res.json().get("results", [])
+        # Simplify data for frontend
+        return [{
+            "id": p["id"],
+            "title": p.get("properties", {}).get("title", {}).get("title", [{}])[0].get("plain_text", "Untitled"),
+            "url": p["url"]
+        } for p in pages]
+
 @router.delete("/{integration_id}")
 async def remove_integration(
     integration_id: int,
@@ -154,3 +278,4 @@ async def remove_integration(
     await db.execute(stmt)
     await db.commit()
     return {"success": True}
+

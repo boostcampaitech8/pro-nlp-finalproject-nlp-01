@@ -159,8 +159,10 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     
     # External APIs
-    GITHUB_CLIENT_ID: str
-    GITHUB_CLIENT_SECRET: str
+    GH_OAUTH_CLIENT_ID: str
+    GH_OAUTH_CLIENT_SECRET: str
+    GH_OAUTH_REDIRECT_URI: str
+    GH_API_TOKEN: str
     NOTION_CLIENT_ID: str
     KAKAO_CLIENT_ID: str
     GOOGLE_API_KEY: str
@@ -688,9 +690,10 @@ graph TB
 DATABASE_URL=postgresql://...
 
 # External APIs
-GITHUB_CLIENT_ID=xxx
-GITHUB_CLIENT_SECRET=xxx
-GITHUB_TOKEN=xxx
+GH_OAUTH_CLIENT_ID=xxx
+GH_OAUTH_CLIENT_SECRET=xxx
+GH_OAUTH_REDIRECT_URI=https://your-backend.com/api/integrations/github/callback
+GH_API_TOKEN=ghp_xxxxxxxxxxxxx  # Optional: for higher rate limits
 NOTION_CLIENT_ID=xxx
 NOTION_CLIENT_SECRET=xxx
 KAKAO_CLIENT_ID=xxx

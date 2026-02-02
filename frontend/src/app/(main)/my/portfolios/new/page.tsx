@@ -124,7 +124,27 @@ export default function NewPortfolioPage() {
         }
     };
 
+    const handleNotionConnect = async () => {
+        try {
+            const url = await integrationApi.getNotionAuthUrl();
+            window.location.href = url;
+        } catch (err) {
+            console.error("Failed to get Notion auth URL:", err);
+            toast("Notion 연동 URL을 가져오는데 실패했습니다.", "error");
+        }
+    };
+
     const handleNotionAnalyze = async (url: string = "all") => {
+        // Check if Notion is connected
+        const notionIntegration = integrations.find(i => i.provider === 'notion');
+
+        if (!notionIntegration) {
+            // Trigger OAuth if not connected
+            toast("먼저 Notion 워크스페이스를 연동해주세요.", "warning");
+            await handleNotionConnect();
+            return;
+        }
+
         setIsAnalyzing(true);
         try {
             // "all" means workspace search

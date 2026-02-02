@@ -16,7 +16,7 @@ class GitHubExtractor(BaseExtractor):
     """
 
     def __init__(self, token: Optional[str] = None):
-        self.github_token = token or settings.GITHUB_TOKEN
+        self.github_token = token or settings.GH_API_TOKEN
         self.headers = {"Accept": "application/vnd.github.v3+json"}
         if self.github_token:
             self.headers["Authorization"] = f"token {self.github_token}"
@@ -170,31 +170,39 @@ class GitHubExtractor(BaseExtractor):
         return "\n".join(ocr_results)
 
     def _fetch_user_repos(self, user_id: str) -> List[Dict[str, str]]:
-        """Fetches up to 5 most active/recent repos for a user for multi-project creation."""
+        """
+        Fetches up to 5 most active/recent public repos for a user.
+        Uses unauthenticated API to avoid token issues for public repos.
+        """
+        logger.info(f"Fetching public repos for user: {user_id} (without authentication)")
+        
         try:
+            # Use unauthenticated client for public repos
+            headers = {"Accept": "application/vnd.github.v3+json"}
+            unauthenticated_client = httpx.Client(headers=headers, timeout=10.0)
+            
             url = f"https://api.github.com/users/{user_id}/repos"
-            params = {"type": "public", "sort": "pushed", "direction": "desc", "per_page": 5} # Limit to 5 for MVC
-            response = self.client.get(url, params=params)
+            params = {"type": "public", "sort": "pushed", "direction": "desc", "per_page": 5}
+            
+            response = unauthenticated_client.get(url, params=params)
             response.raise_for_status()
             
             repos = response.json()
             results = []
             for repo in repos:
-                content = self._fetch_repo_deep(user_id, repo['name'])
+                content = self._fetch_repo_deep_unauthenticated(user_id, repo['name'], unauthenticated_client)
                 results.append({
                     "title": f"{user_id}/{repo['name']}",
                     "content": content,
                     "url": repo['html_url']
                 })
+            
+            unauthenticated_client.close()
+            logger.info(f"Successfully fetched {len(results)} public repos")
             return results
+            
         except httpx.HTTPStatusError as e:
-            if e.response.status_code == 401:
-                logger.error(f"GitHub API authentication failed. Please connect your GitHub account for private repos.")
-                raise ValueError(
-                    "GitHub 인증이 필요합니다. 마이페이지에서 GitHub 계정을 연결해주세요. "
-                    "Public 저장소는 저장소 URL을 직접 입력해주세요."
-                )
-            elif e.response.status_code == 404:
+            if e.response.status_code == 404:
                 logger.error(f"GitHub user '{user_id}' not found")
                 raise ValueError(f"GitHub 사용자 '{user_id}'를 찾을 수 없습니다.")
             else:
@@ -203,3 +211,51 @@ class GitHubExtractor(BaseExtractor):
         except Exception as e:
             logger.error(f"Error fetching user repos: {e}")
             return []
+
+    
+    def _fetch_repo_deep_unauthenticated(self, owner: str, repo: str, client: httpx.Client) -> str:
+        """Fetch repo content without authentication (for public repos only)."""
+        logger.info(f"Fetching repo (unauthenticated): {owner}/{repo}")
+        
+        # 1. Fetch README
+        readme = ""
+        try:
+            readme_url = f"https://api.github.com/repos/{owner}/{repo}/readme"
+            resp = client.get(readme_url)
+            if resp.status_code == 200:
+                data = resp.json()
+                import base64
+                readme = base64.b64decode(data.get("content", "")).decode("utf-8", errors="ignore")
+        except Exception as e:
+            logger.warning(f"Could not fetch README: {e}")
+        
+        # 2. Try Gitingest (same as authenticated version)
+        code_summary = ""
+        try:
+            from gitingest import ingest
+            exclude_patterns = [
+                "node_modules", "venv", "env", "dist", "build", "target",
+                "*.lock", "*.log", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.pdf",
+                "test", "tests", "spec", "*.test.*", "*.spec.*",
+                ".git", ".github", ".vscode", ".idea"
+            ]
+            
+            ingest_url = f"https://github.com/{owner}/{repo}"
+            summary, tree, content = ingest(
+                ingest_url,
+                max_file_size=10_000,
+                include_patterns=None,
+                exclude_patterns=exclude_patterns
+            )
+            code_summary = summary.get("text_content", "")[:10_000]
+        except Exception as e:
+            logger.warning(f"Gitingest failed (unauthenticated): {e}")
+        
+        combined = f"# {owner}/{repo}\n\n"
+        if readme:
+            combined += f"## README\n{readme[:5000]}\n\n"
+        if code_summary:
+            combined += f"## Code Summary\n{code_summary}\n"
+        
+        return combined if combined.strip() else f"Repository: {owner}/{repo} (No content available)"
+

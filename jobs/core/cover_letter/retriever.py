@@ -8,6 +8,7 @@ from sqlalchemy import select
 from rank_bm25 import BM25Okapi
 from langchain_core.documents import Document
 from common import models
+from jobs.core.cover_letter.config import SEARCH_TOP_K
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ class PGHybridRetriever:
             tokenized_corpus = [doc["text"].lower().split() for doc in self.documents]
             self.bm25 = BM25Okapi(tokenized_corpus)
 
-    def search(self, query: str, query_embedding: List[float] = None, top_k: int = 5) -> List[Document]:
+    def search(self, query: str, query_embedding: List[float] = None, top_k: int = SEARCH_TOP_K) -> List[Document]:
         if not self.documents:
             return []
 
