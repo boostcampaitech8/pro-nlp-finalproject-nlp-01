@@ -127,7 +127,7 @@ class PortfolioService:
                     from notion_client import Client
                     self.notion_extractor.client = Client(auth=token)
                 
-                text = self.notion_extractor.extract(source)
+                text = await self.notion_extractor.extract(source)
                 extracted_projects = [{"title": portfolio.project_name or "Notion Page", "content": text, "url": source}]
             elif p_type == "github":
                 extracted_projects = self.github_extractor.extract_multi(source, token=token)
@@ -272,30 +272,43 @@ class PortfolioService:
             raise
 
     async def _update_user_global_profile(self, user_id: int, project_name: str, role: str, tech_stack: str, description: str):
-        try:
-            from common.models import User
-            stmt = select(User).where(User.id == user_id)
-            res = await self.db.execute(stmt)
-            user = res.scalar_one_or_none()
-            
-            if not user: return
+        import random
+        import asyncio
+        max_retries = 3
+        
+        for attempt in range(max_retries + 1):
+            try:
+                from common.models import User
+                # Use with_for_update() to lock the user row and prevent race conditions
+                stmt = select(User).where(User.id == user_id).with_for_update()
+                res = await self.db.execute(stmt)
+                user = res.scalar_one_or_none()
+                
+                if not user: return
 
-            new_info = f"프로젝트명: {project_name}\n역할: {role}\n기술스택: {tech_stack}\n내용: {description}"
-            
-            updated_profile = await self.llm_refiner.update_global_user_profile(
-                current_summary=user.profile_summary or "",
-                current_job_title=user.desired_job_title or "",
-                new_project_info=new_info
-            )
-            
-            user.profile_summary = updated_profile.get("summary", user.profile_summary)
-            user.desired_job_title = updated_profile.get("job_title", user.desired_job_title)
-            
-            await self.db.commit()
-            logger.info(f"Updated global profile for User {user_id}")
-            
-        except Exception as e:
-            logger.error(f"Failed to update global profile for user {user_id}: {e}")
+                new_info = f"프로젝트명: {project_name}\n역할: {role}\n기술스택: {tech_stack}\n내용: {description}"
+                
+                updated_profile = await self.llm_refiner.update_global_user_profile(
+                    current_summary=user.profile_summary or "",
+                    current_job_title=user.desired_job_title or "",
+                    new_project_info=new_info
+                )
+                
+                user.profile_summary = updated_profile.get("summary", user.profile_summary)
+                user.desired_job_title = updated_profile.get("job_title", user.desired_job_title)
+                
+                await self.db.commit()
+                logger.info(f"Updated global profile for User {user_id}")
+                return # Successful update
+                
+            except Exception as e:
+                await self.db.rollback()
+                if attempt < max_retries:
+                    delay = 0.5 * (2 ** attempt) + random.uniform(0, 0.5)
+                    logger.warning(f"Profile update conflict for User {user_id}, retrying in {delay:.2f}s... Error: {e}")
+                    await asyncio.sleep(delay)
+                else:
+                    logger.error(f"Failed to update global profile for user {user_id} after {max_retries} attempts: {e}")
 
     async def update_user_profile_from_portfolio(self, portfolio_id: int):
         """
@@ -375,7 +388,7 @@ class PortfolioService:
                     self.notion_extractor.access_token = token
                     from notion_client import Client
                     self.notion_extractor.client = Client(auth=token)
-                text = self.notion_extractor.extract(source)
+                text = await self.notion_extractor.extract(source)
                 extracted_projects = [{"title": portfolio.project_name or "Notion Page", "content": text, "url": source}]
             elif p_type == "github":
                 extracted_projects = self.github_extractor.extract_multi(source, token=token)

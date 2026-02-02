@@ -125,12 +125,17 @@ export default function NewPortfolioPage() {
         setIsAnalyzing(true);
         let successCount = 0;
         try {
-            // Batch process using Promise.all
-            await Promise.all(selectedRepoUrls.map(async (url) => {
+            // Process sequentially with a small delay to avoid rate limiting
+            for (const url of selectedRepoUrls) {
                 const repo = githubRepos.find(r => r.url === url);
                 await portfolioApi.importGithub(url, repo?.name || "GitHub Project");
                 successCount++;
-            }));
+
+                // 200ms delay between requests
+                if (selectedRepoUrls.indexOf(url) < selectedRepoUrls.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+            }
 
             toast(`${successCount}개의 저장소 분석이 시작되었습니다.`, "success");
             router.push('/my/portfolios');
@@ -159,11 +164,17 @@ export default function NewPortfolioPage() {
         setIsAnalyzing(true);
         let successCount = 0;
         try {
-            await Promise.all(selectedNotionPageIds.map(async (id) => {
+            // Process sequentially with a small delay
+            for (const id of selectedNotionPageIds) {
                 const page = notionPages.find(p => p.id === id);
                 await portfolioApi.importNotion(id, page?.title || "Notion Page");
                 successCount++;
-            }));
+
+                // 200ms delay between requests
+                if (selectedNotionPageIds.indexOf(id) < selectedNotionPageIds.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+            }
 
             toast(`${successCount}개의 노션 페이지 분석이 시작되었습니다.`, "success");
             router.push('/my/portfolios');
