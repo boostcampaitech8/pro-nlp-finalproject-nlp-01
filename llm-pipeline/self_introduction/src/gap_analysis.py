@@ -5,6 +5,7 @@ Gap Analysis 모듈
 - HyperCLOVA OpenAI 호환 API 사용
 """
 from typing import List, Dict, Any
+import time
 
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
@@ -13,7 +14,8 @@ from langchain_core.documents import Document
 
 from config.settings import (
     CLOVA_API_KEY, CLOVA_BASE_URL, LLM_MODEL, LLM_TEMPERATURE,
-    LLM_TOP_P, LLM_REPETITION_PENALTY, LLM_MAX_TOKENS
+    LLM_TOP_P, LLM_REPETITION_PENALTY, LLM_MAX_TOKENS,
+    LLM_USE_THINKING, LLM_THINKING_LEVEL
 )
 from src.schemas import GapAnalysisResult, ResumeGenerationResult, JobAnalysisResult, ResumeOutlineResult
 from src.prompt_templates import (
@@ -29,17 +31,35 @@ from src.data_loader import load_company_data, load_user_data
 
 def get_llm() -> ChatOpenAI:
     """LLM 인스턴스 생성 (HyperCLOVA OpenAI 호환 API)"""
+    extra_params = {
+        "topP": LLM_TOP_P,
+        "repetitionPenalty": LLM_REPETITION_PENALTY,
+        "maxTokens": LLM_MAX_TOKENS
+    }
+    
+    # Thinking 기능 활성화 (HCX-007)
+    if LLM_USE_THINKING:
+        # v3 API 명세 반영
+        # 1. maxTokens 사용 불가 -> 제거
+        if "maxTokens" in extra_params:
+            del extra_params["maxTokens"]
+            
+        # 2. maxCompletionTokens 설정 (High 기준 권장값 20480 또는 사용자 설정)
+        extra_params["maxCompletionTokens"] = LLM_MAX_TOKENS # 또는 20480
+        
+        # 3. thinking.effort 설정
+        extra_params["thinking"] = {
+            "effort": LLM_THINKING_LEVEL  # v3 명세: 'effort' (low, medium, high)
+        }
+
     return ChatOpenAI(
         model=LLM_MODEL,
         api_key=CLOVA_API_KEY,
         base_url=CLOVA_BASE_URL,
         temperature=LLM_TEMPERATURE,
-        extra_body={
-            "topP": LLM_TOP_P,
-            "repetitionPenalty": LLM_REPETITION_PENALTY,
-            "maxTokens": LLM_MAX_TOKENS
-        }
+        extra_body=extra_params
     )
+
 
 
 def format_experiences(documents: List[Document]) -> str:
@@ -105,7 +125,7 @@ def analyze_gap(
         "job_requirements": job_requirements,
         "user_experiences": experiences_text
     })
-    
+
     # 응답에서 content 추출
     response_text = response.content if hasattr(response, 'content') else str(response)
     
@@ -118,7 +138,8 @@ def generate_resume(
     gap_result: GapAnalysisResult,
     company_data: Dict[str, Any],
     question: Dict[str, Any] = None,
-    used_experiences: List[str] = None  # 이전 문항에서 사용한 경험 목록
+    used_experiences: List[str] = None,  # 이전 문항에서 사용한 경험 목록
+    subheading: bool = False
 ) -> ResumeGenerationResult:
     """
     자소서 생성
@@ -141,6 +162,11 @@ def generate_resume(
     if used_experiences:
         used_exp_text = f"\n⚠️ 다음 경험/프로젝트는 이전 문항에서 이미 사용했으므로 다른 경험을 우선 사용하세요: {', '.join(used_experiences)}"
     
+    # 소제목 지침 설정
+    subheading_instruction = ""
+    if subheading:
+        subheading_instruction = "- 반드시 답변의 시작 부분에 전체 내용을 매력적으로 요약하는 [소제목] 형태의 소제목을 작성하세요. (예: [데이터 기반의 의사결정으로 결제 전환율 15% 개선])"
+    
     # 문항이 주어진 경우 해당 문항에 맞는 프롬프트 사용
     if question:
         template = QUESTION_BASED_RESUME_PROMPT
@@ -153,7 +179,8 @@ def generate_resume(
             "max_length": question.get("max_length", 1000),
             "hint": question.get("hint", ""),
             "matching_points": ", ".join(gap_result.matching_points) if gap_result.matching_points else "해당 없음",
-            "missing_elements": ", ".join(gap_result.missing_elements) if gap_result.missing_elements else "해당 없음"
+            "missing_elements": ", ".join(gap_result.missing_elements) if gap_result.missing_elements else "해당 없음",
+            "subheading_instruction": subheading_instruction
         }
     elif gap_result.is_gap_found:
         template = RESUME_GENERATION_PROMPT
@@ -164,7 +191,8 @@ def generate_resume(
             "user_experiences": experiences_text,
             "max_length": 1000,  # 기본값 또는 대표값
             "matching_points": ", ".join(gap_result.matching_points),
-            "missing_elements": ", ".join(gap_result.missing_elements)
+            "missing_elements": ", ".join(gap_result.missing_elements),
+            "subheading_instruction": subheading_instruction
         }
     else:
         template = SIMPLE_RESUME_PROMPT
@@ -173,7 +201,8 @@ def generate_resume(
             "core_values": ", ".join(company_info.get("core_values", [])),
             "job_title": job_position.get("title", ""),
             "user_experiences": experiences_text,
-            "max_length": 1000  # 기본값 또는 대표값
+            "max_length": 1000,  # 기본값 또는 대표값
+            "subheading_instruction": subheading_instruction
         }
     
     prompt = PromptTemplate(
@@ -185,14 +214,14 @@ def generate_resume(
     # LLM 호출 후 수동 파싱
     chain = prompt | llm
     response = chain.invoke(input_vars)
-    
+
     # 응답에서 content 추출
     response_text = response.content if hasattr(response, 'content') else str(response)
     
     return parse_json_response(response_text, ResumeGenerationResult)
 
 
-def run_full_analysis(user_id: str) -> Dict[str, Any]:
+def run_full_analysis(user_id: str, subheading: bool = False) -> Dict[str, Any]:
     """
     전체 분석 파이프라인 실행
     1. 데이터 로드
@@ -257,7 +286,8 @@ def run_full_analysis(user_id: str) -> Dict[str, Any]:
                 gap_result, 
                 company_data, 
                 question,
-                used_experiences=used_experiences[:-1]  # 현재 제외한 이전 사용 경험
+                used_experiences=used_experiences[:-1],  # 현재 제외한 이전 사용 경험
+                subheading=subheading
             )
             resumes.append({
                 "question_id": question.get("id"),
@@ -265,9 +295,14 @@ def run_full_analysis(user_id: str) -> Dict[str, Any]:
                 "max_length": question.get("max_length"),
                 "resume": resume
             })
+            
+            # API Rate Limit 방지를 위한 대기
+            from rich import print as rprint
+            rprint(f"[dim]⏳ API 호출 제한 방지를 위해 5초 대기합니다... ({question.get('id')}/{len(resume_questions)})[/dim]")
+            time.sleep(5)
     else:
         # 문항이 없으면 기본 자소서 생성
-        resume = generate_resume(relevant_experiences, gap_result, company_data)
+        resume = generate_resume(relevant_experiences, gap_result, company_data, subheading=subheading)
         resumes.append({
             "question_id": 0,
             "question": "자기소개서",
@@ -285,7 +320,7 @@ def run_full_analysis(user_id: str) -> Dict[str, Any]:
     }
 
 
-def run_single_question_analysis(user_id: str, question_id: int) -> Dict[str, Any]:
+def run_single_question_analysis(user_id: str, question_id: int, subheading: bool = False) -> Dict[str, Any]:
     """
     특정 문항에 대한 분석 및 자소서 생성
     """
@@ -327,7 +362,7 @@ def run_single_question_analysis(user_id: str, question_id: int) -> Dict[str, An
         raise ValueError(f"문항 {question_id}을 찾을 수 없습니다.")
     
     # 6. 해당 문항 자소서 생성
-    resume = generate_resume(relevant_experiences, gap_result, company_data, target_question)
+    resume = generate_resume(relevant_experiences, gap_result, company_data, target_question, subheading=subheading)
     
     return {
         "user_id": user_id,
@@ -348,7 +383,8 @@ def generate_outline(
     user_experiences: List[Document],
     gap_result: GapAnalysisResult,
     company_data: Dict[str, Any],
-    question: Dict[str, Any]
+    question: Dict[str, Any],
+    used_experiences: List[str] = None  # 이전 문항에서 사용한 경험 목록
 ) -> ResumeOutlineResult:
     """
     자소서 가이드라인(Outline) 생성
@@ -362,11 +398,16 @@ def generate_outline(
     # 경험 텍스트 결합
     experiences_text = format_experiences(user_experiences)
     
+    # 이전 사용 경험 정보 추가
+    used_exp_text = ""
+    if used_experiences:
+        used_exp_text = f"\n⚠️ 다음 경험/프로젝트는 이전 문항에서 이미 사용했으므로 다른 경험을 우선 사용하세요: {', '.join(used_experiences)}"
+    
     input_vars = {
         "company_name": company_info.get("company_name", ""),
         "core_values": ", ".join(company_info.get("core_values", [])),
         "job_title": job_position.get("title", ""),
-        "user_experiences": experiences_text,
+        "user_experiences": experiences_text + used_exp_text,
         "question": question.get("question", ""),
         "hint": question.get("hint", ""),
         "matching_points": ", ".join(gap_result.matching_points) if gap_result.matching_points else "해당 없음",
@@ -419,8 +460,34 @@ def run_full_outline_analysis(user_id: str) -> Dict[str, Any]:
     outlines = []
     
     if resume_questions:
+        # 문항별 경험 분배: 이전 문항에서 사용한 경험 추적
+        used_experiences = []
+        
         for question in resume_questions:
-            outline = generate_outline(relevant_experiences, gap_result, company_data, question)
+            # 각 문항에 사용할 경험 선택 (이전에 사용하지 않은 것 우선)
+            available_experiences = [
+                exp for exp in relevant_experiences 
+                if exp.metadata.get("project_name") not in used_experiences
+            ]
+            
+            # 사용 가능한 경험이 없으면 전체에서 선택
+            if not available_experiences:
+                available_experiences = relevant_experiences
+                
+            # 첫 번째 사용 가능한 경험의 프로젝트명 기록 (경험이 있는 경우만)
+            if available_experiences:
+                primary_project = available_experiences[0].metadata.get("project_name", "")
+                if primary_project:
+                    used_experiences.append(primary_project)
+            
+            # 문항별로 할당된 경험 정보 전달 (현재 제외한 이전 사용 경험 목록 전달)
+            outline = generate_outline(
+                available_experiences, 
+                gap_result, 
+                company_data, 
+                question,
+                used_experiences=used_experiences[:-1]
+            )
             outlines.append({
                 "question_id": question.get("id"),
                 "question": question.get("question"),
