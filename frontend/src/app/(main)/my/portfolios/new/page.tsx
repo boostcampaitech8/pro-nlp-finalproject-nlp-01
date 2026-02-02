@@ -215,11 +215,6 @@ export default function NewPortfolioPage() {
                                 <div className="p-6 rounded-2xl border border-slate-100 bg-slate-50/50 space-y-4">
                                     <div className="flex justify-between items-center mb-1">
                                         <Label className="font-bold text-slate-700">리포지토리 또는 프로필 URL</Label>
-                                        {githubIntegration && (
-                                            <Badge className="bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-50">
-                                                계정 연동됨
-                                            </Badge>
-                                        )}
                                     </div>
                                     <div className="flex gap-2">
                                         <Input

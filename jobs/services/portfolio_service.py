@@ -320,6 +320,8 @@ class PortfolioService:
             source = portfolio.source_url
             p_type = portfolio.type
             
+            extracted_projects = [] # List of {"title": str, "content": str, "url": str}
+
             # Download from GCS if needed
             if source.startswith("gs://"):
                 local_file_name = os.path.basename(source)
@@ -339,6 +341,7 @@ class PortfolioService:
 
             if p_type == "file":
                 text = self.file_extractor.extract(source)
+                extracted_projects = [{"title": portfolio.project_name or "New File", "content": text, "url": portfolio.source_url}]
                 # Cleanup
                 if source != portfolio.source_url and os.path.exists(source):
                     try: os.remove(source)
@@ -351,48 +354,80 @@ class PortfolioService:
                     from notion_client import Client
                     self.notion_extractor.client = Client(auth=token)
                 text = self.notion_extractor.extract(source)
+                extracted_projects = [{"title": portfolio.project_name or "Notion Page", "content": text, "url": source}]
             elif p_type == "github":
-                text = self.github_extractor.extract(source, token=token)
+                extracted_projects = self.github_extractor.extract_multi(source, token=token)
             elif p_type == "blog":
-                text = await self.blog_extractor.extract(source)
+                extracted_projects = await self.blog_extractor.extract_multi(source)
             else:
-                text = ""
+                raise ValueError(f"Unknown portfolio type: {p_type}")
 
-            if not text or text.startswith("[Error]"):
-                raise ValueError(f"Extraction failed: {text}")
+            if not extracted_projects:
+                raise ValueError(f"Extraction failed or no projects found for {p_type}")
 
-            portfolio.content = self._sanitize_text(text)
-            await self.db.commit()
+            # 2. Process each extracted project
+            # First one updates the existing portfolio, others create new ones
+            for i, proj_data in enumerate(extracted_projects):
+                proj_text = proj_data["content"]
+                proj_title = proj_data["title"]
+                proj_url = proj_data["url"]
 
-            # 2. Refine (AI Pipeline)
-            combined_result = await self.llm_refiner.extract_user_data_and_queries(text)
-            user_data = combined_result.user_data
-            projects = user_data.projects
-            
-            if projects:
-                p0 = projects[0]
-                portfolio.project_name = p0.project_name
-                portfolio.period = p0.period
-                portfolio.role = p0.role
-                portfolio.description = p0.description_for_embedding
-                portfolio.tech_stack = p0.tech_stack
+                target_portfolio = None
+                if i == 0:
+                    target_portfolio = portfolio
+                    # For the first one, we extract profile AND project data
+                    combined_result = await self.llm_refiner.extract_user_data_and_queries(proj_text)
+                    user_data = combined_result.user_data
+                    
+                    target_portfolio.extracted_summary = user_data.profile.summary
+                    target_portfolio.extracted_job_title = user_data.profile.job_title
+                    
+                    if user_data.projects:
+                        project_refined = user_data.projects[0]
+                    else:
+                        # Fallback if AI didn't find specific projects in first chunk
+                        project_refined = await self.llm_refiner.refine_single_project(proj_text, project_name_hint=proj_title)
+                else:
+                    # Create a new portfolio record for subsequent projects
+                    target_portfolio = Portfolio(
+                        user_id=portfolio.user_id,
+                        type=portfolio.type,
+                        source_url=proj_url,
+                        processing_status=ProcessingStatus.PROCESSING
+                    )
+                    self.db.add(target_portfolio)
+                    await self.db.flush() # Get ID
+                    
+                    # Refine single project
+                    project_refined = await self.llm_refiner.refine_single_project(proj_text, project_name_hint=proj_title)
+
+                # Update portfolio data
+                target_portfolio.project_name = project_refined.project_name
+                target_portfolio.period = project_refined.period
+                target_portfolio.role = project_refined.role
+                target_portfolio.description = project_refined.description_for_embedding
+                target_portfolio.tech_stack = project_refined.tech_stack
+                target_portfolio.content = self._sanitize_text(proj_text)
                 
-                # Generate Embedding for Analysis Preview
-                if p0.description_for_embedding:
+                # Generate embedding
+                if target_portfolio.description:
                     try:
-                        embedding0 = await self.vector_store.get_embedding(p0.description_for_embedding)
-                        portfolio.embedding = embedding0
+                        target_portfolio.embedding = await self.vector_store.get_embedding(target_portfolio.description)
                     except Exception as e:
-                        logger.error(f"Failed to generate embedding for analysis: {e}")
+                        logger.error(f"Embedding failed for {target_portfolio.id}: {e}")
 
-                for jq in p0.job_queries:
-                    # Generate query embedding
+                # Add Job Queries
+                # Clear existing if any (for i=0)
+                if i == 0:
+                    target_portfolio.job_queries = []
+                
+                for jq in project_refined.job_queries:
                     q_emb = None
                     try:
                         q_emb = await self.vector_store.get_embedding(jq.query)
                     except: pass
                     
-                    portfolio.job_queries.append(
+                    target_portfolio.job_queries.append(
                         PortfolioJobQuery(
                             type=jq.type,
                             query_text=jq.query,
@@ -400,21 +435,22 @@ class PortfolioService:
                             embedding=q_emb
                         )
                     )
-            
-            portfolio.extracted_summary = user_data.profile.summary
-            portfolio.extracted_job_title = user_data.profile.job_title
-            portfolio.processing_status = ProcessingStatus.REVIEW_REQUIRED
-            
-            await NotificationService.create_and_notify(
-                db=self.db,
-                user_id=portfolio.user_id,
-                title="포트폴리오 분석 완료",
-                message=f"[{portfolio.project_name or '새 포트폴리오'}] 분석이 완료되었습니다. 내용을 검토해 주세요.",
-                link=f"/my/portfolios/{portfolio.id}",
-                notification_type="PORTFOLIO_READY"
-            )
-            await self.db.commit()
-            logger.info(f"Analysis completed for Portfolio {portfolio_id}")
+
+                target_portfolio.processing_status = ProcessingStatus.REVIEW_REQUIRED
+                await self.db.commit()
+
+                # Notify
+                await NotificationService.create_and_notify(
+                    db=self.db,
+                    user_id=target_portfolio.user_id,
+                    title="포트폴리오 분석 완료",
+                    message=f"[{target_portfolio.project_name or '새 포트폴리오'}] 분석이 완료되었습니다. 내용을 검토해 주세요.",
+                    link=f"/my/portfolios/{target_portfolio.id}",
+                    notification_type="PORTFOLIO_READY",
+                    target_id=target_portfolio.id
+                )
+
+            logger.info(f"Analysis multi-process completed for {len(extracted_projects)} projects from {source}")
 
         except Exception as e:
             logger.error(f"Analysis extraction failed for Portfolio {portfolio_id}: {e}")
