@@ -100,7 +100,7 @@ class GitHubExtractor(BaseExtractor):
             
             res_summary, res_tree, res_content = ingest(
                 ingest_url,
-                max_size=10240, # 10KB Limit for cost efficiency
+                max_file_size=10240, # 10KB Limit for cost efficiency
                 exclude_patterns=exclude_patterns
             )
             
@@ -247,7 +247,7 @@ class GitHubExtractor(BaseExtractor):
                 include_patterns=None,
                 exclude_patterns=exclude_patterns
             )
-            code_summary = summary.get("text_content", "")[:10_000]
+            code_summary = content[:10_000]
         except Exception as e:
             logger.warning(f"Gitingest failed (unauthenticated): {e}")
         
