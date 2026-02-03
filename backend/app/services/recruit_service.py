@@ -35,7 +35,12 @@ async def get_recruitments(db: AsyncSession, skip: int = 0, limit: int = 10, cat
     if tech_stack:
         skills = [s.strip() for s in tech_stack.split(',') if s.strip()]
         if skills:
-            stmt = stmt.join(models.Recruitment.tags).where(models.Tag.name.in_(skills))
+            # Use JSON containment operator for PostgreSQL
+            # models.Recruitment.tags.contains(skills) often works if mapped correctly
+            # Or use explicit JSONB contains syntax via text or func
+            # For simplicity and robustness with SQLite/Postgres:
+            for skill in skills:
+                stmt = stmt.where(models.Recruitment.tags.contains([skill]))
     
     if sort_by == 'popular':
         stmt = stmt.order_by(models.Recruitment.view_count.desc(), models.Recruitment.id.desc())
@@ -60,7 +65,8 @@ async def get_recruitments(db: AsyncSession, skip: int = 0, limit: int = 10, cat
     if tech_stack:
         skills = [s.strip() for s in tech_stack.split(',') if s.strip()]
         if skills:
-            count_stmt = count_stmt.join(models.Recruitment.tags).where(models.Tag.name.in_(skills))
+            for skill in skills:
+                count_stmt = count_stmt.where(models.Recruitment.tags.contains([skill]))
     
     total_result = await db.execute(count_stmt)
     total = total_result.scalar() or 0
@@ -109,7 +115,7 @@ async def get_ai_recommendations(db: AsyncSession, user_id: int, portfolio_id: O
             "company": recruitment.company,
             "category": recruitment.category,
             "location": recruitment.location,
-            "tags": [t.name for t in recruitment.tags],
+            "tags": recruitment.tags or [], # Already a list of strings
             "deadline": recruitment.deadline.isoformat() if recruitment.deadline else None,
             "startDate": recruitment.start_date.isoformat() if recruitment.start_date else None,
             "reason": combined_reason

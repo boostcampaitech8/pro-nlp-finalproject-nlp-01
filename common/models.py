@@ -48,12 +48,12 @@ class Recruitment(Base):
     preferred_qualifications = Column(Text, nullable=True)
     company_description = Column(Text, nullable=True)  # 기업 인재상/핵심 가치
     embedding = Column(Vector(1024), nullable=True)  # Unified 1:1 embedding storage
+    tags = Column(JSON, nullable=True) # Direct JSON storage for tech stack tags
     view_count = Column(Integer, default=0) # View count for popularity sorting
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     cover_letters = relationship("CoverLetter", back_populates="recruitment")
     recommendations = relationship("Recommendation", back_populates="recruitment", cascade="all, delete-orphan")
-    tags = relationship("Tag", secondary="recruitment_tag_link", back_populates="recruitments")
 
 class Portfolio(Base):
     __tablename__ = "portfolios"
@@ -144,17 +144,6 @@ class CoverLetterItem(Base):
     
     cover_letter = relationship("CoverLetter", back_populates="items")
 
-class Tag(Base):
-    __tablename__ = "tags"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True, nullable=False)
-    
-    recruitments = relationship("Recruitment", secondary="recruitment_tag_link", back_populates="tags")
-
-class RecruitmentTagLink(Base):
-    __tablename__ = "recruitment_tag_link"
-    recruitment_id = Column(Integer, ForeignKey("recruitments.id", ondelete="CASCADE"), primary_key=True)
-    tag_id = Column(Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True)
 
 class Recommendation(Base):
     __tablename__ = "recommendations"

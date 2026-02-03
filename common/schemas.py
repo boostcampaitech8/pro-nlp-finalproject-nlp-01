@@ -53,14 +53,6 @@ class Recruitment(RecruitmentBase):
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
-    @field_validator('tags', mode='before')
-    @classmethod
-    def transform_tags(cls, v):
-        if isinstance(v, list) and len(v) > 0 and not isinstance(v[0], str):
-            # Transform Tag objects to string names
-            return [t.name for t in v]
-        return v
-
 class RecruitmentListResponse(BaseModel):
     items: List[Recruitment]
     meta: dict
