@@ -72,92 +72,98 @@ class RecruitIndexer:
         Processes and adds multiple recruitment items to BOTH SQL DB and vector store.
         """
         import datetime
-        documents = []
-        for item in data_list:
-            # 1. SQL DB Insertion/Update
-            # Check if exists by title and company
-            stmt = select(Recruitment).where(
-                Recruitment.title == item.get('title'),
-                Recruitment.company == item.get('company')
-            ).options(selectinload(Recruitment.tags))
-            result = await db.execute(stmt)
-            db_recruit = result.scalar_one_or_none()
-            
-            # Format deadline and start_date
-            deadline_val = item.get('deadline')
-            if deadline_val and isinstance(deadline_val, str):
-                 # Try common formats if needed, or just store as is if it matches date format
-                 # Minimal handling for common "YYYY-MM-DD"
-                 try:
-                     deadline_date = datetime.date.fromisoformat(deadline_val)
-                 except:
-                     deadline_date = None
-            else:
-                 deadline_date = None
-            
-            start_date_val = item.get('start_date')
-            if start_date_val and isinstance(start_date_val, str):
-                 try:
-                     start_date_obj = datetime.date.fromisoformat(start_date_val)
-                 except:
-                     start_date_obj = None
-            else:
-                 start_date_obj = None
-
-            if not db_recruit:
-                db_recruit = Recruitment(
-                    title=item.get('title'),
-                    company=item.get('company'),
-                    link=item.get('link'),
-                    start_date=start_date_obj,
-                    deadline=deadline_date,
-                    location=item.get('location'),
-                    experience=item.get('experience'),
-                    education=item.get('education'),
-                    employment_type=item.get('employment_type'),
-                    salary=item.get('salary'),
-                    category=item.get('category'),
-                    key_responsibilities=sanitize_text(item.get('key_responsibilities')),
-                    required_qualifications=sanitize_text(item.get('required_qualifications')),
-                    preferred_qualifications=sanitize_text(item.get('preferred_qualifications')),
-                )
-                db.add(db_recruit)
-            else:
-                # Update existing
-                db_recruit.link = item.get('link', db_recruit.link)
-                db_recruit.deadline = deadline_date or db_recruit.deadline
-            
-            # Handle Tags (Many-to-Many Normalized)
-            tag_names = item.get('tags', [])
-            if tag_names:
+        from sqlalchemy.orm import joinedload
+        
+        # Turn off autoflush to prevent unexpected IO during synchronous attribute assignments
+        original_autoflush = db.autoflush
+        db.autoflush = False
+        
+        try:
+            for item in data_list:
+                # 1. Handle Tags first (Many-to-Many Normalized)
+                tag_names = item.get('tags', [])
                 db_tags = []
-                for tname in tag_names:
-                    # Get or Create Tag
-                    stmt_tag = select(Tag).where(Tag.name == tname)
-                    res_tag = await db.execute(stmt_tag)
-                    tag_obj = res_tag.scalar_one_or_none()
-                    if not tag_obj:
-                        tag_obj = Tag(name=tname)
-                        db.add(tag_obj)
-                    db_tags.append(tag_obj)
-                db_recruit.tags = db_tags
-            
-            await db.flush() # Get the ID for metadata
-            
-            # 2. Generate Embedding for 1:1 Storage (Only if new or missing embedding)
-            if not db_recruit.embedding:
-                try:
-                    doc = self.preprocess_recruitment(item)
-                    embedding = await self.vector_store.get_embedding(doc.page_content)
-                    db_recruit.embedding = embedding
-                    logger.info(f"Generated embedding for recruitment {db_recruit.id}")
-                except Exception as e:
-                    logger.error(f"Failed to generate embedding for recruitment {db_recruit.id}: {e}")
-            else:
-                logger.info(f"Skipping embedding generation for existing recruitment {db_recruit.id}")
-            
-        await db.commit()
-        return len(data_list)
+                if tag_names:
+                    for tname in tag_names:
+                        # Get or Create Tag
+                        stmt_tag = select(Tag).where(Tag.name == tname)
+                        res_tag = await db.execute(stmt_tag)
+                        tag_obj = res_tag.scalar_one_or_none()
+                        if not tag_obj:
+                            tag_obj = Tag(name=tname)
+                            db.add(tag_obj)
+                        db_tags.append(tag_obj)
+
+                # 2. SQL DB Insertion/Update - Use joinedload for tags
+                # Check if exists by title and company
+                stmt = select(Recruitment).where(
+                    Recruitment.title == item.get('title'),
+                    Recruitment.company == item.get('company')
+                ).options(joinedload(Recruitment.tags))
+                result = await db.execute(stmt)
+                db_recruit = result.scalar_one_or_none()
+                
+                # Format deadline and start_date
+                deadline_val = item.get('deadline')
+                deadline_date = None
+                if deadline_val and isinstance(deadline_val, str):
+                     try: deadline_date = datetime.date.fromisoformat(deadline_val)
+                     except: pass
+                
+                start_date_val = item.get('start_date')
+                start_date_obj = None
+                if start_date_val and isinstance(start_date_val, str):
+                     try: start_date_obj = datetime.date.fromisoformat(start_date_val)
+                     except: pass
+
+                if not db_recruit:
+                    db_recruit = Recruitment(
+                        title=item.get('title'),
+                        company=item.get('company'),
+                        link=item.get('link'),
+                        start_date=start_date_obj,
+                        deadline=deadline_date,
+                        location=item.get('location'),
+                        experience=item.get('experience'),
+                        education=item.get('education'),
+                        employment_type=item.get('employment_type'),
+                        salary=item.get('salary'),
+                        category=item.get('category'),
+                        key_responsibilities=sanitize_text(item.get('key_responsibilities')),
+                        required_qualifications=sanitize_text(item.get('required_qualifications')),
+                        preferred_qualifications=sanitize_text(item.get('preferred_qualifications')),
+                        tags=db_tags # Set tags in constructor
+                    )
+                    db.add(db_recruit)
+                else:
+                    # Update existing
+                    db_recruit.link = item.get('link', db_recruit.link)
+                    db_recruit.deadline = deadline_date or db_recruit.deadline
+                    # Update tags (Safe due to joinedload and autoflush=False)
+                    db_recruit.tags = db_tags
+                
+                # Manual flush here is safe because it's awaited and ensures ID is available
+                await db.flush()
+                
+                # 3. Generate Embedding for 1:1 Storage (Only if new or missing embedding)
+                if not db_recruit.embedding:
+                    try:
+                        doc = self.preprocess_recruitment(item)
+                        embedding = await self.vector_store.get_embedding(doc.page_content)
+                        db_recruit.embedding = embedding
+                        logger.info(f"Generated embedding for recruitment {db_recruit.id}")
+                    except Exception as e:
+                        logger.error(f"Failed to generate embedding for recruitment {db_recruit.id}: {e}")
+                else:
+                    logger.info(f"Skipping embedding generation for existing recruitment {db_recruit.id}")
+                
+            await db.commit()
+            return len(data_list)
+        except Exception as e:
+            await db.rollback()
+            raise e
+        finally:
+            db.autoflush = original_autoflush
 
     async def search_by_vector(self, db: AsyncSession, embedding: List[float], k: int = 5):
         """
