@@ -62,6 +62,9 @@ export function Header() {
                                 <Link href="/my/portfolios" className="hover:text-blue-600 transition-colors">
                                     내 포트폴리오
                                 </Link>
+                                <Link href="/my/profile" className="hover:text-blue-600 transition-colors">
+                                    내 프로필
+                                </Link>
                             </>
                         )}
                     </nav>

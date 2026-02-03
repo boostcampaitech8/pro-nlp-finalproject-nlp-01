@@ -87,10 +87,74 @@ export function useNotifications() {
         }
     };
 
+    // Smart SSE State
+    const [isPageVisible, setIsPageVisible] = useState(true);
+    const [isUserIdle, setIsUserIdle] = useState(false);
+
+    // 1. Visibility Detection
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            const visible = !document.hidden;
+            setIsPageVisible(visible);
+            if (visible) {
+                fetchNotifications();
+            }
+        };
+
+        // Initialize state (deferred to avoid synchronous setState warning)
+        // If state is already matching, we don't need to do anything.
+        if (document.hidden) {
+            // Use setTimeout to avoid "setState synchronously within effect" lint error
+            const timer = setTimeout(() => setIsPageVisible(false), 0);
+            return () => clearTimeout(timer);
+        }
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    }, [fetchNotifications]);
+
+    // 2. Idle Detection (5 minutes timeout)
+    useEffect(() => {
+        let timeoutId: NodeJS.Timeout;
+        const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+
+        const resetIdle = () => {
+            if (isUserIdle) {
+                setIsUserIdle(false); // Waking up
+            }
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => setIsUserIdle(true), IDLE_TIMEOUT);
+        };
+
+        // Events to detect user activity
+        const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
+
+        // Throttled handler could be better but native events are fine for resetting timer
+        events.forEach(e => document.addEventListener(e, resetIdle, { passive: true }));
+
+        resetIdle(); // Start timer
+
+        return () => {
+            events.forEach(e => document.removeEventListener(e, resetIdle));
+            clearTimeout(timeoutId);
+        };
+    }, [isUserIdle]);
+
+    // Determine if we should maintain the expensive SSE connection
+    // Cloud Run scales to zero, so disconnecting when idle saves money.
+    const isRealtimeActive = isPageVisible && !isUserIdle;
+
+    // 3. SSE Manager
     useEffect(() => {
         if (!isAuthenticated) return;
 
-        // Initialize
+        // If inactive, do not connect SSE to save resources/cost.
+        // We relying on fetchNotifications() called by visibility/idle handlers when becoming active.
+        if (!isRealtimeActive) {
+            return;
+        }
+
+        // Initialize (Load latest data when becoming active)
         const init = async () => {
             await fetchNotifications();
         };
@@ -101,37 +165,47 @@ export function useNotifications() {
         const ssePath = `/api/notifications/events?token=${token}`;
         const sseUrl = getApiUrl(ssePath);
 
-        // Note: EventSource doesn't support headers natively, so we pass token as query param
+        console.log("Connecting Notification SSE...");
         const eventSource = new EventSource(sseUrl);
 
+        eventSource.onopen = () => {
+            // console.log("SSE Connected");
+        };
+
         eventSource.onmessage = (event) => {
-            const data = JSON.parse(event.data);
+            try {
+                const data = JSON.parse(event.data);
+                // Show Toast using our custom useToast
+                toast(data.message || data.title, "success");
 
-            // Show Toast using our custom useToast
-            toast(data.message || data.title, "success");
+                // 1. Refresh global notification list/count
+                fetchNotifications();
 
-            // Refresh list
-            fetchNotifications();
+                // 2. Broadcast Custom Event for specific UI updates
+                if (data.type) {
+                    const event = new CustomEvent('notification_event', {
+                        detail: { type: data.type, data: data }
+                    });
+                    window.dispatchEvent(event);
+                    console.log(`Global event dispatched: status_update_${data.type}`);
+                }
+            } catch (e) {
+                console.error("SSE Parse Error", e);
+            }
         };
 
         eventSource.onerror = (err) => {
             // Do not close connection on error, let EventSource retry automatically
+            // unless we want to stop retrying on fatal auth errors?
+            // For now, simple warning.
             console.warn("SSE Connection lost, retrying...", err);
-            // eventSource.close(); 
         };
-
-        // Fallback Polling (every 30 seconds)
-        // This ensures that even if SSE misses (e.g. initial connection issues),
-        // the user eventually gets the notification red dot.
-        const intervalId = setInterval(() => {
-            fetchNotifications();
-        }, 30000);
 
         return () => {
+            console.log("Closing Notification SSE (Inactive or Unmount)");
             eventSource.close();
-            clearInterval(intervalId);
         };
-    }, [isAuthenticated, token, fetchNotifications, toast]);
+    }, [isAuthenticated, token, fetchNotifications, toast, isRealtimeActive]);
 
     return { notifications, unreadCount, markAsRead, markAllAsRead, refresh: fetchNotifications };
 }

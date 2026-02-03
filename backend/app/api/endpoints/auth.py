@@ -31,8 +31,12 @@ async def kakao_callback(
     redirect_uri: Optional[str] = None, 
     db: AsyncSession = Depends(get_async_db)
 ):
-    # Determine which redirect_uri to use (parameter has priority for dynamic environments)
-    actual_redirect_uri = redirect_uri or settings.KAKAO_REDIRECT_URI
+    # If frontend provides redirect_uri, use it exactly as is.
+    # Otherwise, use the one from settings and append the callback path.
+    if redirect_uri:
+        actual_redirect_uri = redirect_uri
+    else:
+        actual_redirect_uri = f"{settings.KAKAO_REDIRECT_URI}/api/auth/kakao/callback"
     
     # 1. Exchange code for token
     async with httpx.AsyncClient() as client:
@@ -96,7 +100,9 @@ async def kakao_callback(
             "user": {
                 "id": user.id,
                 "email": user.email,
-                "name": user.name
+                "name": user.name,
+                "profile_summary": user.profile_summary,
+                "desired_job_title": user.desired_job_title
             }
         }
 

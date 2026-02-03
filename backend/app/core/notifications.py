@@ -83,7 +83,7 @@ class NotificationBroadcaster:
             except Exception as e:
                 logger.error(f"Error closing pubsub for user {user_id}: {e}")
 
-    async def broadcast(self, user_id: int, data: dict):
+    async def broadcast(self, user_id: int, data: dict, increment_unread: bool = True):
         """
         Publishes message to user-specific Redis channel.
         This works from ANY instance to ANY instance.
@@ -102,9 +102,41 @@ class NotificationBroadcaster:
 
         try:
             await redis.publish(channel, payload)
+            # Also increment unread count in Redis (if requested)
+            if increment_unread:
+                await self.incr_unread_count(user_id)
             logger.info(f"Broadcasted to Redis channel {channel}: {payload}")
         except Exception as e:
             logger.error(f"Redis publish error for user {user_id}: {e}", exc_info=True)
+
+    async def incr_unread_count(self, user_id: int):
+        redis = await self.get_redis()
+        if not redis: return
+        key = f"unread_count:{user_id}"
+        await redis.incr(key)
+
+    async def decr_unread_count(self, user_id: int, amount: int = 1):
+        redis = await self.get_redis()
+        if not redis: return
+        key = f"unread_count:{user_id}"
+        count = await redis.get(key)
+        if count and int(count) > 0:
+            await redis.decr(key, amount=amount)
+            # Ensure it doesn't go below 0
+            new_count = await redis.get(key)
+            if new_count and int(new_count) < 0:
+                await redis.set(key, 0)
+
+    async def get_unread_count(self, user_id: int) -> Optional[int]:
+        redis = await self.get_redis()
+        if not redis: return None
+        count = await redis.get(f"unread_count:{user_id}")
+        return int(count) if count is not None else None
+
+    async def reset_unread_count(self, user_id: int, count: int = 0):
+        redis = await self.get_redis()
+        if not redis: return
+        await redis.set(f"unread_count:{user_id}", count)
 
     async def close(self):
         """Gracefully close the connection pool"""

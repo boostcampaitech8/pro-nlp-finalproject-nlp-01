@@ -28,6 +28,13 @@ export interface PortfolioJobQuery {
     evidence: string[];
 }
 
+export interface PortfolioStrength {
+    tag: string;
+    claim: string;
+    evidence: string[];
+    level: 'low' | 'medium' | 'high';
+}
+
 export interface Portfolio {
     id: number;
     project_name: string;
@@ -44,6 +51,7 @@ export interface Portfolio {
     role?: string;
     description?: string;
     tech_stack?: string[];
+    strengths?: PortfolioStrength[];
     job_queries?: PortfolioJobQuery[];
 }
 
@@ -52,6 +60,8 @@ export interface CoverLetterItem {
     question: string;
     content: string;
     category?: string;
+    hint?: string;
+    max_length?: number;
     key_points?: string[];
     suggested_improvements?: string[];
 }
@@ -85,4 +95,15 @@ export interface User {
     name: string;
     profile_summary?: string;
     desired_job_title?: string;
+}
+
+export interface NotificationEventDetail {
+    type: string;
+    data: {
+        target_id?: number;
+        title?: string;
+        message?: string;
+        link?: string;
+        [key: string]: unknown;
+    };
 }

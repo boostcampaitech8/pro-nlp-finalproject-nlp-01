@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { CoverLetter } from "@/types";
+import { CoverLetter, NotificationEventDetail } from "@/types";
 import { PenTool, FileText, Calendar, Trash2, X, LayoutList, Check, LayoutGrid, List, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,7 @@ export default function CoverLettersPage() {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-    const fetchLetters = () => {
+    const fetchLetters = useCallback(() => {
         fetchWithAuth(getApiUrl("/cover-letters"), { cache: 'no-store' })
             .then(res => res.json())
             .then(data => {
@@ -29,11 +29,26 @@ export default function CoverLettersPage() {
                 }
             })
             .catch(err => console.error(err));
-    };
+    }, []);
 
     useEffect(() => {
         fetchLetters();
-    }, []);
+    }, [fetchLetters]);
+
+    // Real-time update listener
+    useEffect(() => {
+        const handleNotification = (e: Event) => {
+            const customEvent = e as CustomEvent<NotificationEventDetail>;
+            const { type } = customEvent.detail;
+            if (type === 'COVER_LETTER_READY' || type === 'COVER_LETTER_COMPLETED') {
+                console.log("Real-time cover letter update triggered");
+                fetchLetters();
+            }
+        };
+
+        window.addEventListener('notification_event', handleNotification);
+        return () => window.removeEventListener('notification_event', handleNotification);
+    }, [fetchLetters]);
 
     const isExpired = (deadline?: string) => {
         if (!deadline) return false;

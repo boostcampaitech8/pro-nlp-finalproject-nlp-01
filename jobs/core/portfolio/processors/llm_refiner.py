@@ -25,6 +25,36 @@ class QueryItem(BaseModel):
     evidence: List[str] = Field(default_factory=list, description="근거 구절 1~3개")
 
 
+class StrengthItem(BaseModel):
+    tag: Literal[
+        "문제 해결",
+        "주인의식",
+        "책임감",
+        "도전",
+        "새로운 기술 적용",
+        "새로운 방법으로 문제 해결",
+        "실험/검증",
+        "설계/구조화",
+        "품질 개선",
+        "성능 최적화",
+        "협업",
+        "커뮤니케이션",
+        "프로젝트 리딩",
+        "데이터/지표 기반 개선",
+    ] = Field(..., description="강점(역량) 태그 (목록 중 선택)")
+
+    claim: str = Field(..., description="이 프로젝트에서 드러난 강점을 한 문장으로 요약")
+
+    evidence: List[str] = Field(
+        default_factory=list,
+        description="원문 근거 구절 1~3개(짧게 그대로). evidence 없으면 해당 강점은 만들지 말 것.",
+    )
+
+    level: Literal["low", "medium", "high"] = Field(
+        ..., description="원문 근거 기반 강도 (근거가 약하면 low)"
+    )
+
+
 class Project(BaseModel):
     project_name: str = Field(..., description="프로젝트 이름")
     period: Optional[str] = Field(None, description="프로젝트 기간")
@@ -32,6 +62,10 @@ class Project(BaseModel):
     tech_stack: List[str] = Field(default_factory=list, description="원문에 등장한 기술명만")
     description_for_embedding: Optional[str] = Field(
         None, description="아래 섹션 템플릿을 따르는 멀티라인 문자열"
+    )
+    strengths: List[StrengthItem] = Field(
+        default_factory=list,
+        description="이 프로젝트에서 드러난 강점(역량) 3~7개 (근거 포함). 근거 없으면 빈 배열 가능.",
     )
     job_queries: List[QueryItem] = Field(
         ..., 
@@ -127,15 +161,50 @@ class LLMRefiner:
             }
         
         import httpx
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.post(url, headers=headers, json=payload)
-            response.raise_for_status()
-            res_json = response.json()
+        import asyncio
+        import random
+
+        max_retries = 3
+        base_delay = 2.0 # seconds
+        
+        for attempt in range(max_retries + 1):
+            try:
+                async with httpx.AsyncClient(timeout=60.0) as client:
+                    response = await client.post(url, headers=headers, json=payload)
+                    
+                    # Handle Rate Limit (429) or Server Errors (5xx)
+                    if response.status_code == 429 or response.status_code >= 500:
+                        if attempt < max_retries:
+                            delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+                            logger.warning(f"NCP API returned {response.status_code}. Retrying in {delay:.2f}s... (Attempt {attempt + 1}/{max_retries})")
+                            await asyncio.sleep(delay)
+                            continue
+                        else:
+                            response.raise_for_status() # Final attempt failed
+                    
+                    response.raise_for_status()
+                    res_json = response.json()
+                    
+                    if res_json.get("status", {}).get("code") == "20000":
+                        return res_json.get("result", {}).get("message", {}).get("content", "")
+                    else:
+                        status_code = res_json.get("status", {}).get("code")
+                        # Some business logic errors might also be retriable
+                        if status_code == "42901" and attempt < max_retries:
+                             delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+                             logger.warning(f"NCP API business error {status_code}. Retrying in {delay:.2f}s...")
+                             await asyncio.sleep(delay)
+                             continue
+                        
+                        raise RuntimeError(f"NCP API Error: {res_json}")
             
-            if res_json.get("status", {}).get("code") == "20000":
-                return res_json.get("result", {}).get("message", {}).get("content", "")
-            else:
-                raise RuntimeError(f"NCP API Error: {res_json}")
+            except (httpx.RequestError, httpx.HTTPStatusError) as e:
+                if attempt < max_retries:
+                    delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+                    logger.warning(f"NCP connection error: {e}. Retrying in {delay:.2f}s...")
+                    await asyncio.sleep(delay)
+                else:
+                    raise
 
 
     async def extract_user_data_and_queries(self, text: str) -> CombinedResult:
@@ -146,17 +215,30 @@ class LLMRefiner:
 당신은 포트폴리오 분석 전문가입니다.
 사용자의 포트폴리오 텍스트를 분석하여 다음을 추출하세요:
 
-1. **사용자 정보**: 이름, 직무, 요약, 프로젝트 리스트, 기술 스택
-2. **각 프로젝트마다 채용 공고 검색 쿼리 3개** (A, B, C 타입):
-   - A: 해당 프로젝트의 핵심 기술과 경험을 기반으로 한 메인 포지션
-   - B: 해당 프로젝트의 부가 기술이나 도메인을 기반으로 한 서브 포지션
-   - C: 해당 프로젝트 경험을 바탕으로 한 도전적 포지션
+2. **각 프로젝트마다**:
+   - **strengths(강점/역량) 3~7개**: tag/claim/evidence/level 포함
+   - **채용 공고 검색 쿼리 3개** (A, B, C 타입):
 
 **중요 규칙:**
 - 모든 필드를 최대한 채우세요. 정보가 부족하면 문맥에서 추론하세요.
+- 텍스트에 근거한 내용만 작성(추측/과장/확장 금지).
+- 정보가 부족하면 null 또는 빈 배열로 둔다. 임의로 채우지 않는다.
+- strengths / job_queries의 evidence에는 원문에서 근거가 된 구절을 1~3개 "짧게 그대로" 넣어라.
+- evidence가 없는 strengths는 생성하지 않는다.
 - **각 프로젝트는 반드시 자체 job_queries 필드를 가져야 합니다** (A, B, C 타입 3개)
 - 각 쿼리는 **해당 프로젝트의 기술 스택과 역할에 특화**되어야 합니다
 - evidence는 **해당 프로젝트**에서 쿼리를 뒷받침하는 구체적인 근거를 제시하세요
+
+**strengths 작성 가이드:**
+- strengths.tag는 아래 목록 중 원문 근거가 있는 것만 선택:
+  문제 해결 / 주인의식 / 책임감 / 도전 / 새로운 기술 적용 / 새로운 방법으로 문제 해결 /
+  실험/검증 / 설계/구조화 / 품질 개선 / 성능 최적화 / 협업 / 커뮤니케이션 /
+  프로젝트 리딩 / 데이터/지표 기반 개선
+- claim: "이 프로젝트에서 내가 어떻게 그 역량을 보여줬는지"를 1문장으로 작성.
+- level 판단:
+  high: 문제-해결 흐름이 구체적이고 핵심 기여가 드러남
+  medium: 행동/방법은 있으나 결과/영향이 약함
+  low: 사용/참여 언급 수준(그래도 evidence는 반드시 있어야 함)
 
 **description_for_embedding 작성 규칙:**
 프로젝트의 description_for_embedding은 반드시 아래 템플릿을 따라 작성하세요:
@@ -214,6 +296,15 @@ class LLMRefiner:
                 if len(project.job_queries) > 3:
                     project.job_queries = project.job_queries[:3]
                 
+                # safety for strengths
+                if len(project.strengths) > 8:
+                    project.strengths = project.strengths[:8]
+                
+                # remove strengths without evidence
+                project.strengths = [
+                    s for s in project.strengths if s.evidence and s.claim and s.tag
+                ]
+                
             return result
 
         except Exception as e:
@@ -233,6 +324,86 @@ class LLMRefiner:
                         )
                     ]
                 )
+            )
+
+    async def refine_single_project(self, text: str, project_name_hint: str = None) -> Project:
+        """
+        Refine a single project's data. This is more efficient than full extraction 
+        because we know there is only ONE project.
+        """
+        system_prompt = f"""
+당신은 IT 전문 포트폴리오 분석가입니다.
+제공된 텍스트(README 및 소스 코드 조각)를 분석하여 **단 하나의 프로젝트**에 대한 상세 정보를 추출하세요.
+
+**분석 대상:** {project_name_hint or "주어진 프로젝트"}
+
+**추출 항목:**
+1. **project_name**: 가장 적합한 프로젝트 이름
+2. **period**: 진행 기간 (없으면 null)
+3. **role**: 주요 역할 및 담당 업무
+4. **tech_stack**: 사용된 핵심 기술 스택 리스트
+5. **description_for_embedding**: 아래 템플릿을 따라 작성
+6. **strengths**: 이 프로젝트에서 드러난 강점(역량) 3~7개 (tag/claim/evidence/level)
+7. **job_queries**: 이 프로젝트 경험을 바탕으로 지원 가능한 채용 공고 검색용 쿼리 3개 (A, B, C 타입)
+   - A: 해당 프로젝트의 핵심 기술과 경험을 기반으로 한 메인 포지션
+   - B: 해당 프로젝트의 부가 기술이나 도메인을 기반으로 한 서브 포지션
+   - C: 해당 프로젝트 경험을 바탕으로 한 도전적 포지션
+
+**description_for_embedding 작성 규칙 (필수):**
+프로젝트의 description_for_embedding은 반드시 아래 템플릿을 따라 작성하세요:
+
+[문제-해결 매핑]
+1) 문제: (프로젝트에서 직면한 구체적인 문제나 과제)
+   - 해결:
+     - (문제를 해결하기 위해 수행한 구체적인 작업 1)
+     - (문제를 해결하기 위해 수행한 구체적인 작업 2)
+   - 결과: (해결 후 얻은 성과, 원문에 있을 때만)
+
+2) 문제: (두 번째 문제, 있다면)
+   - 해결:
+     - (해결 작업)
+   - 결과: (성과, 원문에 있을 때만)
+
+[전체 성과]
+- (프로젝트 전체의 정량적/정성적 성과, 원문에 있을 때만)
+- 없으면: - 미기재
+
+**템플릿 작성 주의사항:**
+- 각 "문제"는 구체적이고 명확해야 합니다
+- "해결" 항목은 기술적 구현 방법을 포함해야 합니다 (소스 코드 조각이 있다면 특정 라이브러리, 알고리즘 등 상세히 반영)
+- "결과"는 원문에 명시된 경우에만 작성하세요
+- 정보가 부족하면 "미기재"로 표시하세요
+
+**strengths 작성 규칙:**
+- strengths.tag: [문제 해결, 주인의식, 책임감, 도전, 새로운 기술 적용, 새로운 방법으로 문제 해결, 실험/검증, 설계/구조화, 품질 개선, 성능 최적화, 협업, 커뮤니케이션, 프로젝트 리딩, 데이터/지표 기반 개선] 중 선택
+- claim: 1문장 요약
+- evidence: 원문 근거 구절 1~3개 (짧게 그대로)
+- level: low, medium, high
+"""
+        user_prompt = f"[프로젝트 데이터]\n{text}"
+        
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ]
+        
+        # We reuse Project's schema for Structured Output
+        schema = Project.model_json_schema()
+        
+        try:
+            response_text = await self._call_ncp(messages, response_schema=schema)
+            project = Project.model_validate_json(response_text)
+            
+            if len(project.job_queries) > 3:
+                project.job_queries = project.job_queries[:3]
+                
+            return project
+        except Exception as e:
+            logger.error(f"Single Project Refinement Failed: {e}")
+            return Project(
+                project_name=project_name_hint or "분석 실패 프로젝트",
+                description_for_embedding=f"분석 오류: {str(e)}\n\n원문 일부:\n{text[:200]}...",
+                job_queries=[]
             )
 
     async def update_global_user_profile(self, current_summary: str, current_job_title: str, new_project_info: str) -> dict:

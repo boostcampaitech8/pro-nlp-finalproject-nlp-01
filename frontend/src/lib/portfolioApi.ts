@@ -12,6 +12,7 @@ export interface PortfolioApi {
     uploadFile: (file: File) => Promise<Portfolio>;
     importNotion: (url: string, title?: string) => Promise<Portfolio>;
     importGithub: (url: string, title?: string) => Promise<Portfolio>;
+    importBlog: (url: string, title?: string) => Promise<Portfolio>;
     analyzePortfolio: (source: string, type: string) => Promise<AnalysisResult>;
     analyzePortfolioFile: (file: File) => Promise<AnalysisResult>;
     getPortfolio: (id: number) => Promise<Portfolio>;
@@ -48,11 +49,11 @@ export const portfolioApi: PortfolioApi = {
     /**
      * Import portfolio from a Notion URL.
      */
-    importNotion: async (url: string, title: string = "Notion Page"): Promise<Portfolio> => {
+    importNotion: async (url: string, projectName: string = "Notion Page"): Promise<Portfolio> => {
         const res = await fetchWithAuth(getApiUrl("/portfolios/notion"), {
             method: "POST",
             body: JSON.stringify({
-                title,
+                project_name: projectName,
                 source_url: url,
                 type: "notion"
             }),
@@ -69,11 +70,11 @@ export const portfolioApi: PortfolioApi = {
     /**
      * Import portfolio from a GitHub URL (Repo or Profile).
      */
-    importGithub: async (url: string, title: string = "GitHub Portfolio"): Promise<Portfolio> => {
+    importGithub: async (url: string, projectName: string = "GitHub Portfolio"): Promise<Portfolio> => {
         const res = await fetchWithAuth(getApiUrl("/portfolios/github"), {
             method: "POST",
             body: JSON.stringify({
-                title,
+                project_name: projectName,
                 source_url: url,
                 type: "github"
             }),
@@ -82,6 +83,27 @@ export const portfolioApi: PortfolioApi = {
         if (!res.ok) {
             const errorData = (await res.json().catch(() => ({}))) as { detail?: string };
             throw new Error(errorData.detail || "GitHub import failed");
+        }
+
+        return res.json() as Promise<Portfolio>;
+    },
+
+    /**
+     * Import portfolio from a Blog URL (Velog, Tistory).
+     */
+    importBlog: async (url: string, projectName: string = "Blog Portfolio"): Promise<Portfolio> => {
+        const res = await fetchWithAuth(getApiUrl("/portfolios/blog"), {
+            method: "POST",
+            body: JSON.stringify({
+                project_name: projectName,
+                source_url: url,
+                type: "blog"
+            }),
+        });
+
+        if (!res.ok) {
+            const errorData = (await res.json().catch(() => ({}))) as { detail?: string };
+            throw new Error(errorData.detail || "Blog import failed");
         }
 
         return res.json() as Promise<Portfolio>;

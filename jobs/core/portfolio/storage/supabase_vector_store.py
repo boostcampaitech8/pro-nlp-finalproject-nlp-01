@@ -38,7 +38,12 @@ class ManualRAG:
             headers=headers,
             json={"text": text_content}
         )
-        res.raise_for_status()
+        try:
+            res.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            # Log the detailed response for debugging
+            raise Exception(f"Embedding API Failed: {e}, Response: {res.text}")
+
         return res.json()["result"]["embedding"]
 
     def add_document(self, content, metadata):

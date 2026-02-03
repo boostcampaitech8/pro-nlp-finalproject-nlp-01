@@ -17,7 +17,7 @@ from app.core.exceptions import AppBaseException
 from common.config import settings
 
 logger.info("Importing endpoints...")
-from app.api.endpoints import auth, recruits, portfolios, cover_letters, health, notifications
+from app.api.endpoints import auth, recruits, portfolios, cover_letters, health, notifications, integrations
 
 logger.info("Initializing FastAPI app...")
 app = FastAPI(
@@ -115,4 +115,5 @@ app.include_router(recruits.router, prefix="/api/recruits", tags=["Recruitments"
 app.include_router(portfolios.router, prefix="/api/portfolios", tags=["Portfolios"])
 app.include_router(cover_letters.router, prefix="/api/cover-letters", tags=["Cover Letters"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
+app.include_router(integrations.router, prefix="/api/integrations", tags=["Integrations"])
 

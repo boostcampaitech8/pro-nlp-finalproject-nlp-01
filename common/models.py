@@ -26,6 +26,7 @@ class User(Base):
 
     portfolios = relationship("Portfolio", back_populates="owner")
     cover_letters = relationship("CoverLetter", back_populates="owner")
+    integrations = relationship("UserIntegration", back_populates="user", cascade="all, delete-orphan")
 
 class Recruitment(Base):
     __tablename__ = "recruitments"
@@ -45,13 +46,14 @@ class Recruitment(Base):
     key_responsibilities = Column(Text, nullable=True)
     required_qualifications = Column(Text, nullable=True)
     preferred_qualifications = Column(Text, nullable=True)
-    tags = Column(JSON, nullable=True)  # List of strings
+    company_description = Column(Text, nullable=True)  # 기업 인재상/핵심 가치
     embedding = Column(Vector(1024), nullable=True)  # Unified 1:1 embedding storage
     view_count = Column(Integer, default=0) # View count for popularity sorting
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     cover_letters = relationship("CoverLetter", back_populates="recruitment")
     recommendations = relationship("Recommendation", back_populates="recruitment", cascade="all, delete-orphan")
+    tags = relationship("Tag", secondary="recruitment_tag_link", back_populates="recruitments")
 
 class Portfolio(Base):
     __tablename__ = "portfolios"
@@ -59,7 +61,6 @@ class Portfolio(Base):
     id = Column(Integer, primary_key=True, index=True)
     type = Column(String, nullable=False)  # github, link, file, notion
     source_url = Column(String, nullable=True)
-    content = Column(Text, nullable=True) # Raw extracted text
     user_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
@@ -72,10 +73,23 @@ class Portfolio(Base):
     role = Column(String, nullable=True)
     description = Column(Text, nullable=True) # Refined Description for Embedding
     tech_stack = Column(JSON, nullable=True) # List of strings
-    embedding = Column(Vector(1024), nullable=True)  # Native vector storage (List of floats)
+    strengths = Column(JSON, nullable=True) # List of StrengthItem dicts
 
     owner = relationship("User", back_populates="portfolios")
     job_queries = relationship("PortfolioJobQuery", back_populates="portfolio", cascade="all, delete-orphan")
+    chunks = relationship("PortfolioChunk", back_populates="portfolio", cascade="all, delete-orphan")
+
+class PortfolioChunk(Base):
+    __tablename__ = "portfolio_chunks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    portfolio_id = Column(Integer, ForeignKey("portfolios.id"), nullable=False)
+    chunk_content = Column(Text, nullable=False)
+    embedding = Column(Vector(1024), nullable=True)
+    chunk_index = Column(Integer, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    portfolio = relationship("Portfolio", back_populates="chunks")
 
 class PortfolioJobQuery(Base):
     __tablename__ = "portfolio_job_queries"
@@ -118,6 +132,8 @@ class CoverLetterItem(Base):
     question = Column(Text, nullable=False)
     content = Column(Text, nullable=True)
     category = Column(String, nullable=True) # motivation, growth, capability, etc.
+    hint = Column(Text, nullable=True)  # 작성 힌트/가이드
+    max_length = Column(Integer, nullable=True, default=1000)  # 글자 수 제한
     
     # AI Analysis
     key_points = Column(JSON, nullable=True) # List of strings
@@ -127,6 +143,18 @@ class CoverLetterItem(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     cover_letter = relationship("CoverLetter", back_populates="items")
+
+class Tag(Base):
+    __tablename__ = "tags"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True, nullable=False)
+    
+    recruitments = relationship("Recruitment", secondary="recruitment_tag_link", back_populates="tags")
+
+class RecruitmentTagLink(Base):
+    __tablename__ = "recruitment_tag_link"
+    recruitment_id = Column(Integer, ForeignKey("recruitments.id", ondelete="CASCADE"), primary_key=True)
+    tag_id = Column(Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True)
 
 class Recommendation(Base):
     __tablename__ = "recommendations"
@@ -153,3 +181,17 @@ class Notification(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User")
+
+class UserIntegration(Base):
+    __tablename__ = "user_integrations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    provider = Column(String, nullable=False)  # 'github', 'notion'
+    access_token = Column(String, nullable=False)
+    refresh_token = Column(String, nullable=True)
+    provider_user_id = Column(String, nullable=True) # ID from the provider
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    user = relationship("User", back_populates="integrations")

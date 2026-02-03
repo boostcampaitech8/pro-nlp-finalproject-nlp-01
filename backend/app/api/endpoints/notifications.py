@@ -36,8 +36,9 @@ async def list_notifications(
     current_user: models.User = Depends(deps.get_current_user)
 ):
     """
-    List historical notifications.
+    List historical notifications. Uses Redis for unread count caching.
     """
+    # 1. Fetch items
     stmt = select(models.Notification).where(
         models.Notification.user_id == current_user.id
     ).order_by(models.Notification.created_at.desc()).limit(50)
@@ -45,13 +46,18 @@ async def list_notifications(
     result = await db.execute(stmt)
     items = result.scalars().all()
     
-    # Count unread
-    unread_stmt = select(func.count()).select_from(models.Notification).where(
-        models.Notification.user_id == current_user.id,
-        models.Notification.is_read == False
-    )
-    unread_res = await db.execute(unread_stmt)
-    unread_count = unread_res.scalar()
+    # 2. Get unread count from Redis
+    unread_count = await broadcaster.get_unread_count(current_user.id)
+    
+    # 3. Fallback to DB if Redis is empty and sync it
+    if unread_count is None:
+        count_stmt = select(func.count()).select_from(models.Notification).where(
+            models.Notification.user_id == current_user.id,
+            models.Notification.is_read == False
+        )
+        count_res = await db.execute(count_stmt)
+        unread_count = count_res.scalar()
+        await broadcaster.reset_unread_count(current_user.id, unread_count)
     
     return {"items": items, "unread_count": unread_count}
 
@@ -61,13 +67,22 @@ async def mark_as_read(
     db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(deps.get_current_user)
 ):
-    stmt = update(models.Notification).where(
-        models.Notification.id == id,
-        models.Notification.user_id == current_user.id
-    ).values(is_read=True)
+    # Check if actually exists and unread
+    existing = await db.execute(
+        select(models.Notification).where(
+            models.Notification.id == id, 
+            models.Notification.user_id == current_user.id,
+            models.Notification.is_read == False
+        )
+    )
+    notif = existing.scalar_one_or_none()
     
-    await db.execute(stmt)
-    await db.commit()
+    if notif:
+        notif.is_read = True
+        await db.commit()
+        # Decrement Redis count
+        await broadcaster.decr_unread_count(current_user.id)
+        
     return {"status": "ok"}
 
 @router.patch("/read-all")
@@ -82,6 +97,8 @@ async def mark_all_as_read(
     
     await db.execute(stmt)
     await db.commit()
+    # Reset Redis count
+    await broadcaster.reset_unread_count(current_user.id, 0)
     return {"status": "ok"}
 
 @router.post("/trigger-internal")
@@ -108,5 +125,8 @@ async def trigger_notification_internal(
     if not user_id:
         raise HTTPException(status_code=400, detail="user_id required")
     
-    await broadcaster.broadcast(user_id, payload)
+    notif_type = payload.get("type", "GENERAL")
+    increment_unread = (notif_type != "REFRESH")
+    
+    await broadcaster.broadcast(user_id, payload, increment_unread=increment_unread)
     return {"status": "dispatched"}

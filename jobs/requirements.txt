@@ -25,3 +25,5 @@ pillow
 rank_bm25
 numpy
 pgvector
+notion-client
+gitingest

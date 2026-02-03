@@ -40,7 +40,7 @@ export function GapAnalysisReport({ gapAnalysis }: GapAnalysisReportProps) {
                         <CheckCircle className="h-4 w-4" /> Strong Points
                     </h3>
                     <div className="space-y-3">
-                        {gapAnalysis.matching_points.map((point, i) => (
+                        {gapAnalysis.matching_points?.map((point, i) => (
                             <div key={i} className="bg-green-50/50 border border-green-100 p-4 rounded-2xl flex items-start gap-3 group transition-all hover:bg-green-50">
                                 <div className="h-5 w-5 bg-green-500 text-white rounded-full flex items-center justify-center shrink-0 mt-0.5"><span className="text-[10px] font-bold">{i + 1}</span></div>
                                 <p className="text-sm font-bold text-green-900 leading-snug">{point}</p>
@@ -53,7 +53,7 @@ export function GapAnalysisReport({ gapAnalysis }: GapAnalysisReportProps) {
                         <AlertCircle className="h-4 w-4" /> Areas to Focus
                     </h3>
                     <div className="space-y-3">
-                        {gapAnalysis.missing_elements.map((point, i) => (
+                        {gapAnalysis.missing_elements?.map((point, i) => (
                             <div key={i} className="bg-amber-50/50 border border-amber-100 p-4 rounded-2xl flex items-start gap-3 group transition-all hover:bg-amber-50">
                                 <div className="h-5 w-5 bg-amber-500 text-white rounded-full flex items-center justify-center shrink-0 mt-0.5"><span className="text-[10px] font-bold">{i + 1}</span></div>
                                 <p className="text-sm font-bold text-amber-900 leading-snug">{point}</p>

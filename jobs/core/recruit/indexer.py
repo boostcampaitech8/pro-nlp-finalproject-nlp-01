@@ -4,7 +4,7 @@ from datetime import date
 from langchain_core.documents import Document
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from common.models import Recruitment
+from common.models import Recruitment, Tag
 from jobs.core.portfolio.storage.supabase_vector_store import SupabaseVectorStore
 
 logger = logging.getLogger(__name__)
@@ -119,14 +119,27 @@ class RecruitIndexer:
                     key_responsibilities=sanitize_text(item.get('key_responsibilities')),
                     required_qualifications=sanitize_text(item.get('required_qualifications')),
                     preferred_qualifications=sanitize_text(item.get('preferred_qualifications')),
-                    tags=item.get('tags', [])
                 )
                 db.add(db_recruit)
             else:
                 # Update existing
                 db_recruit.link = item.get('link', db_recruit.link)
                 db_recruit.deadline = deadline_date or db_recruit.deadline
-                # ... update other fields as needed
+            
+            # Handle Tags (Many-to-Many Normalized)
+            tag_names = item.get('tags', [])
+            if tag_names:
+                db_tags = []
+                for tname in tag_names:
+                    # Get or Create Tag
+                    stmt_tag = select(Tag).where(Tag.name == tname)
+                    res_tag = await db.execute(stmt_tag)
+                    tag_obj = res_tag.scalar_one_or_none()
+                    if not tag_obj:
+                        tag_obj = Tag(name=tname)
+                        db.add(tag_obj)
+                    db_tags.append(tag_obj)
+                db_recruit.tags = db_tags
             
             await db.flush() # Get the ID for metadata
             
@@ -153,7 +166,7 @@ class RecruitIndexer:
         
         # SQL for cosine similarity search
         stmt = text("""
-            SELECT id, title, company, category, location, tags, start_date, deadline, 
+            SELECT id, title, company, category, location, start_date, deadline, 
                    key_responsibilities, required_qualifications, preferred_qualifications,
                    embedding <=> :emb as distance
             FROM recruitments

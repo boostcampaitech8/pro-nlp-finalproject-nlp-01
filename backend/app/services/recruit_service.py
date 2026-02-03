@@ -35,11 +35,7 @@ async def get_recruitments(db: AsyncSession, skip: int = 0, limit: int = 10, cat
     if tech_stack:
         skills = [s.strip() for s in tech_stack.split(',') if s.strip()]
         if skills:
-            conditions = [
-                cast(models.Recruitment.tags, String).ilike(f'%"{skill}"%') 
-                for skill in skills
-            ]
-            stmt = stmt.where(or_(*conditions))
+            stmt = stmt.join(models.Recruitment.tags).where(models.Tag.name.in_(skills))
     
     if sort_by == 'popular':
         stmt = stmt.order_by(models.Recruitment.view_count.desc(), models.Recruitment.id.desc())
@@ -64,11 +60,7 @@ async def get_recruitments(db: AsyncSession, skip: int = 0, limit: int = 10, cat
     if tech_stack:
         skills = [s.strip() for s in tech_stack.split(',') if s.strip()]
         if skills:
-            conditions = [
-                cast(models.Recruitment.tags, String).ilike(f'%"{skill}"%') 
-                for skill in skills
-            ]
-            count_stmt = count_stmt.where(or_(*conditions))
+            count_stmt = count_stmt.join(models.Recruitment.tags).where(models.Tag.name.in_(skills))
     
     total_result = await db.execute(count_stmt)
     total = total_result.scalar() or 0
@@ -117,7 +109,7 @@ async def get_ai_recommendations(db: AsyncSession, user_id: int, portfolio_id: O
             "company": recruitment.company,
             "category": recruitment.category,
             "location": recruitment.location,
-            "tags": recruitment.tags,
+            "tags": [t.name for t in recruitment.tags],
             "deadline": recruitment.deadline.isoformat() if recruitment.deadline else None,
             "startDate": recruitment.start_date.isoformat() if recruitment.start_date else None,
             "reason": combined_reason
@@ -125,7 +117,7 @@ async def get_ai_recommendations(db: AsyncSession, user_id: int, portfolio_id: O
     
     if not final_results and portfolio_id:
         logger.info(f"No recommendations for user {user_id}. Triggering job.")
-        success = job_service.trigger_job(task="recruit_update", target_id=user_id)
+        success = job_service.trigger_recommendation_update(user_id=user_id)
         if not success:
             return {"items": [], "status": "ERROR", "error": "Failed to trigger recommendation update"}
         return {"items": [], "status": "PROCESSING"}
@@ -136,7 +128,7 @@ async def get_ai_recommendations(db: AsyncSession, user_id: int, portfolio_id: O
     }
 
 async def run_bg_recalc_for_user(user_id: int):
-    success = job_service.trigger_job(task="recruit_update", target_id=user_id)
+    success = job_service.trigger_recommendation_update(user_id=user_id)
     if not success:
         logger.error(f"Failed to trigger background recommendation update for user {user_id}")
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Portfolio } from "@/types";
+import { Portfolio, NotificationEventDetail } from "@/types";
 import { useToast } from "@/components/ui/toast-context";
 import { Plus, FileText, Link as LinkIcon, Github, LayoutGrid, List } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,7 @@ export default function PortfoliosPage() {
     const { toast } = useToast();
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-    useEffect(() => {
+    const fetchPortfolios = useCallback(() => {
         fetchWithAuth(getApiUrl("/portfolios"))
             .then(res => res.json())
             .then(data => {
@@ -33,6 +33,25 @@ export default function PortfoliosPage() {
                 toast("포트폴리오 목록을 불러오는데 실패했습니다.", "error");
             });
     }, [toast]);
+
+    useEffect(() => {
+        fetchPortfolios();
+    }, [fetchPortfolios]);
+
+    // Real-time update listener
+    useEffect(() => {
+        const handleNotification = (e: Event) => {
+            const customEvent = e as CustomEvent<NotificationEventDetail>;
+            const { type } = customEvent.detail;
+            if (type === 'PORTFOLIO_READY' || type === 'PORTFOLIO_COMPLETED') {
+                console.log("Real-time portfolio update triggered");
+                fetchPortfolios();
+            }
+        };
+
+        window.addEventListener('notification_event', handleNotification);
+        return () => window.removeEventListener('notification_event', handleNotification);
+    }, [fetchPortfolios]);
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return "N/A";
@@ -113,12 +132,9 @@ export default function PortfoliosPage() {
                                             </div>
                                             <span className="line-clamp-1">{portfolio.project_name || "프로젝트"}</span>
                                         </CardTitle>
-                                        <div className="text-[11px] text-slate-400 font-bold flex items-center justify-between uppercase tracking-wider mt-2">
-                                            <div className="flex items-center gap-2">
-                                                <span>{portfolio.role || 'N/A'}</span>
-                                                <span className="text-slate-200">•</span>
-                                                <span>{formatDate(portfolio.created_at)}</span>
-                                            </div>
+                                        <div className="text-[11px] text-slate-400 font-bold flex items-center justify-between uppercase tracking-wider mt-2 gap-3">
+                                            <span className="truncate flex-1">{portfolio.role || 'N/A'}</span>
+                                            <span className="shrink-0 text-slate-300 font-medium">{formatDate(portfolio.created_at)}</span>
                                         </div>
                                     </CardHeader>
                                     <CardContent className="flex-1 pb-6 space-y-4">
@@ -127,15 +143,12 @@ export default function PortfoliosPage() {
                                         </p>
 
                                         {portfolio.tech_stack && portfolio.tech_stack.length > 0 && (
-                                            <div className="flex flex-wrap gap-1.5 pt-2">
-                                                {portfolio.tech_stack.slice(0, 4).map((tech, i) => (
-                                                    <Badge key={i} variant="secondary" className="text-[10px] bg-slate-100 text-slate-600 hover:bg-slate-200">
+                                            <div className="flex items-center gap-1.5 pt-2 overflow-hidden flex-nowrap">
+                                                {portfolio.tech_stack.map((tech, i) => (
+                                                    <Badge key={i} variant="secondary" className="text-[10px] bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap shrink-0">
                                                         {tech}
                                                     </Badge>
                                                 ))}
-                                                {portfolio.tech_stack.length > 4 && (
-                                                    <span className="text-[10px] text-slate-400 font-bold self-center">+{portfolio.tech_stack.length - 4}</span>
-                                                )}
                                             </div>
                                         )}
                                     </CardContent>

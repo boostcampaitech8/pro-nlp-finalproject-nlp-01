@@ -303,7 +303,7 @@ class RecruitmentCrawler:
             logger.error(f"  → Detail error: {e}")
             return "", "", ""
     
-    async def crawl_and_parse(self, exclude_identifiers: set = set()) -> List[Dict]:
+    async def crawl_and_parse(self, exclude_links: set = set()) -> List[Dict]:
         """Main crawling and parsing logic."""
         loop = asyncio.get_event_loop()
 
@@ -311,17 +311,17 @@ class RecruitmentCrawler:
         # job_list = self.get_job_list()
         job_list = await loop.run_in_executor(None, self.get_job_list)
         
-        # Filter existing jobs by (Company, Title)
+        # Filter existing jobs by link
         original_count = len(job_list)
-        # Check against exclude_identifiers set
+        # Check against exclude_links set
         filtered_list = []
         for job in job_list:
-            identifier = (job['company'], job['title'])
-            if identifier not in exclude_identifiers:
+            link = job.get('url') or job.get('link', '')
+            if link not in exclude_links:
                 filtered_list.append(job)
                 
         job_list = filtered_list
-        logger.info(f"Filtered {original_count - len(job_list)} existing jobs by (Company, Title). {len(job_list)} new jobs to process.")
+        logger.info(f"Filtered {original_count - len(job_list)} existing jobs by link. {len(job_list)} new jobs to process.")
         
         full_data = []
         if not job_list:

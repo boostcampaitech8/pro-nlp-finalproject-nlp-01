@@ -3,19 +3,13 @@ import traceback
 from sqlalchemy import select
 from common.database import AsyncSessionLocal
 from common.models import Portfolio, Recommendation, Recruitment, User
-from jobs.services.recruit_service import precompute_recommendations_for_portfolio, global_rerank_recommendations
+from jobs.services.recruit_service import (
+    precompute_recommendations_for_portfolio, 
+    global_rerank_recommendations, 
+    bulk_precompute_recommendations
+)
 from jobs.core.recruit.crawler import RecruitmentCrawler
-from datetime import datetime
-
-logger = logging.getLogger("recruit_task")
-
-import logging
-import traceback
-from sqlalchemy import select
-from common.database import AsyncSessionLocal
-from common.models import Portfolio, Recommendation, Recruitment, User
-from jobs.services.recruit_service import precompute_recommendations_for_portfolio, global_rerank_recommendations, bulk_precompute_recommendations
-from jobs.core.recruit.crawler import RecruitmentCrawler
+from jobs.core.recruit.indexer import RecruitIndexer
 from datetime import datetime
 
 logger = logging.getLogger("recruit_task")
@@ -65,16 +59,16 @@ async def run_scraper():
     """
     logger.info("Starting recruitment scraper process...")
     
-    existing_identifiers = set()
+    existing_links = set()
     
-    # Phase 1: Fetch existing IDs (Short session)
+    # Phase 1: Fetch existing links (Short session)
     try:
         async with AsyncSessionLocal() as db:
-            stmt = select(Recruitment.company, Recruitment.title)
+            stmt = select(Recruitment.link)
             res = await db.execute(stmt)
             existing_rows = res.all()
-            existing_identifiers = {(row.company, row.title) for row in existing_rows}
-            logger.info(f"Loaded {len(existing_identifiers)} existing recruitments to skip.")
+            existing_links = {row.link for row in existing_rows if row.link}
+            logger.info(f"Loaded {len(existing_links)} existing recruitment links to skip.")
     except Exception as e:
         logger.error(f"Failed to fetch existing recruitments: {e}")
         return
@@ -83,80 +77,23 @@ async def run_scraper():
     try:
         crawler = RecruitmentCrawler(target_pages=3) 
         # This takes 15+ mins, so we must NOT have an open DB session here
-        results = await crawler.crawl_and_parse(exclude_identifiers=existing_identifiers)
+        results = await crawler.crawl_and_parse(exclude_links=existing_links)
         logger.info(f"Crawler returned {len(results)} items. Syncing with database...")
     except Exception as e:
         logger.error(f"Crawler failed: {e}")
         logger.error(traceback.format_exc())
         return
 
-    # Phase 3: Save Results (New Short session)
+    # Phase 3: Save Results & Index (Use modernized indexer)
     if not results:
         logger.info("No new items to save.")
         return
 
     try:
         async with AsyncSessionLocal() as db:
-            new_count = 0
-            updated_count = 0
-            
-            for item in results:
-                # Check for existing recruitment by link
-                # (We check link again here to be safe and update existing records)
-                stmt = select(Recruitment).where(Recruitment.link == item['link'])
-                res = await db.execute(stmt)
-                existing = res.scalar_one_or_none()
-                
-                # Helper to parse dates
-                def parse_date(date_str):
-                    if not date_str or date_str == "상시채용":
-                        return None
-                    try:
-                        return datetime.strptime(date_str, "%Y-%m-%d").date()
-                    except ValueError:
-                        return None
-    
-                if existing:
-                    # Update existing record
-                    existing.title = item.get('title', existing.title)
-                    existing.company = item.get('company', existing.company)
-                    existing.deadline = parse_date(item.get('deadline')) or existing.deadline
-                    existing.location = item.get('location', existing.location)
-                    existing.experience = item.get('experience', existing.experience)
-                    existing.education = item.get('education', existing.education)
-                    existing.employment_type = item.get('employment_type', existing.employment_type)
-                    existing.salary = item.get('salary', existing.salary)
-                    existing.category = item.get('category', existing.category)
-                    existing.key_responsibilities = item.get('key_responsibilities', existing.key_responsibilities)
-                    existing.required_qualifications = item.get('required_qualifications', existing.required_qualifications)
-                    existing.preferred_qualifications = item.get('preferred_qualifications', existing.preferred_qualifications)
-                    existing.tags = item.get('tags', existing.tags)
-                    updated_count += 1
-                else:
-                    # Create new record
-                    new_rec = Recruitment(
-                        title=item.get('title'),
-                        company=item.get('company'),
-                        link=item.get('link'),
-                        start_date=parse_date(item.get('start_date')),
-                        deadline=parse_date(item.get('deadline')),
-                        location=item.get('location'),
-                        experience=item.get('experience'),
-                        education=item.get('education'),
-                        employment_type=item.get('employment_type'),
-                        salary=item.get('salary'),
-                        category=item.get('category'),
-                        key_responsibilities=item.get('key_responsibilities'),
-                        required_qualifications=item.get('required_qualifications'),
-                        preferred_qualifications=item.get('preferred_qualifications'),
-                        tags=item.get('tags')
-                    )
-                    db.add(new_rec)
-                    new_count += 1
-            
-            await db.commit()
-            logger.info(f"Sync complete. New: {new_count}, Updated: {updated_count}")
-
+            indexer = RecruitIndexer()
+            added_count = await indexer.add_recruitments(db, results)
+            logger.info(f"Sync complete. Added/Updated {added_count} items through indexer.")
     except Exception as e:
         logger.error(f"Database sync failed: {e}")
         logger.error(traceback.format_exc())

@@ -3,6 +3,7 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from common.database import get_async_db
 from common import schemas
+from common.exceptions import ResourceNotFoundError
 from app.services.cover_letter_service import CoverLetterService
 from app.services.ai_cover_letter_service import AICoverLetterService
 from app.api import deps
@@ -47,7 +48,7 @@ async def get_cover_letter(
     service = CoverLetterService(db)
     db_cl = await service.get_cover_letter(cl_id, current_user.id)
     if not db_cl:
-        raise HTTPException(status_code=404, detail="Cover letter not found or unauthorized")
+        raise ResourceNotFoundError("CoverLetter", cl_id)
     return db_cl
 
 @router.patch("/{cl_id}", response_model=schemas.CoverLetterDetail)
@@ -62,7 +63,7 @@ async def update_cover_letter(
         cl_id, current_user.id, cl.model_dump(exclude_unset=True)
     )
     if not db_cl:
-        raise HTTPException(status_code=404, detail="Cover letter not found or unauthorized")
+        raise ResourceNotFoundError("CoverLetter", cl_id)
     return db_cl
 
 @router.delete("/{cl_id}")
@@ -74,7 +75,7 @@ async def delete_cover_letter(
     service = CoverLetterService(db)
     success = await service.delete_cover_letter(cl_id, current_user.id)
     if not success:
-        raise HTTPException(status_code=404, detail="Cover letter not found or unauthorized")
+        raise ResourceNotFoundError("CoverLetter", cl_id)
     return {"success": True, "message": "Cover letter deleted"}
 
 @router.patch("/{cl_id}/confirm", response_model=schemas.CoverLetterDetail)

@@ -22,6 +22,24 @@ class JobService:
         else:
             return self._trigger_local_job(task, target_id, **kwargs)
 
+    def trigger_portfolio_extraction(self, portfolio_id: int):
+        return self.trigger_job(task="portfolio_extraction", target_id=portfolio_id)
+
+    def trigger_portfolio_analysis(self, portfolio_id: int):
+        return self.trigger_job(task="portfolio_analysis", target_id=portfolio_id)
+
+    def trigger_profile_update(self, portfolio_id: int):
+        return self.trigger_job(task="profile_update", target_id=portfolio_id)
+
+    def trigger_cover_letter_generation(self, cover_letter_id: int, **kwargs):
+        return self.trigger_job(task="cover_letter_generation", target_id=cover_letter_id, **kwargs)
+
+    def trigger_recruit_indexing(self):
+        return self.trigger_job(task="recruit_indexing")
+
+    def trigger_recommendation_update(self, user_id: Optional[int] = None):
+        return self.trigger_job(task="recruit_update", target_id=user_id)
+
     def _trigger_cloud_run_job(self, task: str, target_id: Optional[int] = None, **kwargs):
         """
         Triggers a Google Cloud Run Job using the official SDK with retry logic.
@@ -44,6 +62,14 @@ class JobService:
                 if target_id:
                     args.append(f"--id={target_id}")
                 
+                # OPTIONAL: Pass kwargs as environment variables
+                # The container expects env vars like JOB_EXTRA_TONE, JOB_EXTRA_MODE
+                env_vars = []
+                for k, v in kwargs.items():
+                    env_key = f"JOB_EXTRA_{k.upper()}"
+                    env_val = str(v)
+                    env_vars.append({"name": env_key, "value": env_val})
+                
                 # Formatting job path: projects/{project}/locations/{location}/jobs/{job}
                 job_path = f"projects/{self.project_id}/locations/{self.region}/jobs/{self.job_name}"
                 
@@ -52,7 +78,8 @@ class JobService:
                     overrides={
                         "container_overrides": [
                             {
-                                "args": args
+                                "args": args,
+                                "env": env_vars
                             }
                         ]
                     }

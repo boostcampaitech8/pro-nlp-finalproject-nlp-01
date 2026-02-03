@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { usePolling } from "@/hooks/usePolling";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ArrowLeft, ExternalLink, FileText, Github, Calendar, Trash2, Edit, Sparkles, User, Code } from "lucide-react";
 import Link from "next/link";
 import { getApiUrl, fetchWithAuth } from "@/lib/apiUtils";
-import { Portfolio } from "@/types";
+import { Portfolio, NotificationEventDetail } from "@/types";
 import { useToast } from "@/components/ui/toast-context";
 
 export default function PortfolioDetailClient({ params }: { params: Promise<{ id: string }> }) {
@@ -31,7 +31,7 @@ export default function PortfolioDetailClient({ params }: { params: Promise<{ id
     // Use polledData as the source of truth when available, otherwise fall back to initial fetch state
     const displayPortfolio = polledData || portfolio;
 
-    useEffect(() => {
+    const fetchPortfolio = useCallback(() => {
         fetchWithAuth(getApiUrl(`/portfolios/${id}`))
             .then(res => {
                 if (!res.ok) throw new Error("Not Found");
@@ -47,6 +47,27 @@ export default function PortfolioDetailClient({ params }: { params: Promise<{ id
                 toast("포트폴리오를 불러오는데 실패했습니다.", "error");
             });
     }, [id, toast]);
+
+    useEffect(() => {
+        fetchPortfolio();
+    }, [fetchPortfolio]);
+
+    // Real-time update listener
+    useEffect(() => {
+        const handleNotification = (e: Event) => {
+            const customEvent = e as CustomEvent<NotificationEventDetail>;
+            const { type, data } = customEvent.detail;
+            if (type === 'PORTFOLIO_READY' || type === 'PORTFOLIO_COMPLETED') {
+                if (data.target_id === parseInt(id)) {
+                    console.log("Real-time portfolio update triggered in Detail");
+                    fetchPortfolio();
+                }
+            }
+        };
+
+        window.addEventListener('notification_event', handleNotification);
+        return () => window.removeEventListener('notification_event', handleNotification);
+    }, [id, fetchPortfolio]);
 
     const handleDelete = async () => {
         if (confirm("정말로 삭제하시겠습니까?")) {
@@ -167,6 +188,51 @@ export default function PortfolioDetailClient({ params }: { params: Promise<{ id
                             <p className="text-slate-500 text-sm">기술 스택 정보가 없습니다.</p>
                         )}
                     </div>
+
+                    {/* Strengths Section */}
+                    {displayPortfolio.strengths && displayPortfolio.strengths.length > 0 && (
+                        <div className="space-y-4 pt-6 border-t border-slate-100">
+                            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                                <Sparkles className="h-4 w-4 text-blue-500" /> AI분석 핵심 강점
+                            </h3>
+                            <div className="grid grid-cols-1 gap-4">
+                                {displayPortfolio.strengths.map((s, i) => (
+                                    <div key={i} className="p-5 rounded-xl border border-blue-100 bg-blue-50/20 shadow-sm space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <Badge className="bg-blue-600 text-white hover:bg-blue-700">
+                                                    {s.tag}
+                                                </Badge>
+                                                <Badge variant="outline" className={`
+                                                    ${s.level === 'high' ? 'border-orange-200 text-orange-600 bg-orange-50' :
+                                                        s.level === 'medium' ? 'border-blue-200 text-blue-600 bg-blue-50' :
+                                                            'border-slate-200 text-slate-500 bg-slate-50'}
+                                                `}>
+                                                    Level {s.level.toUpperCase()}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                        <p className="text-slate-800 font-bold leading-snug">
+                                            {s.claim}
+                                        </p>
+                                        {s.evidence && s.evidence.length > 0 && (
+                                            <div className="space-y-1.5">
+                                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-tight">발췌 근거</p>
+                                                <div className="flex flex-col gap-1.5">
+                                                    {s.evidence.map((ev, j) => (
+                                                        <div key={j} className="flex gap-2 items-start text-sm text-slate-600 bg-white/60 p-2 rounded border border-blue-50/50">
+                                                            <div className="mt-1.5 h-1 w-1 rounded-full bg-blue-400 shrink-0" />
+                                                            <span className="italic">&quot;{ev}&quot;</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Job Queries Section */}
                     {displayPortfolio.job_queries && displayPortfolio.job_queries.length > 0 && (

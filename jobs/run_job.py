@@ -33,8 +33,8 @@ init_db()
 
 async def main():
     parser = argparse.ArgumentParser(description="Cloud Run Job Runner")
-    parser.add_argument("--task", type=str, required=True, help="Task to run")
-    parser.add_argument("--id", type=int, help="Target record ID (Portfolio/CoverLetter ID, or User ID for recruitments)")
+    parser.add_argument("--task", type=str, required=True, help="Task to run (portfolio_extraction, portfolio_analysis, etc.)")
+    parser.add_argument("--id", type=int, help="Target record ID")
     
     args = parser.parse_args()
     

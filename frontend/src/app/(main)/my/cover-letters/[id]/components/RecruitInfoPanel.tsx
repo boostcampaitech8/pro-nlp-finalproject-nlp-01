@@ -3,7 +3,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X, Search, MapPin, Coins, GraduationCap, Sparkles, Zap, Wand2, MessageSquare, LayoutList, Target, Brain, Loader2 } from "lucide-react";
+import { X, MapPin, Coins, GraduationCap, Sparkles, Zap, Wand2, MessageSquare, LayoutList, Target, Brain, Loader2, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Recruit as RecruitDetail } from "@/types";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,8 @@ interface RecruitInfoPanelProps {
     setAiTone: (tone: ToneType) => void;
     aiFocus: string;
     setAiFocus: (focus: string) => void;
+    subheading: boolean;
+    setSubheading: (val: boolean) => void;
     isGenerating: boolean;
     onRunGeneration: () => void;
 }
@@ -41,28 +43,40 @@ export function RecruitInfoPanel({
     setAiTone,
     aiFocus,
     setAiFocus,
+    subheading,
+    setSubheading,
     isGenerating,
     onRunGeneration
 }: RecruitInfoPanelProps) {
     return (
-        <div className={cn("sticky top-0 transition-all duration-700 overflow-hidden shrink-0 hidden xl:block", isOpen ? "w-[580px] opacity-100 h-auto self-start" : "w-0 opacity-0 pointer-events-none")}>
-            <div className="w-[580px] px-8 pt-20 pb-24 flex flex-col">
+        <div className={cn("transition-all duration-700 overflow-hidden shrink-0 hidden xl:block h-full", isOpen ? "w-[580px] opacity-100" : "w-0 opacity-0 pointer-events-none")}>
+            <div className="w-[580px] px-8 pt-8 pb-8 flex flex-col h-full">
                 <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] shadow-2xl flex-1 flex flex-col overflow-hidden">
                     <Tabs value={panelTab} onValueChange={setPanelTab} className="h-full flex flex-col">
                         <div className="p-8 pb-4 bg-white">
                             <div className="flex justify-between items-center mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20 text-white"><Search className="h-5 w-5" /></div>
+                                    <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20 text-white"><Sparkles className="h-5 w-5" /></div>
                                     <div className="space-y-0.5">
-                                        <h2 className="font-black text-xl tracking-tight text-slate-900">공고 분석 패널</h2>
-                                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">AI Context Studio</p>
+                                        <h2 className="font-black text-xl tracking-tight text-slate-900">AI 라이팅 스튜디오</h2>
+                                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">AI Writing Studio</p>
                                     </div>
                                 </div>
                                 <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-slate-100 trasition-all"><X className="h-5 w-5 text-slate-400" /></Button>
                             </div>
-                            <TabsList className="grid grid-cols-2 w-full h-12 bg-slate-100 p-1.5 rounded-[1.25rem] mb-2 font-pretendard">
-                                <TabsTrigger value="recruit" className="rounded-[0.9rem] font-black text-xs">공고 원문</TabsTrigger>
-                                <TabsTrigger value="ai_writing" className="rounded-[0.9rem] font-black text-xs">AI 라이팅</TabsTrigger>
+                            <TabsList className="grid grid-cols-2 w-full h-11 bg-slate-100 p-1 rounded-xl border border-slate-200/50 shadow-inner mb-2 font-pretendard">
+                                <TabsTrigger
+                                    value="recruit"
+                                    className="flex items-center gap-2 rounded-lg font-bold text-[13px] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all duration-200"
+                                >
+                                    <FileText className="h-3.5 w-3.5" /> 공고 원문
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="ai_writing"
+                                    className="flex items-center gap-2 rounded-lg font-bold text-[13px] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all duration-200"
+                                >
+                                    <Sparkles className="h-3.5 w-3.5 text-blue-500 fill-blue-500/10" /> AI 라이팅
+                                </TabsTrigger>
                             </TabsList>
                         </div>
                         <div className="flex-1 overflow-y-auto overflow-x-hidden p-8 pt-4 scrollbar-hide font-pretendard">
@@ -141,9 +155,9 @@ export function RecruitInfoPanel({
                                         </Label>
                                         <div className="grid grid-cols-3 gap-2">
                                             {[
-                                                { id: 'draft', label: '완성형 초안', icon: <Wand2 className="h-4 w-4" /> },
-                                                { id: 'strategy', label: '뼈대 개요', icon: <LayoutList className="h-4 w-4" /> },
-                                                { id: 'refine', label: '문장 정교화', icon: <MessageSquare className="h-4 w-4" /> }
+                                                { id: 'draft', label: '기본 스타일', icon: <Wand2 className="h-4 w-4" /> },
+                                                { id: 'strategy', label: '가이드라인 생성', icon: <LayoutList className="h-4 w-4" /> },
+                                                { id: 'refine', label: '소제목 스타일', icon: <MessageSquare className="h-4 w-4" /> }
                                             ].map(mode => (
                                                 <div key={mode.id} onClick={() => setAiMode(mode.id as AiMode)} className={cn("p-4 rounded-2xl border-2 transition-all cursor-pointer text-center space-y-2", aiMode === mode.id ? "border-blue-600 bg-blue-50/50 shadow-md" : "border-slate-50 bg-slate-50/50 hover:border-slate-100 hover:bg-white")}>
                                                     <div className={cn("mx-auto h-8 w-8 rounded-xl flex items-center justify-center transition-all", aiMode === mode.id ? "bg-blue-600 text-white" : "bg-white text-slate-300")}>{mode.icon}</div>
@@ -173,12 +187,35 @@ export function RecruitInfoPanel({
                                         </div>
                                     </div>
 
-                                    {/* Focus Request */}
                                     <div className="space-y-3">
                                         <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 ml-1">
                                             <Target className="h-3.5 w-3.5 text-blue-500" /> 커스텀 요청
                                         </Label>
                                         <Textarea placeholder="예: 구체적인 수치를 포함해줘..." value={aiFocus} onChange={e => setAiFocus(e.target.value)} className="min-h-[100px] resize-none border-2 border-slate-50 bg-slate-50/50 rounded-2xl px-4 py-3 text-[13px] font-medium leading-relaxed" />
+                                    </div>
+
+                                    {/* Subheading Toggle */}
+                                    <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border-2 border-slate-50 transition-all hover:border-slate-100">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-[13px] font-bold text-slate-900 flex items-center gap-2">
+                                                <LayoutList className="h-4 w-4 text-blue-500" /> 답변 내 소제목 포함
+                                            </Label>
+                                            <p className="text-[11px] text-slate-400 font-medium">가독성을 높여주는 소제목을 자동으로 생성합니다.</p>
+                                        </div>
+                                        <button
+                                            onClick={() => setSubheading(!subheading)}
+                                            className={cn(
+                                                "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                                                subheading ? "bg-blue-600" : "bg-slate-200"
+                                            )}
+                                        >
+                                            <span
+                                                className={cn(
+                                                    "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                                                    subheading ? "translate-x-5" : "translate-x-0"
+                                                )}
+                                            />
+                                        </button>
                                     </div>
 
                                     {/* Action Button */}

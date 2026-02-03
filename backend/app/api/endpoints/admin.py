@@ -1,5 +1,5 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Depends
-from typing import List
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Depends, Header
+from typing import List, Optional
 from common.database import get_async_db
 from common.config import settings
 
@@ -16,7 +16,7 @@ def trigger_crawling(background_tasks: BackgroundTasks, secret: str):
     
     from app.services.job_service import job_service
     # Trigger the scraping job
-    success = job_service.trigger_job(task="recruit_update")
+    success = job_service.trigger_recommendation_update()
     if not success:
         raise HTTPException(status_code=500, detail="Failed to trigger crawling job (Infrastructure error)")
         
@@ -69,3 +69,36 @@ async def clear_database(
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to reset DB: {str(e)}")
+
+@router.post(
+    "/generate-embeddings",
+    status_code=202,
+    summary="공고 임베딩 일괄 생성 (Job 트리거)",
+    description="임베딩이 없는 모든 채용 공고에 대해 임베딩을 생성하는 Job을 트리거합니다. X-Admin-Secret 헤더 필요."
+)
+async def generate_embeddings(
+    background_tasks: BackgroundTasks,
+    x_admin_secret: Optional[str] = Header(None)
+):
+    """
+    임베딩 생성 Job을 트리거합니다.
+    X-Admin-Secret 헤더로 인증.
+    """
+    
+    # 관리자 키 확인
+    if x_admin_secret != settings.INTERNAL_API_SECRET:
+        raise HTTPException(status_code=403, detail="관리자 권한이 필요합니다.")
+    
+    try:
+        from app.services.job_service import job_service
+        
+        # Job 트리거 (recruit_indexing task가 임베딩 생성 포함)
+        job_service.trigger_recruit_indexing()
+        
+        return {
+            "success": True,
+            "message": "임베딩 생성 Job이 트리거되었습니다.",
+            "task": "recruit_indexing"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Job 트리거 실패: {str(e)}")

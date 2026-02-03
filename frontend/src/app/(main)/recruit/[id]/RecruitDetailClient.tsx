@@ -176,15 +176,15 @@ export default function RecruitDetailPage({ params }: { params: Promise<{ id: st
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-6 p-6 text-sm">
-                            <div className="flex justify-between items-center pb-3 border-b border-slate-100 border-dashed">
-                                <span className="text-slate-500 flex items-center gap-2">
+                            <div className="flex justify-between items-start pb-3 border-b border-slate-100 border-dashed gap-4">
+                                <span className="text-slate-500 flex items-center gap-2 whitespace-nowrap shrink-0">
                                     <Building className="h-4 w-4" /> 기업명
                                 </span>
                                 <span className="font-semibold text-right text-slate-700">{recruit.company}</span>
                             </div>
 
                             <div className="flex flex-col gap-2 pb-3 border-b border-slate-100 border-dashed">
-                                <span className="text-slate-500 flex items-center gap-2">
+                                <span className="text-slate-500 flex items-center gap-2 whitespace-nowrap shrink-0">
                                     <Calendar className="h-4 w-4" /> 채용 기간
                                 </span>
                                 <div className="flex items-center justify-between">
@@ -235,8 +235,8 @@ export default function RecruitDetailPage({ params }: { params: Promise<{ id: st
                                 </div>
                             )}
 
-                            <div className="flex justify-between items-center pb-3 border-b border-slate-100 border-dashed">
-                                <span className="text-slate-500 flex items-center gap-2">
+                            <div className="flex justify-between items-center pb-3 border-b border-slate-100 border-dashed gap-4">
+                                <span className="text-slate-500 flex items-center gap-2 whitespace-nowrap shrink-0">
                                     <Flame className="h-4 w-4 text-orange-500" /> 총 조회수
                                 </span>
                                 <span className="font-bold text-right text-orange-600">{(recruit.view_count || 0).toLocaleString()}회</span>

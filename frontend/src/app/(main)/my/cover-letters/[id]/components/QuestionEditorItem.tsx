@@ -1,8 +1,8 @@
 "use client";
 
+import React, { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Trash2, CheckCircle, Sparkles, Plus } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,8 @@ interface QuestionItem {
     id: number;
     question: string;
     answer: string;
+    hint?: string;
+    max_length?: number;
     key_points?: string[];
     suggested_improvements?: string[];
 }
@@ -18,7 +20,7 @@ interface QuestionItem {
 interface QuestionEditorItemProps {
     question: QuestionItem;
     index: number;
-    onUpdate: (field: 'question' | 'answer', value: string) => void;
+    onUpdate: (field: 'question' | 'answer' | 'hint', value: string) => void;
     onRemove: () => void;
     onApplySuggestion: (suggestion: string) => void;
 }
@@ -30,24 +32,54 @@ export function QuestionEditorItem({
     onRemove,
     onApplySuggestion
 }: QuestionEditorItemProps) {
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+        }
+    }, [question.question]);
+
     return (
         <motion.div layout initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
             className="bg-white border-2 border-slate-100 rounded-[2rem] p-8 shadow-sm relative group hover:shadow-xl transition-all duration-300"
         >
-            <div className="flex justify-between items-center mb-8">
-                <div className="flex items-center gap-4 flex-1">
-                    <div className="flex items-center bg-slate-900 text-white rounded-xl px-4 py-2 gap-2 shrink-0 shadow-lg shadow-slate-200">
+            <div className="flex justify-between items-start mb-8">
+                <div className="flex items-start gap-4 flex-1">
+                    <div className="flex items-center bg-slate-900 text-white rounded-xl px-4 py-2 gap-2 shrink-0 shadow-lg shadow-slate-200 mt-1">
                         <span className="text-xs font-bold uppercase tracking-widest opacity-60">ITEM</span>
                         <span className="text-md font-black">{index + 1}</span>
                     </div>
-                    <Input
-                        value={question.question}
-                        onChange={e => onUpdate('question', e.target.value)}
-                        className="border-none text-2xl font-black p-0 focus-visible:ring-0 w-full placeholder:text-slate-200"
-                        placeholder="질문 문항을 입력하세요"
-                    />
+                    <div className="flex-1 space-y-2">
+                        <Textarea
+                            ref={textareaRef}
+                            value={question.question}
+                            onChange={e => onUpdate('question', e.target.value)}
+                            className="border-none text-2xl font-black p-0 focus-visible:ring-0 w-full placeholder:text-slate-200 resize-none min-h-[40px] bg-transparent overflow-hidden leading-tight py-1"
+                            placeholder="질문 문항을 입력하세요"
+                            rows={1}
+                        />
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 ml-1">
+                            <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 px-3 py-1 rounded-xl text-slate-500 hover:border-slate-200 transition-all focus-within:ring-2 focus-within:ring-slate-100 focus-within:bg-white group">
+                                <Sparkles className="h-3 w-3 text-blue-500 group-focus-within:animate-pulse" />
+                                <input
+                                    type="text"
+                                    value={question.hint || ""}
+                                    onChange={e => onUpdate('hint', e.target.value)}
+                                    placeholder="항목별 힌트/가이드라인 입력 (예: 협업 경험 강조)"
+                                    className="bg-transparent border-none p-0 text-[11px] font-bold outline-none w-64 placeholder:text-slate-300"
+                                />
+                            </div>
+                            {question.max_length && (
+                                <span className="text-[11px] text-slate-400 font-bold px-1 py-1 bg-slate-50/50 rounded-lg border border-transparent">
+                                    최대 {question.max_length}자
+                                </span>
+                            )}
+                        </div>
+                    </div>
                 </div>
-                <Button variant="ghost" size="icon" onClick={onRemove} className="text-slate-200 hover:text-red-500 hover:bg-red-50 transition-colors h-10 w-10 rounded-full"><Trash2 className="h-5 w-5" /></Button>
+                <Button variant="ghost" size="icon" onClick={onRemove} className="text-slate-200 hover:text-red-500 hover:bg-red-50 transition-colors h-10 w-10 rounded-full shrink-0"><Trash2 className="h-5 w-5" /></Button>
             </div>
             <div className="relative group/textarea">
                 <Textarea

@@ -1,16 +1,33 @@
 import json
 import logging
-from typing import Dict
-from langchain_naver import ChatClovaX
+import re
+from typing import Dict, Any, List
+from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.output_parsers import PydanticOutputParser
 from common.config import settings
+from jobs.core.cover_letter.prompts import (
+    GAP_ANALYSIS_PROMPT, 
+    RESUME_GENERATION_PROMPT, 
+    SIMPLE_RESUME_PROMPT,
+    QUESTION_BASED_RESUME_PROMPT,
+    QUESTION_BASED_OUTLINE_PROMPT
+)
+from jobs.core.cover_letter.schemas import GapAnalysisResult, ResumeGenerationResult, ResumeOutlineResult
+from jobs.core.cover_letter.config import (
+    LLM_MODEL,
+    LLM_TEMPERATURE,
+    LLM_TOP_P,
+    LLM_REPETITION_PENALTY,
+    LLM_MAX_TOKENS
+)
 
 logger = logging.getLogger(__name__)
 
 class CoverLetterGenerator:
     """
     Handles AI interactions for Cover Letter generation using HyperCLOVA X.
+    Migrated from llm-pipeline to use ChatOpenAI (OpenAI-compatible API).
     """
     def __init__(self):
         self._llm = None
@@ -23,75 +40,236 @@ class CoverLetterGenerator:
                 logger.error("NCP_CLOVASTUDIO_API_KEY is not set. AI features will not work.")
                 raise ValueError("NCP API Key is missing")
             
-            self._llm = ChatClovaX(
-                model="HCX-007",
+            # Use ChatOpenAI with HyperCLOVA OpenAI-compatible endpoint
+            # 설정값은 jobs/core/cover_letter/config.py에서 관리
+            self._llm = ChatOpenAI(
+                model=LLM_MODEL,
                 api_key=api_key,
-                temperature=0.5,
-                max_tokens=2048,
+                base_url="https://clovastudio.stream.ntruss.com/v1/openai",
+                temperature=LLM_TEMPERATURE,
+                extra_body={
+                    "topP": LLM_TOP_P,
+                    "repetitionPenalty": LLM_REPETITION_PENALTY,
+                    "maxTokens": LLM_MAX_TOKENS
+                }
             )
         return self._llm
 
-    def analyze_gap(self, user_context: str, job_req: str) -> Dict:
+    def _parse_json_response(self, response_text: str, pydantic_class):
+        """
+        LLM 응답에서 JSON을 추출하여 Pydantic 객체로 변환
+        (llm-pipeline의 parse_json_response와 동일)
+        """
+        text = response_text
+        
+        # 1. JSON 블록 추출 시도 (```json ... ``` 또는 ``` ... ```)
+        json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+        if json_match:
+            text = json_match.group(1)
+        else:
+            # 2. 중괄호로 시작하고 끝나는 부분 추출
+            json_match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}', text, re.DOTALL)
+            if json_match:
+                text = json_match.group(0)
+        
+        try:
+            data = json.loads(text)
+            return pydantic_class(**data)
+        except (json.JSONDecodeError, Exception) as e:
+            raise ValueError(f"JSON 파싱 실패: {str(e)}\n원본: {response_text[:500]}")
+
+    def _format_experiences(self, documents: List) -> str:
+        """
+        문서 리스트를 LLM 입력용 텍스트로 포맷팅
+        (llm-pipeline의 format_experiences와 동일)
+        """
+        from langchain_core.documents import Document
+        
+        formatted_parts = []
+        for doc in documents:
+            if isinstance(doc, Document):
+                project_name = doc.metadata.get('project_name', 'N/A')
+                role = doc.metadata.get('role', 'N/A')
+                tech_stack = doc.metadata.get('stack', doc.metadata.get('tech_stack', 'N/A'))
+                
+                # tech_stack이 리스트인 경우 문자열로 변환
+                if isinstance(tech_stack, list):
+                    tech_stack = ', '.join(tech_stack)
+                
+                formatted_parts.append(
+                    f"[프로젝트: {project_name}]\n"
+                    f"역할: {role}\n"
+                    f"기술스택: {tech_stack}\n"
+                    f"내용:\n{doc.page_content}"
+                )
+            else:
+                # Document가 아닌 경우 그냥 문자열로 처리
+                formatted_parts.append(str(doc))
+        
+        return "\n\n---\n\n".join(formatted_parts)
+
+    def analyze_gap(self, user_context: str, job_req: str) -> Dict[str, Any]:
         """
         Analyzes the gap between user experience and job requirements.
+        Returns a dict compatible with GapAnalysisResult schema.
         """
-        prompt = PromptTemplate.from_template(
-            """당신은 채용 분석 전문가입니다. 
-            지원자의 경험과 채용 공고를 비교하여 분석 결과를 JSON으로 출력하세요.
-            
-            [채용 공고 요약]
-            {job_req}
-            
-            [지원자 경험]
-            {user_context}
-            
-            반드시 아래 JSON 형식으로만 출력하세요:
-            {{
-                "matching_points": ["매칭점1", "매칭점2"],
-                "missing_elements": ["부족한점1", "부족한점2"],
-                "overall_fit": "상/중/하 판단"
-            }}
-            """
+        parser = PydanticOutputParser(pydantic_object=GapAnalysisResult)
+        
+        prompt = PromptTemplate(
+            template=GAP_ANALYSIS_PROMPT,
+            input_variables=["job_req", "user_context"],
+            partial_variables={"format_instructions": parser.get_format_instructions()}
         )
-        chain = prompt | self.llm | JsonOutputParser()
+        
+        # LLM 호출 후 수동 파싱 (llm-pipeline 방식)
+        chain = prompt | self.llm
+        
         try:
-            return chain.invoke({"job_req": job_req, "user_context": user_context})
+            response = chain.invoke({"job_req": job_req, "user_context": user_context})
+            response_text = response.content if hasattr(response, 'content') else str(response)
+            result = self._parse_json_response(response_text, GapAnalysisResult)
+            return result.model_dump()
         except Exception as e:
             logger.error(f"Gap analysis failed: {e}")
-            return {}
+            # Return empty/safe default to prevent crash
+            return {
+                "is_gap_found": False, 
+                "matching_points": [], 
+                "missing_elements": [], 
+                "question_to_user": "", 
+                "reasoning": "분석에 실패했습니다."
+            }
 
-    def generate_answer(self, company_name, job_title, question, context, gap_analysis, tone) -> Dict:
+    def generate_answer(
+        self, 
+        company_name: str, 
+        job_title: str, 
+        question: str, 
+        context: str, 
+        gap_analysis: Dict[str, Any], 
+        tone: str,
+        core_values: str = "",
+        max_length: int = 1000,
+        used_experiences: List[str] = None,
+        hint: str = "",
+        subheading: bool = False
+    ) -> Dict[str, Any]:
         """
-        Generates the cover letter answer.
+        Generates a cover letter answer for a specific question.
+        Supports 3-way prompt selection based on question and gap analysis.
         """
-        prompt = PromptTemplate.from_template(
-            """당신은 {tone} 톤앤매너를 구사하는 전문 자기소개서 컨설턴트입니다.
-            지원자의 경험을 바탕으로 해당 문항에 대한 최적의 답변을 작성하세요.
-            
-            **기업**: {company_name}
-            **직무**: {job_title}
-            **문항**: {question}
-            
-            **참고 경험**:
-            {context}
-            
-            **분석 참고**:
-            {gap_analysis}
-            
-            답변은 다음 JSON 구조로 작성하세요:
-            {{
-                "content": "작성된 자기소개서 본문 (700자 내외)",
-                "key_points": ["강조된 역량1", "강조된 역량2"],
-                "suggested_improvements": ["개선 제안1", "개선 제안2"]
-            }}
-            """
+        # used_experiences 경고 텍스트 생성 (llm-pipeline 방식)
+        used_exp_warning = ""
+        if used_experiences:
+            used_exp_warning = f"\n\n⚠️ 다음 경험/프로젝트는 이전 문항에서 이미 사용했으므로 다른 경험을 우선 사용하세요: {', '.join(used_experiences)}"
+        
+        # 소제목 지침 설정 (llm-pipeline 방식)
+        subheading_instruction = ""
+        if subheading:
+            subheading_instruction = "- 반드시 답변의 시작 부분에 전체 내용을 매력적으로 요약하는 [소제목] 형태의 소제목을 작성하세요. (예: [데이터 기반의 의사결정으로 결제 전환율 15% 개선])"
+
+        # Determine which prompt to use
+        if question:
+            # Question-based prompt
+            template = QUESTION_BASED_RESUME_PROMPT
+            input_vars = {
+                "company_name": company_name,
+                "core_values": core_values,
+                "job_title": job_title,
+                "user_experiences": context + used_exp_warning,  # 경고 추가
+                "question": question,
+                "max_length": max_length,
+                "hint": hint,
+                "matching_points": ", ".join(gap_analysis.get("matching_points", [])) if gap_analysis.get("matching_points") else "해당 없음",
+                "missing_elements": ", ".join(gap_analysis.get("missing_elements", [])) if gap_analysis.get("missing_elements") else "해당 없음",
+                "subheading_instruction": subheading_instruction
+            }
+        elif gap_analysis.get("is_gap_found"):
+            # Gap analysis-based prompt
+            template = RESUME_GENERATION_PROMPT
+            input_vars = {
+                "company_name": company_name,
+                "core_values": core_values,
+                "job_title": job_title,
+                "user_experiences": context + used_exp_warning,  # 경고 추가
+                "max_length": max_length,
+                "matching_points": ", ".join(gap_analysis.get("matching_points", [])),
+                "missing_elements": ", ".join(gap_analysis.get("missing_elements", [])),
+                "subheading_instruction": subheading_instruction
+            }
+        else:
+            # Simple prompt
+            template = SIMPLE_RESUME_PROMPT
+            input_vars = {
+                "company_name": company_name,
+                "core_values": core_values,
+                "job_title": job_title,
+                "user_experiences": context + used_exp_warning,  # 경고 추가
+                "max_length": max_length,
+                "subheading_instruction": subheading_instruction
+            }
+        
+        parser = PydanticOutputParser(pydantic_object=ResumeGenerationResult)
+        prompt = PromptTemplate(
+            template=template,
+            input_variables=list(input_vars.keys()),
+            partial_variables={"format_instructions": parser.get_format_instructions()}
         )
-        chain = prompt | self.llm | JsonOutputParser()
-        return chain.invoke({
-            "company_name": company_name,
-            "job_title": job_title,
-            "question": question,
-            "context": context,
-            "gap_analysis": json.dumps(gap_analysis, ensure_ascii=False),
-            "tone": tone
-        })
+        
+        # LLM 호출 후 수동 파싱
+        chain = prompt | self.llm
+        
+        try:
+            response = chain.invoke(input_vars)
+            response_text = response.content if hasattr(response, 'content') else str(response)
+            result = self._parse_json_response(response_text, ResumeGenerationResult)
+            return result.model_dump()
+        except Exception as e:
+            logger.error(f"Generation failed: {e}")
+            raise
+
+    def generate_outline(
+        self, 
+        company_name: str, 
+        job_title: str, 
+        question: str, 
+        context: str, 
+        gap_analysis: Dict[str, Any],
+        core_values: str = "",
+        hint: str = ""
+    ) -> Dict[str, Any]:
+        """
+        Generates a structural outline for the cover letter instead of full text.
+        """
+        parser = PydanticOutputParser(pydantic_object=ResumeOutlineResult)
+        
+        # Format gap analysis for prompt
+        matching_points = ", ".join(gap_analysis.get("matching_points", []))
+        missing_elements = ", ".join(gap_analysis.get("missing_elements", []))
+
+        prompt = PromptTemplate(
+            template=QUESTION_BASED_OUTLINE_PROMPT,
+            input_variables=["company_name", "job_title", "question", "user_experiences", "matching_points", "missing_elements", "core_values", "hint"],
+            partial_variables={"format_instructions": parser.get_format_instructions()}
+        )
+        
+        # LLM 호출 후 수동 파싱
+        chain = prompt | self.llm
+        
+        try:
+            response = chain.invoke({
+                "company_name": company_name,
+                "job_title": job_title,
+                "question": question,
+                "user_experiences": context,
+                "matching_points": matching_points,
+                "missing_elements": missing_elements,
+                "core_values": core_values,
+                "hint": hint
+            })
+            response_text = response.content if hasattr(response, 'content') else str(response)
+            result = self._parse_json_response(response_text, ResumeOutlineResult)
+            return result.model_dump()
+        except Exception as e:
+            logger.error(f"Outline generation failed: {e}")
+            raise

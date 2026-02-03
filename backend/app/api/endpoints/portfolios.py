@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from common.database import get_async_db
 from common import schemas
+from common.exceptions import ResourceNotFoundError
 from app.services import recruit_service
 from app.services.portfolio_service import PortfolioService
 from app.api import deps
@@ -17,7 +18,44 @@ router = APIRouter()
     "", 
     response_model=schemas.PortfolioListResponse,
     summary="포트폴리오 목록 조회",
-    description="로그인한 사용자가 생성한 모든 포트폴리오(파일, GitHub, Notion 포함) 목록을 반환합니다."
+    description="""로그인한 사용자가 생성한 모든 포트폴리오 목록을 반환합니다.
+    
+    **지원하는 포트폴리오 타입:**
+    - `github`: GitHub 저장소
+    - `notion`: Notion 페이지
+    - `blog`: 기술 블로그 (Velog, Tistory)
+    - `file`: 업로드된 파일
+    
+    **처리 상태:**
+    - `PENDING`: 분석 대기 중
+    - `PROCESSING`: 분석 진행 중
+    - `REVIEW_REQUIRED`: 사용자 검토 필요
+    - `COMPLETED`: 분석 완료
+    - `FAILED`: 분석 실패
+    """,
+    responses={
+        200: {
+            "description": "포트폴리오 목록 조회 성공",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "items": [
+                            {
+                                "id": 1,
+                                "user_id": 1,
+                                "type": "github",
+                                "source_url": "https://github.com/user/repo",
+                                "project_name": "My Awesome Project",
+                                "processing_status": "COMPLETED",
+                                "created_at": "2024-01-01T00:00:00Z"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        401: {"description": "인증 실패"}
+    }
 )
 async def list_portfolios(
     db: AsyncSession = Depends(get_async_db),
@@ -39,7 +77,8 @@ async def create_portfolio(
     # Trigger background recommendation update
     background_tasks.add_task(recruit_service.run_bg_recalc_for_user, current_user.id)
     # Trigger background profile update
-    background_tasks.add_task(job_service.trigger_job, task="profile_update", target_id=saved_portfolio.id)
+    from app.services.job_service import job_service
+    background_tasks.add_task(job_service.trigger_profile_update, saved_portfolio.id)
     return saved_portfolio
 
 @router.post("/upload", response_model=schemas.PortfolioDetail, status_code=201)
@@ -67,7 +106,7 @@ async def import_notion_portfolio(
     Import portfolio from a Notion URL.
     """
     service = PortfolioService(db)
-    return await service.create_portfolio_from_notion(current_user.id, payload.title, payload.source_url, background_tasks)
+    return await service.create_portfolio_from_notion(current_user.id, payload.project_name, payload.source_url)
 
 @router.post("/github", response_model=schemas.PortfolioDetail, status_code=201)
 async def import_github_portfolio(
@@ -80,7 +119,20 @@ async def import_github_portfolio(
     Import portfolio from a GitHub Repository or User Profile URL/ID.
     """
     service = PortfolioService(db)
-    return await service.create_portfolio_from_github(current_user.id, payload.title, payload.source_url, background_tasks)
+    return await service.create_portfolio_from_github(current_user.id, payload.project_name, payload.source_url)
+
+@router.post("/blog", response_model=schemas.PortfolioDetail, status_code=201)
+async def import_blog_portfolio(
+    background_tasks: BackgroundTasks,
+    payload: schemas.PortfolioCreateRequest,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    """
+    Import portfolio from a Technical Blog (Velog, Tistory).
+    """
+    service = PortfolioService(db)
+    return await service.create_portfolio_from_blog(current_user.id, payload.project_name, payload.source_url)
 
 @router.get("/{portfolio_id}", response_model=schemas.PortfolioDetail)
 async def get_portfolio(
@@ -91,7 +143,7 @@ async def get_portfolio(
     service = PortfolioService(db)
     portfolio = await service.get_portfolio(portfolio_id, current_user.id)
     if not portfolio:
-        raise HTTPException(status_code=404, detail="Portfolio not found")
+        raise ResourceNotFoundError("Portfolio", portfolio_id)
     return portfolio
 
 @router.patch("/{portfolio_id}", response_model=schemas.PortfolioDetail)
@@ -107,13 +159,12 @@ async def update_portfolio(
         portfolio_id, current_user.id, portfolio.model_dump(exclude_unset=True)
     )
     if not updated_portfolio:
-        raise HTTPException(status_code=404, detail="Portfolio not found or unauthorized")
+        raise ResourceNotFoundError("Portfolio", portfolio_id)
     
     # Trigger background recommendation update
     background_tasks.add_task(recruit_service.run_bg_recalc_for_user, current_user.id)
     return updated_portfolio
 
-@router.delete("/{portfolio_id}")
 @router.delete("/{portfolio_id}")
 async def delete_portfolio(
     portfolio_id: int, 
@@ -158,6 +209,7 @@ async def analyze_portfolio_file(
 @router.patch("/{portfolio_id}/confirm", response_model=schemas.PortfolioDetail)
 async def confirm_portfolio(
     portfolio_id: int,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(deps.get_current_user)
 ):
@@ -172,16 +224,9 @@ async def confirm_portfolio(
     await db.commit()
     await db.refresh(portfolio)
     
-    # Update recommendations and profile
-    background_tasks = BackgroundTasks() # We need to inject BackgroundTasks if not present, but better to use job_service directly or request injection.
-    # Wait, confirm_portfolio signature doesn't have background_tasks. Let's add it. 
-    # Actually, simpler to just fire and forget via job_service directly if we don't want to change signature too much, 
-    # BUT job_service.trigger_job is synchronous (encapsulates logic), so we can just call it.
-    # Ideally should use BackgroundTasks for non-blocking HTTP response if possible, but let's change signature to be correct.
-    # Since I cannot see the signature change here, I will modify the signature in a separate step or just call job_service if it returns fast (it spawns process or makes http call, so pretty fast).
-    # Let's check imports. job_service is imported.
+    # Update recommendations and profile in background (non-blocking)
     from app.services.job_service import job_service
-    job_service.trigger_job(task="recruit_update", target_id=current_user.id)
-    job_service.trigger_job(task="profile_update", target_id=portfolio.id)
+    background_tasks.add_task(job_service.trigger_recommendation_update, current_user.id)
+    background_tasks.add_task(job_service.trigger_profile_update, portfolio_id)
     
     return portfolio

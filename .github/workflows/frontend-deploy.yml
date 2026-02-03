@@ -20,7 +20,7 @@ jobs:
       - name: Set Deployment Args
         id: args
         run: |
-          if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+          if [[ "${{ github.ref }}" == "refs/heads/release" ]]; then
             echo "VERCEL_ARGS=--prod" >> $GITHUB_OUTPUT
             echo "ENV_TYPE=Production" >> $GITHUB_OUTPUT
             echo "API_URL=${{ secrets.PROD_BACKEND_URL }}" >> $GITHUB_OUTPUT

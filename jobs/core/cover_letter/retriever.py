@@ -8,6 +8,7 @@ from sqlalchemy import select
 from rank_bm25 import BM25Okapi
 from langchain_core.documents import Document
 from common import models
+from jobs.core.cover_letter.config import SEARCH_TOP_K
 
 logger = logging.getLogger(__name__)
 
@@ -23,18 +24,26 @@ class PGHybridRetriever:
         self.bm25 = None
         
     async def load_documents(self):
-        """Load user's portfolios and recruitment data for context"""
-        # Fetch Portfolios
-        stmt = select(models.Portfolio).where(models.Portfolio.user_id == self.user_id)
+        """Load user's portfolio chunks and recruitment data for context"""
+        # Fetch Portfolio Chunks with Portfolio metadata
+        stmt = select(models.PortfolioChunk).join(models.Portfolio).where(models.Portfolio.user_id == self.user_id)
         result = await self.db.execute(stmt)
-        portfolios = result.scalars().all()
+        chunks = result.scalars().all()
         
-        for p in portfolios:
-            # Combine relevant text fields
-            content = f"{p.project_name}\n{p.description or ''}\n{p.role or ''}\n{p.content or ''}"
+        # We need to fetch portfolios to get metadata like project_name
+        p_stmt = select(models.Portfolio).where(models.Portfolio.user_id == self.user_id)
+        p_res = await self.db.execute(p_stmt)
+        portfolios = {p.id: p for p in p_res.scalars().all()}
+
+        for c in chunks:
+            p = portfolios.get(c.portfolio_id)
+            if not p: continue
+
+            # Chunks are already segments of the portfolio content/description
+            content = c.chunk_content
             
-            # Using stored embedding if available, otherwise skip vector part for this doc
-            embedding = p.embedding
+            # Use chunk's embedding
+            embedding = c.embedding
             if isinstance(embedding, str):
                 try:
                     embedding = json.loads(embedding)
@@ -42,7 +51,8 @@ class PGHybridRetriever:
                     embedding = None
             
             self.documents.append({
-                "id": p.id,
+                "id": c.id,
+                "portfolio_id": c.portfolio_id,
                 "text": content,
                 "embedding": embedding,
                 "metadata": {
@@ -58,7 +68,7 @@ class PGHybridRetriever:
             tokenized_corpus = [doc["text"].lower().split() for doc in self.documents]
             self.bm25 = BM25Okapi(tokenized_corpus)
 
-    def search(self, query: str, query_embedding: List[float] = None, top_k: int = 5) -> List[Document]:
+    def search(self, query: str, query_embedding: List[float] = None, top_k: int = SEARCH_TOP_K) -> List[Document]:
         if not self.documents:
             return []
 
@@ -92,7 +102,7 @@ class PGHybridRetriever:
                         vector_scores[i] = (cos_sim + 1) / 2 # Normalize -1~1 to 0~1
         
         # 3. Hybrid Combination
-        # Weight: BM25 0.3, Vector 0.7 (Adjustable)
+        # Weight: BM25 0.3, Vector 0.7 (llm-pipeline settings)
         final_scores = []
         for i in range(len(self.documents)):
             score = 0.3 * bm25_scores[i] + 0.7 * vector_scores[i]
@@ -100,12 +110,20 @@ class PGHybridRetriever:
             
         final_scores.sort(key=lambda x: x[0], reverse=True)
         
-        # Convert to LangChain Documents
+        # 4. Re-rank and Deduplicate by Portfolio ID
+        # Since we search chunks, we might get multiple chunks from same portfolio.
+        # We want to return unique portfolios if possible, but keep chunk content for context.
+        seen_portfolios = set()
         results = []
-        for score, doc_data in final_scores[:top_k]:
-            results.append(Document(
-                page_content=doc_data["text"],
-                metadata=doc_data["metadata"]
-            ))
+        for score, doc_data in final_scores:
+            p_id = doc_data["portfolio_id"]
+            if p_id not in seen_portfolios:
+                results.append(Document(
+                    page_content=doc_data["text"],
+                    metadata=doc_data["metadata"]
+                ))
+                seen_portfolios.add(p_id)
+            if len(results) >= top_k:
+                break
             
         return results

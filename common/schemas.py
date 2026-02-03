@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, ConfigDict, Field
+from pydantic import BaseModel, EmailStr, ConfigDict, Field, field_validator
 from typing import List, Optional
 from datetime import date, datetime
 
@@ -6,14 +6,22 @@ from datetime import date, datetime
 class UserBase(BaseModel):
     email: EmailStr
     name: str
-    name: str
 
 class UserCreate(UserBase):
     pass
 
+class UserIntegration(BaseModel):
+    id: int
+    provider: str
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
 class User(UserBase):
     id: int
     created_at: datetime
+    profile_summary: Optional[str] = None
+    desired_job_title: Optional[str] = None
+    integrations: List[UserIntegration] = []
     model_config = ConfigDict(from_attributes=True)
 
 # Recruitment Schemas
@@ -32,7 +40,7 @@ class RecruitmentBase(BaseModel):
     key_responsibilities: Optional[str] = None
     required_qualifications: Optional[str] = None
     preferred_qualifications: Optional[str] = None
-    tags: Optional[List[str]] = None
+    company_description: Optional[str] = None  # 기업 인재상/핵심 가치
     reason: Optional[str] = None
     view_count: Optional[int] = 0
 
@@ -44,21 +52,36 @@ class Recruitment(RecruitmentBase):
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
+    @field_validator('tags', mode='before')
+    @classmethod
+    def transform_tags(cls, v):
+        if isinstance(v, list) and len(v) > 0 and not isinstance(v[0], str):
+            # Transform Tag objects to string names
+            return [t.name for t in v]
+        return v
+
 class RecruitmentListResponse(BaseModel):
     items: List[Recruitment]
     meta: dict
     model_config = ConfigDict(from_attributes=True)
 
+# Portfolio Strength Schema
+class PortfolioStrength(BaseModel):
+    tag: str
+    claim: str
+    evidence: List[str] = []
+    level: str # low, medium, high
+
 # Portfolio Schemas
 class PortfolioBase(BaseModel):
     type: str
     source_url: Optional[str] = None
-    content: Optional[str] = None
     project_name: Optional[str] = None
     period: Optional[str] = None
     role: Optional[str] = None
     description: Optional[str] = None
     tech_stack: Optional[List[str]] = None
+    strengths: Optional[List[PortfolioStrength]] = None
 
 class PortfolioCreate(PortfolioBase):
     user_id: int
@@ -85,6 +108,7 @@ class PortfolioSummary(PortfolioBase):
     role: Optional[str] = None
     description: Optional[str] = None
     tech_stack: Optional[List[str]] = None
+    strengths: Optional[List[PortfolioStrength]] = None
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -102,6 +126,33 @@ class PortfolioListResponse(BaseModel):
 
 class PortfolioCreateRequest(PortfolioBase):
     job_queries: Optional[List[PortfolioJobQueryCreate]] = []
+    
+    @field_validator('source_url')
+    @classmethod
+    def validate_source_url(cls, v: Optional[str]) -> Optional[str]:
+        if v and len(v.strip()) == 0:
+            raise ValueError("Source URL cannot be empty")
+        if v and len(v) > 2048:
+            raise ValueError("Source URL is too long (max 2048 characters)")
+        return v.strip() if v else v
+    
+    @field_validator('project_name')
+    @classmethod
+    def validate_project_name(cls, v: Optional[str]) -> Optional[str]:
+        if v and len(v.strip()) == 0:
+            raise ValueError("Project name cannot be empty")
+        if v and len(v) > 200:
+            raise ValueError("Project name is too long (max 200 characters)")
+        return v.strip() if v else v
+    
+    @field_validator('type')
+    @classmethod
+    def validate_type(cls, v: Optional[str]) -> Optional[str]:
+        if v:
+            allowed_types = ['github', 'notion', 'blog', 'file']
+            if v not in allowed_types:
+                raise ValueError(f"Type must be one of: {', '.join(allowed_types)}")
+        return v
 
 class PortfolioUpdateRequest(BaseModel):
     type: Optional[str] = None
@@ -112,6 +163,7 @@ class PortfolioUpdateRequest(BaseModel):
     role: Optional[str] = None
     description: Optional[str] = None
     tech_stack: Optional[List[str]] = None
+    strengths: Optional[List[dict]] = None
 
 # Cover Letter Schemas
 class CoverLetterBase(BaseModel):
@@ -124,6 +176,8 @@ class CoverLetterItemBase(BaseModel):
     question: str
     content: Optional[str] = None
     category: Optional[str] = None
+    hint: Optional[str] = None  # 작성 힌트/가이드
+    max_length: Optional[int] = 1000  # 글자 수 제한
     key_points: Optional[List[str]] = None
     suggested_improvements: Optional[List[str]] = None
 
@@ -139,6 +193,7 @@ class CoverLetterItem(CoverLetterItemBase):
 
 class CoverLetterCreate(CoverLetterBase):
     user_id: int
+    questions: Optional[List[CoverLetterItemCreate]] = []
 
 class CoverLetterSummary(CoverLetterBase):
     id: int
@@ -162,11 +217,12 @@ class CoverLetterListResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class CoverLetterCreateRequest(CoverLetterBase):
-    pass
+    questions: Optional[List[CoverLetterItemCreate]] = []
 
 class CoverLetterUpdateRequest(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
+    questions: Optional[List[CoverLetterItemCreate]] = None
 
 # AI Related Schemas
 class PortfolioAnalyzeRequest(BaseModel):
@@ -175,9 +231,12 @@ class PortfolioAnalyzeRequest(BaseModel):
 
 class CoverLetterGenerateRequest(BaseModel):
     recruit_id: int
+    cover_letter_id: Optional[int] = None
     portfolio_ids: List[int] = []
     questions: List[str]
     tone: str = "professional"
+    mode: str = "full" # 'full' or 'outline'
+    subheading: bool = False
 
 class RecruitmentDetail(Recruitment):
     # If we need recommendations or letters in detail view

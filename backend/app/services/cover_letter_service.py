@@ -9,7 +9,9 @@ class CoverLetterService:
         self.db = db
 
     async def get_cover_letters(self, user_id: int, recruitment_id: int = None):
-        stmt = select(models.CoverLetter).where(models.CoverLetter.user_id == user_id)
+        stmt = select(models.CoverLetter).where(models.CoverLetter.user_id == user_id).options(
+            selectinload(models.CoverLetter.recruitment)
+        )
         if recruitment_id:
             stmt = stmt.where(models.CoverLetter.recruitment_id == recruitment_id)
         result = await self.db.execute(stmt)
@@ -26,10 +28,27 @@ class CoverLetterService:
 
     async def create_cover_letter(self, cl: schemas.CoverLetterCreate):
         try:
-            db_cl = models.CoverLetter(**cl.model_dump())
+            cl_dict = cl.model_dump()
+            questions_data = cl_dict.pop('questions', [])
+            
+            db_cl = models.CoverLetter(**cl_dict)
             self.db.add(db_cl)
+            await self.db.flush()
+            
+            for q_data in questions_data:
+                db_item = models.CoverLetterItem(**q_data, cover_letter_id=db_cl.id)
+                self.db.add(db_item)
+                
             await self.db.commit()
-            await self.db.refresh(db_cl)
+            
+            # Explicitly load relationships to prevent MissingGreenlet error
+            stmt = select(models.CoverLetter).where(models.CoverLetter.id == db_cl.id).options(
+                selectinload(models.CoverLetter.items),
+                selectinload(models.CoverLetter.recruitment)
+            )
+            result = await self.db.execute(stmt)
+            db_cl = result.scalar_one()
+            
             return db_cl
         except Exception as e:
             await self.db.rollback()
@@ -41,8 +60,23 @@ class CoverLetterService:
             if not db_cl:
                 return None
             
+            questions_data = data.pop('questions', None)
+            
             for key, value in data.items():
                 setattr(db_cl, key, value)
+            
+            if questions_data is not None:
+                # Simple replacement logic for questions
+                # 1. Delete existing items
+                from sqlalchemy import delete
+                await self.db.execute(
+                    delete(models.CoverLetterItem).where(models.CoverLetterItem.cover_letter_id == cl_id)
+                )
+                
+                # 2. Add new items
+                for q_data in questions_data:
+                    db_item = models.CoverLetterItem(**q_data, cover_letter_id=cl_id)
+                    self.db.add(db_item)
                 
             await self.db.commit()
             await self.db.refresh(db_cl)

@@ -164,9 +164,9 @@ export default function RecruitPage() {
                                                         </Tooltip>
                                                     </TooltipProvider>
                                                 )}
-                                                <div className="flex flex-wrap gap-2">
+                                                <div className="flex items-center gap-2 overflow-hidden flex-nowrap">
                                                     {recruit.tags?.map((tag) => (
-                                                        <Badge key={tag} variant="secondary" className="font-bold bg-slate-100/80 text-slate-600 border-none px-2.5 py-0.5 text-[11px]">
+                                                        <Badge key={tag} variant="secondary" className="font-bold bg-slate-100/80 text-slate-600 border-none px-2.5 py-0.5 text-[11px] whitespace-nowrap shrink-0">
                                                             {tag}
                                                         </Badge>
                                                     )) || null}
@@ -222,9 +222,9 @@ export default function RecruitPage() {
                                                         <span className="text-xs font-black text-slate-300 uppercase tracking-widest hidden sm:block">|</span>
                                                         <span className="text-sm font-bold text-slate-500">{recruit.company}</span>
                                                     </div>
-                                                    <div className="flex flex-wrap gap-2">
+                                                    <div className="flex items-center gap-2 overflow-hidden flex-nowrap">
                                                         {recruit.tags?.map((tag) => (
-                                                            <span key={tag} className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-100 group-hover:bg-white group-hover:border-blue-100 group-hover:text-blue-500 transition-colors duration-300">
+                                                            <span key={tag} className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-100 group-hover:bg-white group-hover:border-blue-100 group-hover:text-blue-500 transition-colors duration-300 whitespace-nowrap shrink-0">
                                                                 #{tag}
                                                             </span>
                                                         ))}

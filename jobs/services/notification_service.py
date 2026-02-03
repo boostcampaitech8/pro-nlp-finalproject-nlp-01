@@ -15,7 +15,8 @@ class NotificationService:
         title: str,
         message: str,
         link: Optional[str] = None,
-        notification_type: str = "GENERAL"
+        notification_type: str = "GENERAL",
+        target_id: Optional[int] = None
     ):
         """
         Consolidated helper to:
@@ -23,17 +24,21 @@ class NotificationService:
         2. Trigger real-time broadcast via Backend internal API.
         """
         try:
-            # 1. Persist to DB
-            notification = Notification(
-                user_id=user_id,
-                title=title,
-                message=message,
-                link=link
-            )
-            db.add(notification)
-            # We assume the caller commits later or we rely on session flush
+            # 1. Persist to DB (Skip if it's just a refresh trigger)
+            if notification_type != "REFRESH":
+                notification = Notification(
+                    user_id=user_id,
+                    title=title,
+                    message=message,
+                    link=link
+                )
+                db.add(notification)
             
             # 2. Trigger Real-time Event
+            if not settings.BACKEND_URL or not str(settings.BACKEND_URL).startswith("http"):
+                logger.warning(f"Skipping real-time notification broadcast: BACKEND_URL is empty or missing protocol ('{settings.BACKEND_URL}')")
+                return
+
             target_url = f"{settings.BACKEND_URL}/api/notifications/trigger-internal"
             logger.info(f"Attempting to trigger notification at: {target_url}")
             
@@ -46,7 +51,8 @@ class NotificationService:
                             "type": notification_type,
                             "title": title,
                             "message": message,
-                            "link": link
+                            "link": link,
+                            "target_id": target_id
                         },
                         headers={
                             "X-Internal-Secret": settings.INTERNAL_API_SECRET
