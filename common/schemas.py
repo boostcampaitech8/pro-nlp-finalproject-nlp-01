@@ -24,6 +24,9 @@ class User(UserBase):
     integrations: List[UserIntegration] = []
     model_config = ConfigDict(from_attributes=True)
 
+class TestLoginRequest(BaseModel):
+    role: str # frontend | backend | data
+
 # Recruitment Schemas
 class RecruitmentBase(BaseModel):
     title: str

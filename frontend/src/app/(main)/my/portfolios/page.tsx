@@ -191,21 +191,11 @@ export default function PortfoliosPage() {
                                                     <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-700 transition-colors duration-300 truncate">
                                                         {portfolio.project_name || "프로젝트"}
                                                     </h3>
-                                                    {portfolio.processing_status === 'COMPLETED' && (
-                                                        <Badge variant="outline" className="bg-emerald-50 border-emerald-100 text-emerald-600 text-[9px] font-black uppercase py-0 px-2 shrink-0">
-                                                            Confirmed
-                                                        </Badge>
-                                                    )}
-                                                    {portfolio.processing_status === 'REVIEW_REQUIRED' && (
-                                                        <Badge variant="outline" className="bg-amber-500 border-amber-600 text-white text-[9px] font-black uppercase py-0 px-2 shrink-0">
-                                                            Review Required
-                                                        </Badge>
-                                                    )}
-                                                    {(portfolio.processing_status === 'PENDING' || portfolio.processing_status === 'PROCESSING') && (
-                                                        <Badge variant="outline" className="bg-yellow-50 border-yellow-100 text-yellow-600 text-[9px] font-black uppercase py-0 px-2 shrink-0 animate-pulse">
-                                                            Processing
-                                                        </Badge>
-                                                    )}
+                                                    <StatusBadge
+                                                        status={portfolio.processing_status || 'PENDING'}
+                                                        showIcon={false}
+                                                        className="text-[9px] py-0 px-2 shrink-0 h-5"
+                                                    />
                                                 </div>
                                                 <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
                                                     <span className="truncate max-w-[200px]">{portfolio.description || "설명이 없습니다."}</span>

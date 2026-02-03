@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { MessageCircle, ArrowRight } from "lucide-react";
+import { getApiUrl } from "@/lib/apiUtils";
 
 export default function LoginPage() {
     const [loading, setLoading] = useState(false);
@@ -18,6 +19,30 @@ export default function LoginPage() {
         const redirect_uri = window.location.origin + "/auth/kakao/callback";
         const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=code`;
         window.location.href = kakaoAuthUrl;
+    };
+
+    const handleTestLogin = async (role: string) => {
+        setLoading(true);
+        try {
+            const res = await fetch(getApiUrl("/auth/test-login"), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ role })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                localStorage.setItem("access_token", data.access_token);
+                localStorage.setItem("user", JSON.stringify(data.user));
+                router.push("/my/dashboard");
+            } else {
+                alert("테스트 로그인에 실패했습니다.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("로그인 중 오류가 발생했습니다.");
+        } finally {
+            setLoading(false);
+        }
     };
 
 
@@ -59,6 +84,31 @@ export default function LoginPage() {
                                 <MessageCircle className="mr-3 h-6 w-6 fill-current" />
                                 {loading ? "연결 중..." : "카카오로 3초만에 시작하기"}
                             </Button>
+
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-3 py-2">
+                                    <div className="h-[1px] flex-1 bg-slate-100" />
+                                    <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">빠른 체험하기</span>
+                                    <div className="h-[1px] flex-1 bg-slate-100" />
+                                </div>
+                                <div className="grid grid-cols-1 gap-2">
+                                    {[
+                                        { id: 'frontend', label: '프론트엔드 아이디로 로그인', color: 'bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100' },
+                                        { id: 'backend', label: '백엔드 아이디로 로그인', color: 'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100' },
+                                        { id: 'data', label: '데이터 엔지니어 아이디로 로그인', color: 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100' }
+                                    ].map((role) => (
+                                        <Button
+                                            key={role.id}
+                                            variant="outline"
+                                            className={cn("h-11 rounded-xl text-xs font-bold border transition-all active:scale-[0.98]", role.color)}
+                                            onClick={() => handleTestLogin(role.id)}
+                                            disabled={loading}
+                                        >
+                                            {role.label}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
 
                             <p className="text-[10px] text-center text-slate-400/80 leading-relaxed px-6 font-medium">
                                 로그인 시 Pro-NLP의 <span className="underline cursor-pointer hover:text-blue-500 transition-colors">이용약관</span> 및 <span className="underline cursor-pointer hover:text-blue-500 transition-colors">개인정보처리방침</span>에 동의하게 됩니다.

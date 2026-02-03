@@ -106,6 +106,61 @@ async def kakao_callback(
             }
         }
 
+@router.post("/test-login")
+async def test_login(
+    req: schemas.TestLoginRequest,
+    db: AsyncSession = Depends(get_async_db)
+):
+    """
+    Exhibition support: logs in as a mock user based on role.
+    Creates user if it doesn't exist.
+    """
+    role_emails = {
+        "frontend": "exhibit_frontend@pro-nlp.ai",
+        "backend": "exhibit_backend@pro-nlp.ai",
+        "data": "exhibit_data@pro-nlp.ai"
+    }
+    role_names = {
+        "frontend": "Front-end Dev",
+        "backend": "Back-end Dev",
+        "data": "Data Engineer"
+    }
+    
+    email = role_emails.get(req.role)
+    name = role_names.get(req.role)
+    
+    if not email:
+        raise HTTPException(status_code=400, detail="Invalid role")
+        
+    stmt = select(models.User).where(models.User.email == email)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        user = models.User(
+            email=email,
+            name=name,
+            desired_job_title=name
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+
+    # Create Local Token
+    local_token = create_access_token(data={"sub": user.email, "user_id": user.id})
+    
+    return {
+        "access_token": local_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "name": user.name,
+            "profile_summary": user.profile_summary,
+            "desired_job_title": user.desired_job_title
+        }
+    }
+
 @router.get("/me", response_model=schemas.User)
 async def get_me(current_user: models.User = Depends(deps.get_current_user)):
     return current_user

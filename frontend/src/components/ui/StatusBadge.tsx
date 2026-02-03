@@ -36,7 +36,7 @@ export function StatusBadge({ status, className, showIcon = true, variant = 'def
                 )}
             >
                 {showIcon && <Loader2 className="h-3 w-3 animate-spin text-amber-500" />}
-                {normalizedStatus === 'PENDING' ? 'PENDING...' : 'ANALYZING...'}
+                분석 중...
             </Badge>
         );
     }

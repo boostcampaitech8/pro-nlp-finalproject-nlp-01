@@ -326,7 +326,8 @@ export default function CoverLettersPage() {
                                                     <div className="flex gap-1">
                                                         <StatusBadge
                                                             status={cl.processing_status || 'PENDING'}
-                                                            variant="card-tag"
+                                                            showIcon={false}
+                                                            className="text-[9px] py-0 px-2 shrink-0 h-5"
                                                         />
                                                         {expired && (
                                                             <Badge variant="outline" className="bg-slate-200 text-slate-500 border-slate-300 text-[9px] font-black uppercase py-0 px-2">

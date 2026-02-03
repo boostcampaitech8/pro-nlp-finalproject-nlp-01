@@ -80,31 +80,25 @@ class GitHubExtractor(BaseExtractor):
         code_summary = ""
         try:
             from gitingest import ingest
-            # Aggressive exclusion for cost saving
+            # Strategic exclusion: Keep tests and core logic, remove distractions
             exclude_patterns = [
                 "node_modules", "venv", "env", "dist", "build", "target",
                 "*.lock", "*.log", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.pdf",
-                "test", "tests", "spec", "*.test.*", "*.spec.*",
                 ".git", ".github", ".vscode", ".idea"
             ]
             
             # ingest(url, max_size=..., exclude_patterns=...)
             ingest_url = f"https://github.com/{owner}/{repo}"
             if self.github_token:
-                # Gitingest might support token directly or via URL. 
-                # Assuming it needs token for private repo if passed in URL or if it uses env (it doesn't seem to have a token param in API)
-                # Let's use the token in URL if possible, or just depend on the fact that if it's private, 
-                # we might need to handle it differently.
-                # Actually, many libraries use GITHUB_TOKEN env.
                 os.environ["GITHUB_TOKEN"] = self.github_token
             
             res_summary, res_tree, res_content = ingest(
                 ingest_url,
-                max_file_size=10240, # 10KB Limit for cost efficiency
+                max_file_size=204800, # 200KB Limit for deeper analysis
                 exclude_patterns=exclude_patterns
             )
             
-            code_summary = f"\n### File Structure\n{res_tree}\n\n### Core Snippets\n{res_content}"
+            code_summary = f"\n### File Structure\n{res_tree}\n\n### Core Snippets (Tests & Logic Included)\n{res_content}"
             
         except Exception as e:
             logger.warning(f"Gitingest failed for {owner}/{repo}: {e}. Falling back to README only.")
@@ -236,18 +230,17 @@ class GitHubExtractor(BaseExtractor):
             exclude_patterns = [
                 "node_modules", "venv", "env", "dist", "build", "target",
                 "*.lock", "*.log", "*.svg", "*.png", "*.jpg", "*.jpeg", "*.pdf",
-                "test", "tests", "spec", "*.test.*", "*.spec.*",
                 ".git", ".github", ".vscode", ".idea"
             ]
             
             ingest_url = f"https://github.com/{owner}/{repo}"
             summary, tree, content = ingest(
                 ingest_url,
-                max_file_size=10_000,
+                max_file_size=204800,
                 include_patterns=None,
                 exclude_patterns=exclude_patterns
             )
-            code_summary = content[:10_000]
+            code_summary = content[:204800]
         except Exception as e:
             logger.warning(f"Gitingest failed (unauthenticated): {e}")
         
