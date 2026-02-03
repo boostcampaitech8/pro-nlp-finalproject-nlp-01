@@ -7,16 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { MessageCircle, ArrowRight, Monitor, Server, Database } from "lucide-react";
 import { getApiUrl } from "@/lib/apiUtils";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function LoginPage() {
     const [loading, setLoading] = useState(false);
-    import { useAuthStore } from "@/stores/useAuthStore";
-    import { getApiUrl } from "@/lib/apiUtils";
+    const router = useRouter();
+    const { login } = useAuthStore();
 
-    export default function LoginPage() {
-        const [loading, setLoading] = useState(false);
-        const router = useRouter();
-        const { login } = useAuthStore();
+    const handleKakaoLogin = () => {
         setLoading(true);
         const client_id = "36cb87d77a70e26540f4e7c71bc02c87";
         const redirect_uri = window.location.origin + "/auth/kakao/callback";

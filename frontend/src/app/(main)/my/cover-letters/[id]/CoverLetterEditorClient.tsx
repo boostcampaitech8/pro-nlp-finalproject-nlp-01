@@ -21,7 +21,6 @@ import { CoverLetterItem, GapAnalysisResult, NotificationEventDetail, CoverLette
 import { RecruitInfoPanel } from "./components/RecruitInfoPanel";
 import { GapAnalysisReport } from "./components/GapAnalysisReport";
 import { QuestionEditorItem } from "./components/QuestionEditorItem";
-import { VersionHistoryPanel } from "./components/VersionHistoryPanel";
 
 // --- Types ---
 interface QuestionItem {
