@@ -88,3 +88,12 @@ class ResumeOutlineResult(BaseModel):
     questions_for_user: List[str] = Field(
         description="부족한 정보(구체적 수치, 역할, 기간, 기술적 검증 방법 등)를 채우기 위한 사용자 대상 질문 3~5개"
     )
+
+
+class HeadlineGenerationResult(BaseModel):
+    """소제목 생성 결과 스키마"""
+    
+    headline: str = Field(
+        description="내용을 요약하는 매력적인 소제목 (대괄호 없이 텍스트만)"
+    )
+

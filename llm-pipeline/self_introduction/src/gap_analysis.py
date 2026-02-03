@@ -5,25 +5,28 @@ Gap Analysis 모듈
 - HyperCLOVA OpenAI 호환 API 사용
 """
 from typing import List, Dict, Any
-import time
+
 
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.documents import Document
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+import openai
 
 from config.settings import (
     CLOVA_API_KEY, CLOVA_BASE_URL, LLM_MODEL, LLM_TEMPERATURE,
     LLM_TOP_P, LLM_REPETITION_PENALTY, LLM_MAX_TOKENS,
     LLM_USE_THINKING, LLM_THINKING_LEVEL
 )
-from src.schemas import GapAnalysisResult, ResumeGenerationResult, JobAnalysisResult, ResumeOutlineResult
+from src.schemas import GapAnalysisResult, ResumeGenerationResult, JobAnalysisResult, ResumeOutlineResult, HeadlineGenerationResult
 from src.prompt_templates import (
     GAP_ANALYSIS_PROMPT,
     RESUME_GENERATION_PROMPT,
     SIMPLE_RESUME_PROMPT,
     QUESTION_BASED_RESUME_PROMPT,
-    QUESTION_BASED_OUTLINE_PROMPT
+    QUESTION_BASED_OUTLINE_PROMPT,
+    HEADLINE_GENERATION_PROMPT
 )
 from src.retrieval import HybridRetriever
 from src.data_loader import load_company_data, load_user_data
@@ -98,6 +101,11 @@ def parse_json_response(response_text: str, pydantic_class):
         raise ValueError(f"JSON 파싱 실패: {str(e)}\n원본: {response_text[:500]}")
 
 
+@retry(
+    retry=retry_if_exception_type(openai.RateLimitError),
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(multiplier=1, min=4, max=20)
+)
 def analyze_gap(
     user_experiences: List[Document],
     job_requirements: str
@@ -133,6 +141,11 @@ def analyze_gap(
 
 
 
+@retry(
+    retry=retry_if_exception_type(openai.RateLimitError),
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(multiplier=1, min=4, max=20)
+)
 def generate_resume(
     user_experiences: List[Document],
     gap_result: GapAnalysisResult,
@@ -165,7 +178,18 @@ def generate_resume(
     # 소제목 지침 설정
     subheading_instruction = ""
     if subheading:
-        subheading_instruction = "- 반드시 답변의 시작 부분에 전체 내용을 매력적으로 요약하는 [소제목] 형태의 소제목을 작성하세요. (예: [데이터 기반의 의사결정으로 결제 전환율 15% 개선])"
+        subheading_instruction = (
+            "- 반드시 답변 시작 부분에 [소제목]을 작성하세요.\n"
+            "- 15자 내외의 짧고 강렬한 명사형 문구로 핵심 역량이나 철학을 단정적으로 표현하세요.\n"
+            "- '~하겠습니다', '~인 것 같습니다'와 같은 서술형이나 미사여구를 완전히 배제하세요.\n"
+            "- 예시: \n"
+            "  - [일편단심 신뢰성 전문가]\n"
+            "  - [기술로서 인간을 널리 이롭게]\n"
+            "  - [클라우드로 실현하는 초격차]\n"
+            "  - [이견을 확신으로 바꾼 지표]\n"
+            "  - [1만 TPS를 견디는 결제 아키텍처]\n"
+            "  - [MSA 전환으로 달성한 유지보수 비용 40% 절감]"
+        )
     
     # 문항이 주어진 경우 해당 문항에 맞는 프롬프트 사용
     if question:
@@ -177,7 +201,6 @@ def generate_resume(
             "user_experiences": experiences_text + used_exp_text,
             "question": question.get("question", ""),
             "max_length": question.get("max_length", 1000),
-            "hint": question.get("hint", ""),
             "matching_points": ", ".join(gap_result.matching_points) if gap_result.matching_points else "해당 없음",
             "missing_elements": ", ".join(gap_result.missing_elements) if gap_result.missing_elements else "해당 없음",
             "subheading_instruction": subheading_instruction
@@ -296,10 +319,7 @@ def run_full_analysis(user_id: str, subheading: bool = False) -> Dict[str, Any]:
                 "resume": resume
             })
             
-            # API Rate Limit 방지를 위한 대기
-            from rich import print as rprint
-            rprint(f"[dim]⏳ API 호출 제한 방지를 위해 5초 대기합니다... ({question.get('id')}/{len(resume_questions)})[/dim]")
-            time.sleep(5)
+
     else:
         # 문항이 없으면 기본 자소서 생성
         resume = generate_resume(relevant_experiences, gap_result, company_data, subheading=subheading)
@@ -379,6 +399,11 @@ def run_single_question_analysis(user_id: str, question_id: int, subheading: boo
     }
 
 
+@retry(
+    retry=retry_if_exception_type(openai.RateLimitError),
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(multiplier=1, min=4, max=20)
+)
 def generate_outline(
     user_experiences: List[Document],
     gap_result: GapAnalysisResult,
@@ -409,7 +434,6 @@ def generate_outline(
         "job_title": job_position.get("title", ""),
         "user_experiences": experiences_text + used_exp_text,
         "question": question.get("question", ""),
-        "hint": question.get("hint", ""),
         "matching_points": ", ".join(gap_result.matching_points) if gap_result.matching_points else "해당 없음",
         "missing_elements": ", ".join(gap_result.missing_elements) if gap_result.missing_elements else "해당 없음"
     }
@@ -426,6 +450,30 @@ def generate_outline(
     return result
 
 
+@retry(
+    retry=retry_if_exception_type(openai.RateLimitError),
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(multiplier=1, min=4, max=20)
+)
+def generate_headline(content: str) -> str:
+    """
+    기존 텍스트에 대한 소제목 생성
+    """
+    llm = get_llm()
+    parser = PydanticOutputParser(pydantic_object=HeadlineGenerationResult)
+    
+    prompt = PromptTemplate(
+        template=HEADLINE_GENERATION_PROMPT,
+        input_variables=["content"],
+        partial_variables={"format_instructions": parser.get_format_instructions()}
+    )
+    
+    chain = prompt | llm | parser
+    result = chain.invoke({"content": content})
+    
+    return result.headline
+    
+    
 def run_full_outline_analysis(user_id: str) -> Dict[str, Any]:
     """
     자소서 가이드라인(Outline) 전체 분석 파이프라인
@@ -495,7 +543,7 @@ def run_full_outline_analysis(user_id: str) -> Dict[str, Any]:
             })
     else:
         # 문항이 없으면 기본 문항으로 Outline 생성
-        default_question = {"id": 0, "question": "자기소개 및 지원동기", "hint": ""}
+        default_question = {"id": 0, "question": "자기소개 및 지원동기"}
         outline = generate_outline(relevant_experiences, gap_result, company_data, default_question)
         outlines.append({
             "question_id": 0,
