@@ -27,6 +27,27 @@ def trigger_crawling(background_tasks: BackgroundTasks, secret: str):
         
     return {"message": "Crawling job triggered successfully"}
 
+@router.post(
+    "/fast-crawl", 
+    status_code=202,
+    summary="급속 채용 공고 크롤링 트리거 (1페이지, 1개)",
+    description="빠른 테스트를 위해 1페이지에서 1개의 공고만 크롤링합니다. 관리자 비밀번호가 필요합니다."
+)
+def trigger_fast_crawling(background_tasks: BackgroundTasks, secret: str):
+    """
+    Trigger a limited crawling process (1 page, 1 item) for testing.
+    """
+    if secret != settings.ADMIN_SECRET:
+        raise HTTPException(status_code=403, detail="Invalid admin secret")
+    
+    from app.services.job_service import job_service
+    # Trigger with extra parameters
+    success = job_service.trigger_recommendation_update(pages=1, limit=1)
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to trigger fast crawling job")
+        
+    return {"message": "Fast crawling job triggered successfully (1 page, 1 item)"}
+
 @router.delete(
     "/clear", 
     status_code=200,

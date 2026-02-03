@@ -75,9 +75,15 @@ async def run_scraper():
 
     # Phase 2: Crawl (Long running, NO DB CONNECTION)
     try:
-        crawler = RecruitmentCrawler(target_pages=1) 
+        # Read pages and limit from environment (passed via JobService)
+        target_pages = int(os.getenv("JOB_EXTRA_PAGES", "1"))
+        crawl_limit = os.getenv("JOB_EXTRA_LIMIT")
+        crawl_limit = int(crawl_limit) if crawl_limit else None
+        
+        logger.info(f"Starting crawler: target_pages={target_pages}, limit={crawl_limit}")
+        crawler = RecruitmentCrawler(target_pages=target_pages) 
         # This takes 15+ mins, so we must NOT have an open DB session here
-        results = await crawler.crawl_and_parse(exclude_links=existing_links)
+        results = await crawler.crawl_and_parse(exclude_links=existing_links, limit=crawl_limit)
         logger.info(f"Crawler returned {len(results)} items. Syncing with database...")
     except Exception as e:
         logger.error(f"Crawler failed: {e}")

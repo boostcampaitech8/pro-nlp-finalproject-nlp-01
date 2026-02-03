@@ -303,7 +303,7 @@ class RecruitmentCrawler:
             logger.error(f"  → Detail error: {e}")
             return "", "", ""
     
-    async def crawl_and_parse(self, exclude_links: set = set()) -> List[Dict]:
+    async def crawl_and_parse(self, exclude_links: set = set(), limit: Optional[int] = None) -> List[Dict]:
         """Main crawling and parsing logic."""
         loop = asyncio.get_event_loop()
 
@@ -321,8 +321,12 @@ class RecruitmentCrawler:
                 filtered_list.append(job)
                 
         job_list = filtered_list
-        logger.info(f"Filtered {original_count - len(job_list)} existing jobs by link. {len(job_list)} new jobs to process.")
+        logger.info(f"Filtered {original_count - len(job_list)} existing jobs by link. {len(job_list)} new jobs available.")
         
+        if limit:
+            logger.info(f"Applying limit: Processing only first {limit} items.")
+            job_list = job_list[:limit]
+
         full_data = []
         if not job_list:
             logger.info("No new jobs to process.")
@@ -352,6 +356,11 @@ class RecruitmentCrawler:
             
             # Rate limiting delay
             time.sleep(2)
+            
+            if limit and len(final_json_results) >= limit:
+                logger.info(f"Reached limit of {limit} parsed items. Stopping.")
+                final_json_results = final_json_results[:limit]
+                break
         
         logger.info(f"\n[Complete] Parsed {len(final_json_results)} recruitment items")
         return final_json_results

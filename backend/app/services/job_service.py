@@ -37,8 +37,8 @@ class JobService:
     def trigger_recruit_indexing(self):
         return self.trigger_job(task="recruit_indexing")
 
-    def trigger_recommendation_update(self, user_id: Optional[int] = None):
-        return self.trigger_job(task="recruit_update", target_id=user_id)
+    def trigger_recommendation_update(self, user_id: Optional[int] = None, **kwargs):
+        return self.trigger_job(task="recruit_update", target_id=user_id, **kwargs)
 
     def _trigger_cloud_run_job(self, task: str, target_id: Optional[int] = None, **kwargs):
         """
