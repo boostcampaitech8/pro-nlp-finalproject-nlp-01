@@ -159,6 +159,7 @@ origins = [
     "http://localhost:8080",
     "https://pro-nlp-finalproject-nlp-01.vercel.app",
     "https://pro-nlp-finalproject-nlp-01-pileuszu-nlp-01-final.vercel.app",
+    "https://pro-nlp-finalproject-nlp-01-pileuszu.vercel.app",
 ]
 
 if settings.FRONTEND_URL:
@@ -175,7 +176,7 @@ origins = list(set([o for o in origins if o]))
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=r"https://pro-nlp-finalproject-nlp-01.*\.vercel\.app",
+    allow_origin_regex=r"https://pro-nlp-finalproject-nlp-01-.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
