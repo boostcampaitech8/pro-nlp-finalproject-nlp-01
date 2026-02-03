@@ -6,6 +6,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { NotificationBell } from "./NotificationBell";
+import { ModeToggle } from "@/components/theme-toggle";
 
 export function Header() {
     const { isAuthenticated, logout, user } = useAuthStore();
@@ -43,14 +44,14 @@ export function Header() {
     );
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60">
+        <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
             <div className="container max-w-screen-xl mx-auto flex h-16 items-center justify-between px-4 md:px-8">
                 {/* Logo & Nav */}
                 <div className="flex items-center gap-8">
                     <Link href="/" className="flex items-center">
-                        <span className="font-extrabold text-xl tracking-tight text-gray-900">Pro-NLP</span>
+                        <span className="font-extrabold text-xl tracking-tight text-foreground">Pro-NLP</span>
                     </Link>
-                    <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+                    <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
                         <Link href="/recruit" className="hover:text-blue-600 transition-colors">
                             채용 공고
                         </Link>
@@ -72,6 +73,7 @@ export function Header() {
 
                 {/* Right Side Actions */}
                 <div className="flex items-center gap-3">
+                    <ModeToggle />
                     {isAuthenticated ? (
                         <>
                             <NotificationBell />

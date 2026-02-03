@@ -24,7 +24,7 @@ export function StatusBadge({ status, className, showIcon = true, variant = 'def
     const modernBadgeVisuals = "px-3 py-1 shadow-md rounded-lg whitespace-nowrap border border-slate-100 ring-1 ring-slate-200/50 backdrop-blur-md transition-all duration-300";
 
     // Positioning specific to card-tag
-    const absolutePositioning = "absolute top-2 right-2 z-10";
+    const absolutePositioning = "absolute top-1.5 right-4 z-10";
 
     const cardTagStyles = isCardTag
         ? `${absolutePositioning} ${modernBadgeVisuals}`

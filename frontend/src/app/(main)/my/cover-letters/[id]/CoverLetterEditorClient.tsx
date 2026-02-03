@@ -446,132 +446,134 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
     if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
     return (
-        <div className="flex justify-center min-h-[calc(100vh-64px)] bg-slate-50/10 relative pb-20">
-            <div className={cn("flex relative items-start w-full transition-all duration-500", showRecruitPanel ? "max-w-[1700px]" : "max-w-5xl")}>
+        <div className="flex justify-center h-[calc(100vh-64px)] bg-muted/20 relative overflow-hidden">
+            <div className={cn("flex relative items-start w-full transition-all duration-500 h-full", showRecruitPanel ? "max-w-[1700px]" : "max-w-5xl")}>
                 {/* Editor Content */}
-                <div className="flex-1 p-4 md:p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4">
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-6">
-                        <div className="space-y-3 font-pretendard">
-                            <div className="flex items-center gap-3">
-                                <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full hover:bg-slate-100"><ArrowLeft className="h-5 w-5" /></Button>
-                                <h1 className="text-2xl font-bold tracking-tight text-slate-900">{isNew ? "새 자기소개서 작성" : "자기소개서 수정"}</h1>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                {linkedRecruit && (
-                                    <Badge variant="outline" className="bg-blue-50 border-blue-100 px-2 py-1 gap-1.5 font-semibold text-blue-700">
-                                        <Building className="h-3 w-3" /> {linkedRecruit.company}
-                                    </Badge>
-                                )}
-                                <StatusBadge
-                                    status={status || 'PENDING'}
-                                    variant="detail"
-                                />
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => setShowRecruitPanel(!showRecruitPanel)}
-                                    className={cn("h-8 gap-1.5 text-xs border-slate-200 transition-all", showRecruitPanel && "bg-slate-900 text-white border-slate-900 shadow-md")}
-                                >
-                                    <Sparkles className="h-3.5 w-3.5" /> 스튜디오 {showRecruitPanel ? "닫기" : "열기"}
-                                </Button>
-                            </div>
-                        </div>
-                        {previewSnapshot ? (
-                            <div className="flex items-center gap-3">
-                                <div className="px-4 py-2 bg-amber-50 rounded-xl border border-amber-200 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-                                    <History className="h-4 w-4 text-amber-600" />
-                                    <span className="text-xs font-bold text-amber-700">
-                                        현재 과거 버전({versions.find(v => v.id === previewVersionId)?.created_at ? new Date(versions.find(v => v.id === previewVersionId)!.created_at).toLocaleString() : 'Loading...'})을 미리보고 있습니다.
-                                    </span>
-                                    <div className="h-4 w-px bg-amber-200 mx-1" />
+                <div className="flex-1 space-y-8 animate-in fade-in slide-in-from-bottom-4 h-full overflow-y-auto scrollbar-hide">
+                    <div className="p-4 md:p-8 space-y-8">
+                        <div className="flex items-center justify-between border-b border-border pb-6">
+                            <div className="space-y-3 font-pretendard">
+                                <div className="flex items-center gap-3">
+                                    <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full hover:bg-muted"><ArrowLeft className="h-5 w-5" /></Button>
+                                    <h1 className="text-2xl font-bold tracking-tight text-foreground">{isNew ? "새 자기소개서 작성" : "자기소개서 수정"}</h1>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    {linkedRecruit && (
+                                        <Badge variant="outline" className="bg-blue-50/50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800 px-2 py-1 gap-1.5 font-semibold text-blue-700 dark:text-blue-400">
+                                            <Building className="h-3 w-3" /> {linkedRecruit.company}
+                                        </Badge>
+                                    )}
+                                    <StatusBadge
+                                        status={status || 'PENDING'}
+                                        variant="detail"
+                                    />
                                     <Button
+                                        variant="outline"
                                         size="sm"
-                                        variant="ghost"
-                                        onClick={handleCancelPreview}
-                                        className="h-7 text-xs font-bold text-amber-800 hover:bg-amber-100 px-3"
+                                        onClick={() => setShowRecruitPanel(!showRecruitPanel)}
+                                        className={cn("h-8 gap-1.5 text-xs border-border transition-all", showRecruitPanel && "bg-foreground text-background border-foreground shadow-md")}
                                     >
-                                        원래대로 돌아가기
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        onClick={() => {
-                                            const ver = versions.find(v => v.id === previewVersionId);
-                                            if (ver) handleRestoreVersion(ver);
-                                        }}
-                                        className="h-7 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm border-none px-3"
-                                    >
-                                        이 버전으로 복원
+                                        <Sparkles className="h-3.5 w-3.5" /> 스튜디오 {showRecruitPanel ? "닫기" : "열기"}
                                     </Button>
                                 </div>
                             </div>
-                        ) : (
-                            <div className="flex gap-2 items-center">
-                                {!isNew && (
-                                    <Button
-                                        variant="ghost"
-                                        onClick={async () => {
-                                            if (confirm("정말 이 자기소개서를 삭제하시겠습니까?")) {
-                                                try {
-                                                    const res = await fetchWithAuth(getApiUrl(`/cover-letters/${id}`), { method: 'DELETE' });
-                                                    if (res.ok) {
-                                                        alert("삭제되었습니다.");
-                                                        router.push('/my/cover-letters');
-                                                    }
-                                                } catch (e) { console.error(e); }
-                                            }
-                                        }}
-                                        className="text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors h-10 px-4"
-                                    >
-                                        <Trash2 className="h-4 w-4 mr-2" /> 삭제
-                                    </Button>
-                                )}
-
-                                {status === 'REVIEW_REQUIRED' ? (
-                                    <>
-                                        <Button variant="outline" onClick={() => router.back()} className="border-slate-200 h-10 px-6 font-semibold">취소</Button>
-                                        <Button variant="brand" onClick={handleConfirm} className="rounded-md h-10 px-8 font-black shadow-lg shadow-blue-500/20 animate-bounce">
-                                            <Sparkles className="mr-2 h-4 w-4 fill-white" /> 이 내용으로 최종 확정
+                            {previewSnapshot ? (
+                                <div className="flex items-center gap-3">
+                                    <div className="px-4 py-2 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-900 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                                        <History className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+                                        <span className="text-xs font-bold text-amber-700 dark:text-amber-400">
+                                            현재 과거 버전({versions.find(v => v.id === previewVersionId)?.created_at ? new Date(versions.find(v => v.id === previewVersionId)!.created_at).toLocaleString() : 'Loading...'})을 미리보고 있습니다.
+                                        </span>
+                                        <div className="h-4 w-px bg-amber-200 dark:bg-amber-800 mx-1" />
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={handleCancelPreview}
+                                            className="h-7 text-xs font-bold text-amber-800 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900 px-3"
+                                        >
+                                            원래대로 돌아가기
                                         </Button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Button variant="outline" onClick={() => router.back()} className="border-slate-200 h-10 px-6 font-semibold">취소</Button>
-                                        <Button variant="default" onClick={handleSave} className="rounded-md h-10 px-6 font-bold shadow-lg shadow-blue-500/20 bg-blue-600 hover:bg-blue-700">
-                                            <Save className="mr-2 h-4 w-4" /> 저장하기
+                                        <Button
+                                            size="sm"
+                                            onClick={() => {
+                                                const ver = versions.find(v => v.id === previewVersionId);
+                                                if (ver) handleRestoreVersion(ver);
+                                            }}
+                                            className="h-7 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm border-none px-3"
+                                        >
+                                            이 버전으로 복원
                                         </Button>
-                                    </>
-                                )}
-                            </div>
-                        )}
-                    </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex gap-2 items-center">
+                                    {!isNew && (
+                                        <Button
+                                            variant="ghost"
+                                            onClick={async () => {
+                                                if (confirm("정말 이 자기소개서를 삭제하시겠습니까?")) {
+                                                    try {
+                                                        const res = await fetchWithAuth(getApiUrl(`/cover-letters/${id}`), { method: 'DELETE' });
+                                                        if (res.ok) {
+                                                            alert("삭제되었습니다.");
+                                                            router.push('/my/cover-letters');
+                                                        }
+                                                    } catch (e) { console.error(e); }
+                                                }
+                                            }}
+                                            className="text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors h-10 px-4"
+                                        >
+                                            <Trash2 className="h-4 w-4 mr-2" /> 삭제
+                                        </Button>
+                                    )}
 
-                    <div className="space-y-4">
-                        <Label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">문서 제목</Label>
-                        <Input value={title} onChange={(e) => setTitle(e.target.value)} className="h-14 text-xl font-black border-2 border-slate-100 bg-white shadow-sm focus-visible:ring-blue-500 focus:border-blue-500 transition-all rounded-2xl" placeholder="자소서 제목을 입력하세요" />
-                    </div>
+                                    {status === 'REVIEW_REQUIRED' ? (
+                                        <>
+                                            <Button variant="outline" onClick={() => router.back()} className="border-border h-10 px-6 font-semibold">취소</Button>
+                                            <Button variant="brand" onClick={handleConfirm} className="rounded-md h-10 px-8 font-black shadow-lg shadow-blue-500/20 animate-bounce">
+                                                <Sparkles className="mr-2 h-4 w-4 fill-white" /> 이 내용으로 최종 확정
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Button variant="outline" onClick={() => router.back()} className="border-slate-200 dark:border-slate-700 h-10 px-6 font-semibold">취소</Button>
+                                            <Button variant="default" onClick={handleSave} className="rounded-md h-10 px-6 font-bold shadow-lg shadow-blue-500/20">
+                                                <Save className="mr-2 h-4 w-4" /> 저장하기
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                        </div>
 
-                    {/* Gap Analysis Dashboard */}
-                    <GapAnalysisReport gapAnalysis={gapAnalysis} />
+                        <div className="space-y-4">
+                            <Label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1">문서 제목</Label>
+                            <Input value={title} onChange={(e) => setTitle(e.target.value)} className="h-14 text-xl font-black border-2 border-border bg-card shadow-sm focus-visible:ring-primary focus:border-primary transition-all rounded-2xl" placeholder="자소서 제목을 입력하세요" />
+                        </div>
 
-                    <div className="space-y-12 pb-40">
-                        <AnimatePresence mode="popLayout">
-                            {questions.map((q, idx) => (
-                                <QuestionEditorItem
-                                    key={q.id}
-                                    question={q}
-                                    index={idx}
-                                    onUpdate={(field, value) => updateQuestion(q.id, field, value)}
-                                    onRemove={() => removeQuestion(q.id)}
-                                    onApplySuggestion={(si) => applySuggestion(q.id, si)}
-                                    onGenerateHeadline={() => handleGenerateHeadline(q.id)}
-                                />
-                            ))}
-                        </AnimatePresence>
-                        <motion.div layout>
-                            <Button variant="outline" onClick={addQuestion} className="w-full h-16 border-dashed border-2 border-slate-200 bg-white/50 hover:bg-white hover:border-blue-200 hover:text-blue-600 transition-all rounded-[2rem] font-bold text-slate-400">
-                                <Plus className="mr-2 h-6 w-6" /> 문항 추가
-                            </Button>
-                        </motion.div>
+                        {/* Gap Analysis Dashboard */}
+                        <GapAnalysisReport gapAnalysis={gapAnalysis} />
+
+                        <div className="space-y-12 pb-40">
+                            <AnimatePresence mode="popLayout">
+                                {questions.map((q, idx) => (
+                                    <QuestionEditorItem
+                                        key={q.id}
+                                        question={q}
+                                        index={idx}
+                                        onUpdate={(field, value) => updateQuestion(q.id, field, value)}
+                                        onRemove={() => removeQuestion(q.id)}
+                                        onApplySuggestion={(si) => applySuggestion(q.id, si)}
+                                        onGenerateHeadline={() => handleGenerateHeadline(q.id)}
+                                    />
+                                ))}
+                            </AnimatePresence>
+                            <motion.div layout>
+                                <Button variant="outline" onClick={addQuestion} className="w-full h-16 border-dashed border-2 border-border bg-card/50 hover:bg-card hover:border-primary/50 hover:text-primary transition-all rounded-[2rem] font-bold text-muted-foreground">
+                                    <Plus className="mr-2 h-6 w-6" /> 문항 추가
+                                </Button>
+                            </motion.div>
+                        </div>
                     </div>
                 </div>
 

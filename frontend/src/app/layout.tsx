@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import "./globals.css";
 import { MSWComponent } from "@/components/MSWComponent";
 import { ToastProvider } from "@/components/ui/toast-context";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const fontSans = FontSans({
     subsets: ["latin"],
@@ -30,9 +31,16 @@ export default function RootLayout({
                 fontSans.variable
             )}>
                 <MSWComponent>
-                    <ToastProvider>
-                        {children}
-                    </ToastProvider>
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="system"
+                        enableSystem
+                        disableTransitionOnChange
+                    >
+                        <ToastProvider>
+                            {children}
+                        </ToastProvider>
+                    </ThemeProvider>
                 </MSWComponent>
                 <Analytics />
                 <SpeedInsights />

@@ -122,18 +122,21 @@ export default function PortfoliosPage() {
                                 transition={{ delay: index * 0.05 }}
                             >
                                 <Card className="flex flex-col h-full hover:shadow-xl transition-all duration-500 ease-in-out border-slate-200 hover:-translate-y-1.5 bg-white group overflow-visible rounded-2xl shadow-sm ring-4 ring-transparent hover:ring-blue-500/5">
-                                    <CardHeader className="pb-4 relative">
-                                        <StatusBadge
-                                            status={portfolio.processing_status || 'PENDING'}
-                                            variant="card-tag"
-                                        />
-                                        <CardTitle className="flex items-center gap-3 text-lg font-bold text-slate-800 group-hover:text-blue-700 transition-colors duration-300">
-                                            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-blue-50 group-hover:border-blue-100 transition-colors duration-300">
-                                                {getIcon(portfolio.type)}
-                                            </div>
-                                            <span className="line-clamp-1">{portfolio.project_name || "프로젝트"}</span>
-                                        </CardTitle>
-                                        <div className="text-[11px] text-slate-400 font-bold flex items-center justify-between uppercase tracking-wider mt-2 gap-3">
+                                    <CardHeader className="pb-4">
+                                        <div className="flex justify-between items-start gap-3">
+                                            <CardTitle className="flex items-center gap-3 text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors duration-300">
+                                                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:border-blue-100 dark:group-hover:border-blue-800 transition-colors duration-300">
+                                                    {getIcon(portfolio.type)}
+                                                </div>
+                                                <span className="line-clamp-1">{portfolio.project_name || "프로젝트"}</span>
+                                            </CardTitle>
+                                            <StatusBadge
+                                                status={portfolio.processing_status || 'PENDING'}
+                                                variant="default"
+                                                className="shrink-0 text-[11px] px-2.5 py-0.5"
+                                            />
+                                        </div>
+                                        <div className="text-[11px] text-slate-400 font-bold flex items-center justify-between uppercase tracking-wider mt-2 gap-3 pl-1">
                                             <span className="truncate flex-1">{portfolio.role || 'N/A'}</span>
                                             <span className="shrink-0 text-slate-300 font-medium">{formatDate(portfolio.created_at)}</span>
                                         </div>
