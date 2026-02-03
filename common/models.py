@@ -72,6 +72,7 @@ class Portfolio(Base):
     period = Column(String, nullable=True)
     role = Column(String, nullable=True)
     description = Column(Text, nullable=True) # Refined Description for Embedding
+    content = Column(Text, nullable=True)     # Raw Extracted Content (Basis for Refinement)
     tech_stack = Column(JSON, nullable=True) # List of strings
     strengths = Column(JSON, nullable=True) # List of StrengthItem dicts
 

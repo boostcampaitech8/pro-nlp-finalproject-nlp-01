@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Github, Globe, BookOpen, Link, FileText, Upload, Sparkles, Loader2, Library, RefreshCw, Check, ExternalLink, Settings, Database, Info } from "lucide-react";
+import { ArrowLeft, Github, BookOpen, FileText, Upload, Sparkles, Loader2, Library, RefreshCw, Check, ExternalLink, Settings, Database } from "lucide-react";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { portfolioApi } from "@/lib/portfolioApi";
 import { integrationApi, IntegrationRepo, UserIntegration, NotionPage } from "@/lib/integrationApi";
@@ -17,6 +17,11 @@ import { useToast } from "@/components/ui/toast-context";
 import { getApiUrl, fetchWithAuth } from "@/lib/apiUtils";
 import { useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
+
+interface BlogPost {
+    url: string;
+    title: string;
+}
 
 export default function NewPortfolioPage() {
     const router = useRouter();
@@ -26,7 +31,7 @@ export default function NewPortfolioPage() {
     // Form States
     const [githubUrl, setGithubUrl] = useState("");
     const [blogUrl, setBlogUrl] = useState("");
-    const [blogPosts, setBlogPosts] = useState<any[]>([]);
+    const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
     const [isLoadingBlogPosts, setIsLoadingBlogPosts] = useState(false);
     const [selectedBlogUrls, setSelectedBlogUrls] = useState<string[]>([]);
     const [blogSearch, setBlogSearch] = useState("");
@@ -263,7 +268,6 @@ export default function NewPortfolioPage() {
 
         try {
             for (const url of selectedBlogUrls) {
-                const post = blogPosts.find(p => p.url === url);
                 const resp = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/portfolios/analyze-source?source=${encodeURIComponent(url)}&type=blog`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
@@ -275,28 +279,14 @@ export default function NewPortfolioPage() {
             setSelectedBlogUrls([]);
             router.push('/my/portfolios');
         } catch (error) {
+            console.error(error);
             toast("분석 요청 중 오류가 발생했습니다.", "error");
         } finally {
             setIsAnalyzing(false);
         }
     };
 
-    const handleBlogAnalyze = async (url: string) => {
-        if (!url) {
-            toast("블로그 URL을 입력해주세요.", "warning");
-            return;
-        }
-        setIsAnalyzing(true);
-        try {
-            await portfolioApi.importBlog(url, "Blog Projects");
-            toast("블로그 분석이 시작되었습니다. 개별 포스팅들을 가져올게요!", "success");
-            router.push('/my/portfolios');
-        } catch (err) {
-            console.error(err);
-            toast(`분석 실패: ${err instanceof Error ? err.message : "Unknown error"}`, "error");
-            setIsAnalyzing(false);
-        }
-    };
+    // handleBlogAnalyze removed (unused)
 
     const handleFileAnalyze = async (file: File) => {
         if (!file) return;

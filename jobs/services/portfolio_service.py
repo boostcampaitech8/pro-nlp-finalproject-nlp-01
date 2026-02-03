@@ -279,6 +279,7 @@ class PortfolioService:
                 target_portfolio.period = project_refined.period
                 target_portfolio.role = project_refined.role
                 target_portfolio.description = project_refined.description_for_embedding
+                target_portfolio.content = proj_text  # SAVE RAW CONTENT
                 target_portfolio.tech_stack = project_refined.tech_stack
                 target_portfolio.strengths = [s.model_dump() for s in project_refined.strengths]
                 
@@ -464,7 +465,10 @@ class PortfolioService:
             integration = res_int.scalar_one_or_none()
             token = integration.access_token if integration else None
 
-            if p_type == "file":
+            if p_type == "text" or (portfolio.content and not source.startswith("http")):
+                # USE EXISTING CONTENT FOR RE-ANALYSIS
+                extracted_projects = [{"title": portfolio.project_name, "content": portfolio.content, "url": portfolio.source_url}]
+            elif p_type == "file":
                 text = self.file_extractor.extract(source)
                 extracted_projects = [{"title": portfolio.project_name or "New File", "content": text, "url": portfolio.source_url}]
                 # Cleanup
@@ -567,6 +571,7 @@ class PortfolioService:
                 target_portfolio.period = project_refined.period
                 target_portfolio.role = project_refined.role
                 target_portfolio.description = project_refined.description_for_embedding
+                target_portfolio.content = proj_text  # SAVE RAW CONTENT
                 target_portfolio.tech_stack = project_refined.tech_stack
                 target_portfolio.strengths = [s.model_dump() for s in project_refined.strengths]
                 

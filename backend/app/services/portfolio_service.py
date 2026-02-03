@@ -217,8 +217,9 @@ class PortfolioService:
         await self.db.commit()
         await self.db.refresh(portfolio)
         
-        # Trigger re-embedding since content might have changed
-        job_service.trigger_portfolio_embedding(portfolio_id=portfolio.id)
+        # Trigger re-analysis since content or description might have changed.
+        # This will update strengths, job queries, AND embeddings.
+        job_service.trigger_portfolio_analysis(portfolio_id=portfolio.id)
         
         return portfolio
 
