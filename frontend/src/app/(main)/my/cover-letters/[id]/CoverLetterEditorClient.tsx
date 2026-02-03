@@ -466,16 +466,6 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
                                 </Button>
                             )}
 
-                            {!isNew && (
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setShowVersions(!showVersions)}
-                                    className={cn("h-10 px-4 font-semibold gap-2 border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all", showVersions && "bg-slate-900 text-white border-slate-900 shadow-md")}
-                                >
-                                    <History className="h-4 w-4" /> 버전 내역
-                                </Button>
-                            )}
-
                             {status === 'REVIEW_REQUIRED' ? (
                                 <>
                                     <Button variant="outline" onClick={() => router.back()} className="border-slate-200 h-10 px-6 font-semibold">취소</Button>
@@ -538,12 +528,7 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
                     setTemperature={setTemperature}
                     isGenerating={isGenerating}
                     onRunGeneration={runAiGeneration}
-                />
 
-                {/* Version History */}
-                <VersionHistoryPanel
-                    isOpen={showVersions}
-                    onClose={() => setShowVersions(false)}
                     versions={versions}
                     onRestore={handleRestoreVersion}
                 />

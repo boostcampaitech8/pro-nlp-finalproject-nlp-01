@@ -1,12 +1,15 @@
-"use client";
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X, MapPin, Coins, GraduationCap, Sparkles, Zap, Wand2, MessageSquare, LayoutList, Brain, Loader2, FileText } from "lucide-react";
+import {
+    X, MapPin, Coins, GraduationCap, Sparkles, Zap,
+    Wand2, MessageSquare, LayoutList, Brain, Loader2,
+    FileText, History, Clock, RotateCcw
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Recruit as RecruitDetail } from "@/types";
+import { Recruit as RecruitDetail, CoverLetterVersion } from "@/types";
 import { Label } from "@/components/ui/label";
+import { motion } from "framer-motion";
 
 type AiMode = 'draft' | 'strategy' | 'refine';
 
@@ -19,11 +22,13 @@ interface RecruitInfoPanelProps {
     // AI Studio Props
     aiMode: AiMode;
     setAiMode: (mode: AiMode) => void;
-    // Removed Tone/Focus/Subheading props
     temperature: number;
     setTemperature: (val: number) => void;
     isGenerating: boolean;
     onRunGeneration: () => void;
+    // Version History Props
+    versions: CoverLetterVersion[];
+    onRestore: (version: CoverLetterVersion) => void;
 }
 
 export function RecruitInfoPanel({
@@ -37,40 +42,60 @@ export function RecruitInfoPanel({
     temperature,
     setTemperature,
     isGenerating,
-    onRunGeneration
+    onRunGeneration,
+    versions,
+    onRestore
 }: RecruitInfoPanelProps) {
     return (
-        <div className={cn("transition-all duration-700 shrink-0 hidden xl:block self-start sticky top-8 max-h-[calc(100vh-40px)] overflow-y-auto scrollbar-hide", isOpen ? "w-[580px] opacity-100" : "w-0 opacity-0 pointer-events-none")}>
-            <div className="w-[580px] px-8 py-8 flex flex-col">
-                <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] shadow-2xl flex flex-col">
-                    <Tabs value={panelTab} onValueChange={setPanelTab} className="flex flex-col">
-                        <div className="p-8 pb-4 bg-white">
+        <aside className={cn(
+            "transition-all duration-700 shrink-0 hidden xl:block self-start sticky top-[138px] max-h-[calc(100vh-160px)]",
+            isOpen ? "w-[600px] opacity-100" : "w-0 opacity-0 pointer-events-none"
+        )}>
+            <div className="w-[600px] px-6 pb-10 flex flex-col h-full">
+                <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] shadow-xl flex flex-col overflow-hidden h-full">
+                    <Tabs value={panelTab} onValueChange={setPanelTab} className="flex flex-col h-full">
+                        <div className="p-8 pb-4 bg-white border-b border-slate-50">
                             <div className="flex justify-between items-center mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20 text-white"><Sparkles className="h-5 w-5" /></div>
+                                    <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20 text-white">
+                                        {panelTab === 'history' ? <History className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
+                                    </div>
                                     <div className="space-y-0.5">
-                                        <h2 className="font-black text-xl tracking-tight text-slate-900">AI 라이팅 스튜디오</h2>
-                                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">AI Writing Studio</p>
+                                        <h2 className="font-black text-xl tracking-tight text-slate-900">
+                                            {panelTab === 'history' ? '버전 이력 관리' : 'AI 라이팅 스튜디오'}
+                                        </h2>
+                                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">
+                                            {panelTab === 'history' ? 'Version History' : 'AI Writing Studio'}
+                                        </p>
                                     </div>
                                 </div>
-                                <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-slate-100 trasition-all"><X className="h-5 w-5 text-slate-400" /></Button>
+                                <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-slate-100 transition-all">
+                                    <X className="h-5 w-5 text-slate-400" />
+                                </Button>
                             </div>
-                            <TabsList className="grid grid-cols-2 w-full h-11 bg-slate-100 p-1 rounded-xl border border-slate-200/50 shadow-inner mb-2 font-pretendard">
+                            <TabsList className="grid grid-cols-3 w-full h-11 bg-slate-100 p-1 rounded-xl border border-slate-200/50 shadow-inner mb-2 font-pretendard">
                                 <TabsTrigger
                                     value="recruit"
-                                    className="flex items-center gap-2 rounded-lg font-bold text-[13px] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all duration-200"
+                                    className="flex items-center gap-2 rounded-lg font-bold text-[12px] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all duration-200"
                                 >
                                     <FileText className="h-3.5 w-3.5" /> 공고 원문
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="ai_writing"
-                                    className="flex items-center gap-2 rounded-lg font-bold text-[13px] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all duration-200"
+                                    className="flex items-center gap-2 rounded-lg font-bold text-[12px] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all duration-200"
                                 >
-                                    <Sparkles className="h-3.5 w-3.5 text-blue-500 fill-blue-500/10" /> AI 라이팅
+                                    <Sparkles className="h-3.5 w-3.5 text-blue-500" /> AI 라이팅
+                                </TabsTrigger>
+                                <TabsTrigger
+                                    value="history"
+                                    className="flex items-center gap-2 rounded-lg font-bold text-[12px] data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm transition-all duration-200"
+                                >
+                                    <History className="h-3.5 w-3.5 text-amber-500" /> 버전 이력
                                 </TabsTrigger>
                             </TabsList>
                         </div>
-                        <div className="p-8 pt-4 font-pretendard">
+
+                        <div className="flex-1 overflow-y-auto p-8 pt-6 font-pretendard scrollbar-hide">
                             <TabsContent value="recruit" className="m-0 space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
                                 {recruit ? (
                                     <div className="space-y-8 pb-8">
@@ -127,7 +152,8 @@ export function RecruitInfoPanel({
                                     </div>
                                 ) : <div className="text-center py-24 text-slate-400 font-medium">연결된 공고가 없습니다.</div>}
                             </TabsContent>
-                            <TabsContent value="ai_writing" className="m-0 space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+
+                            <TabsContent value="ai_writing" className="m-0 space-y-6 animate-in fade-in slide-in-from-right-4 duration-500 pb-20">
                                 <div className="bg-blue-600 p-6 rounded-3xl shadow-xl shadow-blue-500/20 mb-2 group relative overflow-hidden">
                                     <Sparkles className="absolute -top-4 -right-4 h-24 w-24 text-white/10 rotate-12" />
                                     <p className="text-white text-md font-black mb-1 flex items-center gap-2 relative z-10">
@@ -138,8 +164,7 @@ export function RecruitInfoPanel({
                                     </p>
                                 </div>
 
-                                <div className="space-y-6 pb-20">
-                                    {/* Mode Selection */}
+                                <div className="space-y-6">
                                     <div className="space-y-3">
                                         <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 ml-1">
                                             <Zap className="h-3.5 w-3.5 text-blue-500 fill-blue-500" /> 답변 구성 모드
@@ -158,7 +183,6 @@ export function RecruitInfoPanel({
                                         </div>
                                     </div>
 
-                                    {/* Temperature Control */}
                                     <div className="space-y-4">
                                         <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 ml-1">
                                             <Brain className="h-3.5 w-3.5 text-blue-500" /> 창의성 (Temperature): {temperature.toFixed(1)}
@@ -185,7 +209,6 @@ export function RecruitInfoPanel({
                                         </p>
                                     </div>
 
-                                    {/* Action Button */}
                                     <Button variant="default" size="lg" onClick={onRunGeneration} disabled={isGenerating} className="w-full h-16 rounded-2xl text-[15px] font-black shadow-xl shadow-blue-500/20 bg-blue-600 hover:bg-blue-700">
                                         {isGenerating ? (
                                             <span className="flex items-center gap-2"><Loader2 className="h-5 w-5 animate-spin" /> 생성 중...</span>
@@ -195,10 +218,66 @@ export function RecruitInfoPanel({
                                     </Button>
                                 </div>
                             </TabsContent>
+
+                            <TabsContent value="history" className="m-0 space-y-4 animate-in fade-in slide-in-from-right-4 duration-500 pb-20">
+                                {versions.length === 0 ? (
+                                    <div className="py-24 text-center space-y-3">
+                                        <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-slate-50 text-slate-200 mb-2">
+                                            <Clock className="h-8 w-8" />
+                                        </div>
+                                        <p className="text-sm text-slate-400 font-bold tracking-tight">저장된 버전 이력이 없습니다.</p>
+                                        <p className="text-[11px] text-slate-400 px-10">내용을 저장할 때마다 새로운 버전 스냅샷이 생성됩니다.</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {versions.map((ver, idx) => (
+                                            <motion.div
+                                                key={ver.id}
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: idx * 0.05 }}
+                                                className="group bg-white border border-slate-100 rounded-2xl p-4 hover:border-blue-200 hover:shadow-md transition-all relative overflow-hidden"
+                                            >
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <div className="space-y-1">
+                                                        <div className="text-xs font-black text-slate-800 truncate max-w-[240px]">
+                                                            {ver.title || "제목 없음"}
+                                                        </div>
+                                                        <div className="text-[10px] text-slate-400 font-bold flex items-center gap-1.5">
+                                                            <Clock className="h-3 w-3" />
+                                                            {new Date(ver.created_at).toLocaleString('ko-KR', {
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        onClick={() => onRestore(ver)}
+                                                        className="h-8 px-3 text-[11px] font-black text-blue-600 hover:bg-blue-50 transition-colors rounded-lg flex items-center gap-1.5"
+                                                    >
+                                                        <RotateCcw className="h-3 w-3" /> 복원
+                                                    </Button>
+                                                </div>
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {ver.items_snapshot.map((it, i) => (
+                                                        <div key={i} className="px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-black text-slate-400 group-hover:text-blue-500 group-hover:border-blue-100 transition-colors">
+                                                            문항 {i + 1}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                )}
+                            </TabsContent>
                         </div>
                     </Tabs>
                 </div>
             </div>
-        </div>
+        </aside>
     );
 }
