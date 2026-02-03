@@ -50,7 +50,7 @@ export function QuestionEditorItem({
             <div className="flex justify-between items-start mb-8">
                 <div className="flex items-start gap-4 flex-1">
                     <div className="flex items-center bg-slate-900 text-white rounded-xl px-4 py-2 gap-2 shrink-0 shadow-lg shadow-slate-200 mt-1">
-                        <span className="text-xs font-bold uppercase tracking-widest opacity-60">ITEM</span>
+                        <span className="text-xs font-bold uppercase tracking-widest opacity-60">문항</span>
                         <span className="text-md font-black">{index + 1}</span>
                     </div>
                     <div className="flex-1 space-y-2">
@@ -58,12 +58,12 @@ export function QuestionEditorItem({
                             ref={textareaRef}
                             value={question.question}
                             onChange={e => onUpdate('question', e.target.value)}
-                            className="border-none text-2xl font-black p-0 focus-visible:ring-0 w-full placeholder:text-slate-200 resize-none min-h-[40px] bg-transparent overflow-hidden leading-tight py-1"
+                            className="border-none text-xl font-black p-0 focus-visible:ring-0 w-full placeholder:text-slate-200 resize-none min-h-[30px] bg-transparent overflow-hidden leading-tight py-1"
                             placeholder="질문 문항을 입력하세요"
                             rows={1}
                         />
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 ml-1">
-                            <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 px-3 py-1 rounded-xl text-slate-500 hover:border-slate-200 transition-all focus-within:ring-2 focus-within:ring-slate-100 focus-within:bg-white group">
+                        <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
+                            <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-xl text-slate-500 hover:border-slate-200 transition-all focus-within:ring-2 focus-within:ring-slate-100 focus-within:bg-white group">
                                 <span className="text-[10px] font-bold text-slate-400">최대 글자수</span>
                                 <input
                                     type="number"
@@ -73,6 +73,14 @@ export function QuestionEditorItem({
                                 />
                                 <span className="text-[10px] font-bold text-slate-400">자</span>
                             </div>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={onGenerateHeadline}
+                                className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 h-9 gap-2 rounded-xl"
+                            >
+                                <Sparkles className="h-4 w-4" /> 소제목 생성
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -81,16 +89,6 @@ export function QuestionEditorItem({
 
             {/* Answer Section */}
             <div className="space-y-2">
-                <div className="flex justify-end mb-2">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={onGenerateHeadline}
-                        className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 h-8 gap-2 rounded-lg"
-                    >
-                        <Sparkles className="h-3.5 w-3.5" /> 소제목 생성
-                    </Button>
-                </div>
                 <div className="relative group/textarea">
                     <Textarea
                         value={question.answer}

@@ -28,15 +28,85 @@ class BlogExtractor(BaseExtractor):
             # Fallback to general HTML extraction
             return await self._extract_general(url)
 
+    async def discover_posts(self, url: str) -> List[Dict[str, str]]:
+        """
+        Scrapes a blog home page to find post titles and URLs.
+        Supports Velog and Tistory.
+        """
+        try:
+            async with httpx.AsyncClient(headers=self.headers, timeout=self.timeout) as client:
+                resp = await client.get(url)
+                resp.raise_for_status()
+                soup = BeautifulSoup(resp.text, "html.parser")
+                posts = []
+
+                if "velog.io" in url:
+                    # Velog specific: posts are usually in h2 tags inside article tags
+                    # Updated selector for better accuracy
+                    articles = soup.find_all("div", {"class": "sc-hHTYSt"}) or soup.find_all("article")
+                    for article in articles:
+                        link_tag = article.find("a")
+                        title_tag = article.find("h2")
+                        if link_tag and title_tag and link_tag.get("href"):
+                            full_url = link_tag.get("href")
+                            if full_url.startswith("/"):
+                                # Handle relative URL for Velog (e.g. /@username/post-title)
+                                base = url.split(".io")[0] + ".io"
+                                full_url = base + full_url
+                            posts.append({
+                                "title": title_tag.get_text(strip=True),
+                                "url": full_url
+                            })
+                elif "tistory.com" in url:
+                    # Tistory: widely varies by skin, but usually in .post-item or similar
+                    # Try common selectors
+                    links = soup.select("a[href*='/']")
+                    for link in links:
+                        # Skip pagination and category links
+                        href = link.get("href", "")
+                        if any(x in href for x in ["/category", "?page="]) or len(href.split("/")) < 2:
+                            continue
+                        
+                        title = link.get_text(strip=True)
+                        if title and len(title) > 2:
+                            full_url = href
+                            if not href.startswith("http"):
+                                base = "/".join(url.split("/")[:3])
+                                full_url = base + href
+                            posts.append({
+                                "title": title,
+                                "url": full_url
+                            })
+                
+                # Deduplicate and limit
+                seen = set()
+                unique_posts = []
+                for p in posts:
+                    if p["url"] not in seen:
+                        unique_posts.append(p)
+                        seen.add(p["url"])
+                
+                return unique_posts[:20]
+        except Exception as e:
+            logger.error(f"Error discovering blog posts: {e}")
+            return []
+
     async def extract_multi(self, url: str) -> List[Dict[str, str]]:
         """
         Extract multiple posts if the URL is a profile/index page.
         Returns: List of {"title": str, "content": str, "url": str}
         """
-        # For MVC, we focus on extracting the main content of the provided URL.
-        # If it's a list page, we could crawl, but let's start with single page or top post.
         content = await self.extract(url)
-        return [{"title": "Blog Post", "content": content, "url": url}]
+        # Try to find title from HTML
+        title = "Blog Post"
+        try:
+            async with httpx.AsyncClient(headers=self.headers, timeout=self.timeout) as client:
+                resp = await client.get(url)
+                soup = BeautifulSoup(resp.text, "html.parser")
+                title = soup.title.string if soup.title else "Blog Post"
+        except: pass
+        
+        return [{"title": title, "content": content, "url": url}]
 
     async def _extract_velog(self, url: str) -> str:
         try:

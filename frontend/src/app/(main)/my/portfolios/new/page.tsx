@@ -8,10 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Github, Upload, Loader2, BookOpen, Settings, Database, Library, ExternalLink, RefreshCw, Sparkles, Check } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Github, Globe, BookOpen, Link, FileText, Upload, Sparkles, Loader2, Library, RefreshCw, Check, ExternalLink, Settings, Database, Info } from "lucide-react";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { portfolioApi } from "@/lib/portfolioApi";
 import { integrationApi, IntegrationRepo, UserIntegration, NotionPage } from "@/lib/integrationApi";
 import { useToast } from "@/components/ui/toast-context";
+import { getApiUrl, fetchWithAuth } from "@/lib/apiUtils";
 import { useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +26,12 @@ export default function NewPortfolioPage() {
     // Form States
     const [githubUrl, setGithubUrl] = useState("");
     const [blogUrl, setBlogUrl] = useState("");
+    const [blogPosts, setBlogPosts] = useState<any[]>([]);
+    const [isLoadingBlogPosts, setIsLoadingBlogPosts] = useState(false);
+    const [selectedBlogUrls, setSelectedBlogUrls] = useState<string[]>([]);
+    const [blogSearch, setBlogSearch] = useState("");
     const [notionUrl, setNotionUrl] = useState("");
+    const [directText, setDirectText] = useState("");
 
     // Integration States
     const [integrations, setIntegrations] = useState<UserIntegration[]>([]);
@@ -158,6 +166,35 @@ export default function NewPortfolioPage() {
         );
     };
 
+    const handleTextAnalyze = async (text: string) => {
+        if (!text || text.trim().length < 20) {
+            toast("내용이 너무 짧습니다. 최소 20자 이상 입력해주세요.", "error");
+            return;
+        }
+        setIsAnalyzing(true);
+        try {
+            // We use 'link'/generic type for manual text or specialized 'text' if backend supports
+            // But PortfolioService handles file/notion/github/blog specifically. 
+            // For raw text, we can use 'link' with source_url='manual' or specific endpoint.
+            // Let's assume backend /analyze can take generic text.
+            const res = await fetchWithAuth(getApiUrl('/portfolios/analyze'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ source: text, type: 'text' })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                toast("데이터 추출 및 분석이 완료되었습니다. 내용을 확인 후 등록해주세요.", "success");
+                router.push(`/my/portfolios/${data.portfolio_id}`);
+            } else {
+                toast("분석에 실패했습니다.", "error");
+            }
+        } catch (error) {
+            toast("오류가 발생했습니다.", "error");
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
     const handleBatchNotionAnalyze = async () => {
         if (selectedNotionPageIds.length === 0) return;
 
@@ -186,6 +223,61 @@ export default function NewPortfolioPage() {
             } else {
                 setIsAnalyzing(false);
             }
+        }
+    };
+
+    const handleBlogDiscover = async () => {
+        if (!blogUrl) return;
+        setIsLoadingBlogPosts(true);
+        try {
+            const resp = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/integrations/blog/posts?url=${encodeURIComponent(blogUrl)}`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (resp.ok) {
+                const data = await resp.json();
+                setBlogPosts(data);
+                if (data.length === 0) {
+                    toast("포스팅을 찾을 수 없습니다. URL을 확인해 주세요.", "error");
+                }
+            } else {
+                toast("블로그 정보를 불러오는데 실패했습니다.", "error");
+            }
+        } catch (error) {
+            toast("오류가 발생했습니다.", "error");
+        } finally {
+            setIsLoadingBlogPosts(false);
+        }
+    };
+
+    const toggleBlogSelection = (url: string) => {
+        setSelectedBlogUrls(prev =>
+            prev.includes(url) ? prev.filter(u => u !== url) : [...prev, url]
+        );
+    };
+
+    const handleBatchBlogAnalyze = async () => {
+        if (selectedBlogUrls.length === 0) return;
+
+        setIsAnalyzing(true);
+        let successCount = 0;
+
+        try {
+            for (const url of selectedBlogUrls) {
+                const post = blogPosts.find(p => p.url === url);
+                const resp = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/portfolios/analyze-source?source=${encodeURIComponent(url)}&type=blog`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                if (resp.ok) successCount++;
+            }
+
+            toast(`${successCount}개의 블로그 포스팅 분석이 시작되었습니다.`, "success");
+            setSelectedBlogUrls([]);
+            router.push('/my/portfolios');
+        } catch (error) {
+            toast("분석 요청 중 오류가 발생했습니다.", "error");
+        } finally {
+            setIsAnalyzing(false);
         }
     };
 
@@ -259,6 +351,7 @@ export default function NewPortfolioPage() {
     };
 
 
+
     return (
         <div className="container max-w-4xl mx-auto py-12 px-4 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center space-x-2 mb-4">
@@ -295,8 +388,9 @@ export default function NewPortfolioPage() {
                             </CardHeader>
                             <CardContent className="px-8 pb-8 space-y-6">
                                 <div className="p-6 rounded-2xl border border-slate-100 bg-slate-50/50 space-y-4">
-                                    <div className="flex justify-between items-center mb-1">
+                                    <div className="flex items-center gap-2 mb-1">
                                         <Label className="font-bold text-slate-700">리포지토리 또는 프로필 URL</Label>
+                                        <InfoTooltip message="GitHub 사용자 URL(@username)이나 특정 레포지토리 URL을 입력하세요." />
                                     </div>
                                     <div className="flex gap-2">
                                         <Input
@@ -451,24 +545,113 @@ export default function NewPortfolioPage() {
                             </CardHeader>
                             <CardContent className="px-8 pb-8 space-y-6">
                                 <div className="p-6 rounded-2xl border border-slate-100 bg-slate-50/50 space-y-4">
-                                    <Label className="font-bold text-slate-700">블로그 주소 또는 포스팅 URL</Label>
+                                    <div className="flex items-center gap-2">
+                                        <Label className="font-bold text-slate-700">블로그 주소 또는 포스팅 URL</Label>
+                                        <InfoTooltip message="Velog나 Tistory의 홈 주소를 입력하면 포스팅 목록을 불러옵니다. 특정 포스팅 URL을 직접 입력해도 됩니다." />
+                                    </div>
                                     <div className="flex gap-2">
                                         <Input
                                             placeholder="https://velog.io/@username"
                                             className="border-slate-200 bg-white focus-visible:ring-blue-500 h-11"
                                             value={blogUrl}
                                             onChange={(e) => setBlogUrl(e.target.value)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleBlogDiscover()}
                                         />
                                         <Button
-                                            onClick={() => handleBlogAnalyze(blogUrl)}
-                                            disabled={isAnalyzing}
+                                            onClick={handleBlogDiscover}
+                                            disabled={isLoadingBlogPosts || isAnalyzing}
                                             className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-11 px-6 rounded-xl transition-all"
                                         >
-                                            {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                                            분석 시작
+                                            {isLoadingBlogPosts ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                            최근 글 불러오기
                                         </Button>
                                     </div>
                                 </div>
+
+                                {blogPosts.length > 0 && (
+                                    <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div className="relative flex-1">
+                                                <Input
+                                                    placeholder="글 제목 검색..."
+                                                    value={blogSearch}
+                                                    onChange={(e) => setBlogSearch(e.target.value)}
+                                                    className="h-9 text-sm pl-8 border-slate-200"
+                                                />
+                                                <Library className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
+                                            </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
+                                                    const visible = blogPosts.filter(p => p.title.toLowerCase().includes(blogSearch.toLowerCase()));
+                                                    const allSelected = visible.every(p => selectedBlogUrls.includes(p.url));
+                                                    if (allSelected) {
+                                                        setSelectedBlogUrls(prev => prev.filter(u => !visible.some(p => p.url === u)));
+                                                    } else {
+                                                        setSelectedBlogUrls(prev => Array.from(new Set([...prev, ...visible.map(p => p.url)])));
+                                                    }
+                                                }}
+                                                className="h-9 text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 font-bold"
+                                            >
+                                                {blogPosts.filter(p => p.title.toLowerCase().includes(blogSearch.toLowerCase())).every(p => selectedBlogUrls.includes(p.url)) ? "전체 해제" : "전체 선택"}
+                                            </Button>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 p-1">
+                                            {blogPosts
+                                                .filter(p => p.title.toLowerCase().includes(blogSearch.toLowerCase()))
+                                                .map(post => {
+                                                    const isSelected = selectedBlogUrls.includes(post.url);
+                                                    return (
+                                                        <div
+                                                            key={post.url}
+                                                            className={cn(
+                                                                "p-4 rounded-xl border cursor-pointer transition-all group relative flex items-center gap-3",
+                                                                isSelected ? "border-emerald-500 bg-emerald-50/30 ring-1 ring-emerald-500" : "border-slate-100 bg-white hover:border-emerald-400"
+                                                            )}
+                                                            onClick={() => toggleBlogSelection(post.url)}
+                                                        >
+                                                            <div className={cn(
+                                                                "w-5 h-5 rounded border flex items-center justify-center transition-colors shrink-0",
+                                                                isSelected ? "bg-emerald-600 border-emerald-600" : "border-slate-300 bg-white group-hover:border-emerald-400"
+                                                            )}>
+                                                                {isSelected && <Check className="h-3.5 w-3.5 text-white stroke-[3px]" />}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="font-bold text-sm text-slate-900 group-hover:text-emerald-600 truncate">{post.title}</div>
+                                                                <div className="text-[10px] text-slate-400 mt-1 truncate">{post.url}</div>
+                                                            </div>
+                                                            <ExternalLink
+                                                                className="h-3.5 w-3.5 text-slate-200 hover:text-emerald-500 transition-colors shrink-0"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    window.open(post.url, '_blank');
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    );
+                                                })}
+                                        </div>
+
+                                        {selectedBlogUrls.length > 0 && (
+                                            <div className="pt-4 flex justify-center animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                                <Button
+                                                    onClick={handleBatchBlogAnalyze}
+                                                    disabled={isAnalyzing}
+                                                    className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-slate-200 flex gap-3 items-center w-full"
+                                                >
+                                                    {isAnalyzing ? (
+                                                        <Loader2 className="h-5 w-5 animate-spin" />
+                                                    ) : (
+                                                        <Sparkles className="h-5 w-5 text-emerald-400" />
+                                                    )}
+                                                    선택한 {selectedBlogUrls.length}개의 포스팅 분석 시작
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </TabsContent>
@@ -647,6 +830,10 @@ export default function NewPortfolioPage() {
                                                 <div className="relative flex justify-center text-xs uppercase"><span className="bg-slate-50 px-2 text-slate-300 font-bold italic">직접 URL 입력</span></div>
                                             </div>
 
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Label className="font-bold text-slate-700">Notion 페이지 URL</Label>
+                                                <InfoTooltip message="공유된 Notion 페이지 URL을 입력하세요. 계정 연동 시 더 편리하게 가져올 수 있습니다." />
+                                            </div>
                                             <div className="flex gap-2">
                                                 <Input
                                                     placeholder="https://www.notion.so/..."
@@ -688,7 +875,10 @@ export default function NewPortfolioPage() {
                                 <div className="h-20 w-20 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-300">
                                     <Upload className="h-10 w-10 text-slate-400 group-hover:text-blue-500" />
                                 </div>
-                                <h3 className="mt-6 text-xl font-bold text-slate-900">파일 업로드 (PDF, TXT, MD)</h3>
+                                <div className="flex items-center justify-center gap-2 mt-6">
+                                    <h3 className="text-xl font-bold text-slate-900">파일 업로드 (PDF, TXT, MD)</h3>
+                                    <InfoTooltip message="파일 내에서 여러 프로젝트가 발견되면 각각 별도의 포트폴리오로 자동 분리되어 등록됩니다." />
+                                </div>
                                 <p className="mt-2 text-slate-500 font-medium">포트폴리오 파일을 선택하거나 이 영역으로 드래그하세요.</p>
                                 <div className="mt-8 flex gap-2">
                                     <Badge variant="outline" className="text-slate-400 border-slate-200">PDF</Badge>
@@ -697,6 +887,42 @@ export default function NewPortfolioPage() {
                                 </div>
                             </div>
                         </div>
+                    </TabsContent>
+                    <TabsContent value="direct">
+                        <Card className="border-slate-200 shadow-sm border-2 overflow-hidden hover:border-blue-200 transition-colors bg-white">
+                            <CardHeader className="p-8">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-3 bg-slate-100 rounded-2xl">
+                                        <FileText className="h-8 w-8 text-slate-900" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <CardTitle className="text-xl font-bold text-slate-900">직접 텍스트 입력</CardTitle>
+                                        <CardDescription className="text-slate-500">프로젝트 수행 경험을 자유롭게 작성하세요. AI가 핵심 성과를 추출해 드립니다.</CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="px-8 pb-8 space-y-6">
+                                <Textarea
+                                    placeholder="어떤 프로젝트를 수행하셨나요? 사용한 기술, 본인의 역할, 그리고 구체적인 성과를 자유롭게 설명해주세요."
+                                    className="min-h-[300px] border-slate-200 focus-visible:ring-blue-500 bg-white"
+                                    value={directText}
+                                    onChange={(e) => setDirectText(e.target.value)}
+                                />
+                                <div className="flex justify-end">
+                                    <Button
+                                        onClick={() => handleTextAnalyze(directText)}
+                                        disabled={isAnalyzing || !directText || directText.length < 20}
+                                        className="bg-slate-900 hover:bg-slate-800 text-white font-bold h-12 px-8 rounded-xl"
+                                    >
+                                        {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2 text-blue-400" />}
+                                        분석 등록하기
+                                    </Button>
+                                </div>
+                                <p className="text-xs text-slate-400 text-center">
+                                    입력하신 텍스트를 바탕으로 AI가 자동 완성한 포트폴리오를 생성하며, 이후 수정할 수 있습니다.
+                                </p>
+                            </CardContent>
+                        </Card>
                     </TabsContent>
                 </div>
             </Tabs>

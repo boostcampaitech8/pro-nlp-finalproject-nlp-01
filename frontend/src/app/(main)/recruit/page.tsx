@@ -24,6 +24,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
     DropdownMenuTrigger,
@@ -40,7 +41,7 @@ export default function RecruitPage() {
     const [activeTab, setActiveTab] = useState("all");
 
     // 필터 상태
-    const [selectedCategory, setSelectedCategory] = useState("all");
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [selectedTechs, setSelectedTechs] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
@@ -66,13 +67,30 @@ export default function RecruitPage() {
         { label: "프론트엔드", value: "frontend" },
         { label: "서버/백엔드", value: "backend" },
         { label: "웹 풀스택", value: "fullstack" },
+        { label: "모바일", value: "mobile" },
         { label: "AI/ML/NLP", value: "ai" },
         { label: "데이터", value: "data" },
-        { label: "모바일", value: "mobile" },
         { label: "DevOps", value: "devops" },
+        { label: "게임 개발", value: "game" },
+        { label: "보안", value: "security" },
+        { label: "QA/테스트", value: "qa" },
+        { label: "임베디드", value: "embedded" },
     ];
 
-    const TECH_STACKS = ["React", "TypeScript", "Next.js", "Java", "Spring", "Python", "PyTorch", "Node.js", "Go", "Swift", "AWS", "Kubernetes"];
+    const TECH_STACKS = [
+        {
+            category: "Languages",
+            items: ["Java", "Python", "JavaScript", "TypeScript", "Kotlin", "Swift", "Go", "Rust", "C++", "C#"]
+        },
+        {
+            category: "Frameworks/Libs",
+            items: ["React", "Next.js", "Vue.js", "Spring Boot", "Nest.js", "Fast API", "Django", "Node.js"]
+        },
+        {
+            category: "Infra/DB/etc",
+            items: ["AWS", "Kubernetes", "Docker", "PostgreSQL", "MySQL", "Redis", "MongoDB", "Flutter", "React Native"]
+        }
+    ];
 
     const fetchRecruits = useCallback(async () => {
         setLoading(true);
@@ -80,7 +98,7 @@ export default function RecruitPage() {
             const params = new URLSearchParams({
                 page: currentPage.toString(),
                 limit: itemsPerPage.toString(),
-                category: selectedCategory,
+                category: selectedCategories.join(','),
                 techStack: selectedTechs.join(','),
                 keyword: debouncedSearchQuery,
                 searchType: searchType,
@@ -99,17 +117,41 @@ export default function RecruitPage() {
         } finally {
             setLoading(false);
         }
-    }, [activeTab, currentPage, itemsPerPage, selectedCategory, selectedTechs, debouncedSearchQuery, searchType]);
+    }, [activeTab, currentPage, itemsPerPage, selectedCategories, selectedTechs, debouncedSearchQuery, searchType]);
 
     useEffect(() => {
         fetchRecruits();
     }, [fetchRecruits, isAuthenticated]);
 
+    const toggleCategory = (category: string) => {
+        if (category === 'all') {
+            setSelectedCategories([]);
+        } else {
+            setSelectedCategories(prev => {
+                const isSelected = prev.includes(category);
+                if (isSelected) {
+                    return prev.filter(c => c !== category);
+                } else {
+                    return [...prev, category];
+                }
+            });
+        }
+        setCurrentPage(1);
+    };
+
     const toggleTech = (tech: string) => {
         setSelectedTechs(prev =>
             prev.includes(tech) ? prev.filter(t => t !== tech) : [...prev, tech]
         );
-        setCurrentPage(1); // 필터 변경 시 첫 페이지로
+        setCurrentPage(1);
+    };
+
+    const resetFilters = () => {
+        setSelectedCategories([]);
+        setSelectedTechs([]);
+        setSearchQuery("");
+        setSearchType("all");
+        setCurrentPage(1);
     };
 
     // 공통 카드 렌더링 함수
@@ -392,29 +434,32 @@ export default function RecruitPage() {
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="outline"
-                                className="h-16 px-6 rounded-3xl border-slate-200 bg-white shadow-lg shadow-slate-200/40 hover:bg-slate-50 transition-all flex items-center gap-2 group min-w-[130px]"
+                                className="h-16 px-6 rounded-3xl border-slate-200 bg-white shadow-lg shadow-slate-200/40 hover:bg-slate-50 transition-all flex items-center gap-2 group min-w-max"
                             >
-                                <span className="text-sm font-black text-slate-600 uppercase tracking-widest">
+                                <span className="text-sm font-black text-slate-600 uppercase tracking-widest whitespace-nowrap">
                                     {SEARCH_TYPES.find(t => t.value === searchType)?.label}
                                 </span>
                                 <ChevronDown className="h-4 w-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[180px] rounded-2xl p-2 border-slate-200 shadow-xl animate-in fade-in zoom-in duration-200">
-                            <DropdownMenuRadioGroup value={searchType} onValueChange={(val) => {
-                                setSearchType(val);
-                                setCurrentPage(1);
-                            }}>
-                                {SEARCH_TYPES.map((type) => (
-                                    <DropdownMenuRadioItem
-                                        key={type.value}
-                                        value={type.value}
-                                        className="rounded-xl px-4 py-3 font-bold text-sm text-slate-600 data-[state=checked]:text-blue-600 data-[state=checked]:bg-blue-50 transition-all cursor-pointer mb-1 last:mb-0"
-                                    >
-                                        {type.label}
-                                    </DropdownMenuRadioItem>
-                                ))}
-                            </DropdownMenuRadioGroup>
+                        <DropdownMenuContent align="end" className="min-w-[120px] w-auto rounded-2xl p-1.5 border-slate-200 shadow-xl animate-in fade-in zoom-in duration-200">
+                            {SEARCH_TYPES.map((type) => (
+                                <DropdownMenuItem
+                                    key={type.value}
+                                    onClick={() => {
+                                        setSearchType(type.value);
+                                        setCurrentPage(1);
+                                    }}
+                                    className={cn(
+                                        "rounded-xl px-4 py-3 font-bold text-sm transition-all cursor-pointer mb-1 last:mb-0 justify-center whitespace-nowrap",
+                                        searchType === type.value
+                                            ? "text-blue-600 bg-blue-50"
+                                            : "text-slate-600 hover:bg-slate-50"
+                                    )}
+                                >
+                                    {type.label}
+                                </DropdownMenuItem>
+                            ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
@@ -456,45 +501,76 @@ export default function RecruitPage() {
                     </div>
 
                     {/* 카테고리 & 기술 필터 바 (Tabs 바로 아래 위치) */}
-                    <div className="space-y-6 mb-12 animate-in slide-in-from-top-4 fade-in duration-700">
-                        <div className="flex flex-wrap gap-2.5 items-center justify-start">
-                            <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest mr-2 border-r border-slate-200 pr-4">직무</span>
-                            {JOB_CATEGORIES.map((cat) => (
-                                <Button
-                                    key={cat.value}
-                                    variant="outline"
-                                    onClick={() => {
-                                        setSelectedCategory(cat.value);
-                                        setCurrentPage(1);
-                                    }}
-                                    className={cn(
-                                        "rounded-full h-10 px-5 font-bold transition-colors duration-200 border-2",
-                                        selectedCategory === cat.value
-                                            ? "bg-slate-900 border-slate-900 text-white shadow-md"
-                                            : "bg-white border-slate-100 text-slate-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/20"
-                                    )}
-                                >
-                                    {cat.label}
-                                </Button>
-                            ))}
+                    <div className="space-y-8 mb-12 animate-in slide-in-from-top-4 fade-in duration-700">
+                        {/* 필터 헤더 및 초기화 버튼 */}
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                            <div className="flex items-center gap-3">
+                                <span className="text-xl font-black text-slate-800 tracking-tight">상세 필터</span>
+                                {(selectedCategories.length > 0 || selectedTechs.length > 0 || searchQuery !== "") && (
+                                    <Badge variant="secondary" className="bg-blue-50 text-blue-600 px-2.5 py-1 rounded-lg font-bold text-[11px] animate-in zoom-in duration-300">
+                                        {selectedCategories.length + selectedTechs.length + (searchQuery !== "" ? 1 : 0)}개 필터 활성
+                                    </Badge>
+                                )}
+                            </div>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={resetFilters}
+                                disabled={selectedCategories.length === 0 && selectedTechs.length === 0 && searchQuery === ""}
+                                className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 font-bold text-[12px] gap-1.5 transition-all disabled:opacity-30"
+                            >
+                                <MoreHorizontal className="h-3.5 w-3.5 rotate-90" /> 필터 초기화
+                            </Button>
                         </div>
 
-                        <div className="flex flex-wrap gap-2.5 items-center justify-start">
-                            <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest mr-2 border-r border-slate-200 pr-4">기술</span>
-                            {TECH_STACKS.map((tech) => (
-                                <Badge
-                                    key={tech}
-                                    variant={selectedTechs.includes(tech) ? "default" : "outline"}
-                                    onClick={() => toggleTech(tech)}
-                                    className={cn(
-                                        "cursor-pointer px-4 py-2 rounded-xl font-bold transition-all duration-300 border-2 select-none",
-                                        selectedTechs.includes(tech)
-                                            ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/20"
-                                            : "bg-white text-slate-400 border-slate-100 hover:border-slate-300 hover:text-slate-600"
-                                    )}
-                                >
-                                    {tech}
-                                </Badge>
+                        {/* 직무 카테고리 (Horizontal Scroll) */}
+                        <div className="space-y-3">
+                            <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest block pl-1">직무</span>
+                            <div className="relative group">
+                                <div className="overflow-x-auto pb-2 scrollbar-hide flex gap-2.5 no-scrollbar">
+                                    {JOB_CATEGORIES.map((cat) => (
+                                        <Button
+                                            key={cat.value}
+                                            variant="outline"
+                                            onClick={() => toggleCategory(cat.value)}
+                                            className={cn(
+                                                "rounded-full h-11 px-6 font-bold transition-all duration-300 border-2 whitespace-nowrap",
+                                                (cat.value === 'all' && selectedCategories.length === 0) || selectedCategories.includes(cat.value)
+                                                    ? "bg-slate-900 border-slate-900 text-white shadow-xl shadow-slate-900/10 scale-105"
+                                                    : "bg-white border-slate-100 text-slate-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/50"
+                                            )}
+                                        >
+                                            {cat.label}
+                                        </Button>
+                                    ))}
+                                </div>
+                                <div className="absolute right-0 top-0 bottom-2 w-16 bg-gradient-to-l from-white to-transparent pointer-events-none group-hover:opacity-0 transition-opacity" />
+                            </div>
+                        </div>
+
+                        {/* 기술 스택 (Grouped) */}
+                        <div className="space-y-6">
+                            {TECH_STACKS.map((group) => (
+                                <div key={group.category} className="space-y-3">
+                                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest block pl-1">{group.category}</span>
+                                    <div className="flex flex-wrap gap-2.5">
+                                        {group.items.map((tech) => (
+                                            <Badge
+                                                key={tech}
+                                                variant={selectedTechs.includes(tech) ? "default" : "outline"}
+                                                onClick={() => toggleTech(tech)}
+                                                className={cn(
+                                                    "cursor-pointer px-5 py-2.5 rounded-2xl font-bold transition-all duration-300 border-2 select-none text-[13px]",
+                                                    selectedTechs.includes(tech)
+                                                        ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/20 scale-105"
+                                                        : "bg-white text-slate-400 border-slate-100 hover:border-slate-300 hover:text-slate-700"
+                                                )}
+                                            >
+                                                {tech}
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     </div>

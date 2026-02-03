@@ -63,8 +63,8 @@ class RecruitMatcher:
 
     @retry(
         retry=retry_if_exception_type((httpx.RequestError, httpx.HTTPStatusError, RuntimeError)), 
-        stop=stop_after_attempt(4), 
-        wait=wait_exponential(multiplier=2, min=2, max=20)
+        stop=stop_after_attempt(5), 
+        wait=wait_exponential(multiplier=4, min=4, max=60)
     )
     async def _execute_chat_completion(self, url: str, headers: dict, payload: dict) -> str:
         import httpx
@@ -172,8 +172,8 @@ class RecruitMatcher:
 
     @retry(
         retry=retry_if_exception_type((httpx.RequestError, httpx.HTTPStatusError, RuntimeError)),
-        stop=stop_after_attempt(4),
-        wait=wait_exponential(multiplier=2, min=2, max=20)
+        stop=stop_after_attempt(5),
+        wait=wait_exponential(multiplier=4, min=4, max=60)
     )
     async def _execute_rerank(self, url, headers, payload, candidates, top_n):
         import httpx

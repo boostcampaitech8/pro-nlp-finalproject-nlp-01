@@ -65,7 +65,10 @@ export default function RecruitDetailPage({ params }: { params: Promise<{ id: st
         <div className="container max-w-screen-xl mx-auto py-12 px-4 md:px-8 animate-in fade-in zoom-in-95 duration-500">
             {/* Header Section */}
             <div className="mb-10 pb-8 border-b border-slate-100">
-                <div className="flex flex-wrap items-center gap-2 mb-4">
+                <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-4">
+                    {recruit.title}
+                </h1>
+                <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="outline" className="px-3 py-1 text-sm font-medium bg-white border-slate-200 text-slate-600 gap-1.5 shadow-sm">
                         <Building className="h-3.5 w-3.5" />
                         {recruit.company}
@@ -76,9 +79,6 @@ export default function RecruitDetailPage({ params }: { params: Promise<{ id: st
                         </Badge>
                     )) || null}
                 </div>
-                <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-                    {recruit.title}
-                </h1>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

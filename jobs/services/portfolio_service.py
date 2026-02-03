@@ -162,23 +162,43 @@ class PortfolioService:
             integration = res_int.scalar_one_or_none()
             token = integration.access_token if integration else None
 
-            if p_type == "file":
-                text = self.file_extractor.extract(source)
-                extracted_projects = [{"title": portfolio.project_name or "New File", "content": text, "url": portfolio.source_url}]
-                # Cleanup local download
-                if source != portfolio.source_url and os.path.exists(source):
-                    try: os.remove(source)
-                    except: pass
-            elif p_type == "notion":
-                # If we have a token from integration, use it. Otherwise use default.
-                if token:
-                    self.notion_extractor.client = None # Reset to re-init with new token
-                    self.notion_extractor.access_token = token
-                    from notion_client import Client
-                    self.notion_extractor.client = Client(auth=token)
+            if p_type == "file" or p_type == "notion":
+                if p_type == "file":
+                    text = self.file_extractor.extract(source)
+                    # Cleanup local download
+                    if source != portfolio.source_url and os.path.exists(source):
+                        try: os.remove(source)
+                        except: pass
+                    # Notion
+                    if token:
+                        from notion_client import Client
+                        self.notion_extractor.client = Client(auth=token)
+                    notion_title, text = await self.notion_extractor._process_node(source)
+                    
+                    # If project name is placeholder/empty, update it with extracted title
+                    if notion_title and (not portfolio.project_name or "Notion" in portfolio.project_name or "Analysis" in portfolio.project_name):
+                        portfolio.project_name = notion_title
+                        await self.db.commit()
+                elif p_type == "text":
+                    text = portfolio.content or ""
+                    logger.info("Processing manual text input directly.")
                 
-                text = await self.notion_extractor.extract(source)
-                extracted_projects = [{"title": portfolio.project_name or "Notion Page", "content": text, "url": source}]
+                # AI-powered split for multi-project documents
+                logger.info(f"Using AI to detect multiple projects in {p_type} content...")
+                combined = await self.llm_refiner.extract_user_data_and_queries(text)
+                
+                if combined.user_data.projects:
+                    logger.info(f"AI detected {len(combined.user_data.projects)} projects in single {p_type} source.")
+                    extracted_projects = []
+                    for i, p in enumerate(combined.user_data.projects):
+                        extracted_projects.append({
+                            "title": p.project_name or (f"{p_type} Project {i+1}"),
+                            "content": text, # Pass original text for refining if needed, or p.description_for_embedding
+                            "url": portfolio.source_url,
+                            "refined_data": p # Carry over refined data
+                        })
+                else:
+                    extracted_projects = [{"title": portfolio.project_name or "New Portfolio", "content": text, "url": portfolio.source_url}]
             elif p_type == "github":
                 extracted_projects = self.github_extractor.extract_multi(source, token=token)
             elif p_type == "blog":
@@ -248,7 +268,11 @@ class PortfolioService:
                 target_portfolio = res.scalar_one()
 
                 # Refine single project
-                project_refined = await self.llm_refiner.refine_single_project(proj_text, project_name_hint=proj_title)
+                if "refined_data" in proj_data:
+                    logger.info(f"Using pre-refined data for project {i}: {proj_title}")
+                    project_refined = proj_data["refined_data"]
+                else:
+                    project_refined = await self.llm_refiner.refine_single_project(proj_text, project_name_hint=proj_title)
 
                 # Update portfolio data
                 target_portfolio.project_name = project_refined.project_name
@@ -609,3 +633,32 @@ class PortfolioService:
             except Exception as final_e:
                 logger.error(f"Final failure state update failed (Analysis): {final_e}")
             raise
+    async def process_embedding(self, portfolio_id: int):
+        """
+        Re-sync chunks and embeddings for a portfolio.
+        Called after a manual update or status change.
+        """
+        logger.info(f"Re-processing embeddings for portfolio {portfolio_id}")
+        
+        stmt = select(Portfolio).where(Portfolio.id == portfolio_id).options(
+            selectinload(Portfolio.chunks)
+        )
+        res = await self.db.execute(stmt)
+        portfolio = res.scalar_one_or_none()
+        
+        if not portfolio:
+            logger.error(f"Portfolio {portfolio_id} not found for embedding update")
+            return
+
+        # Delete existing chunks first to be safe (though _calculate_and_save_chunks clears the list)
+        from sqlalchemy import delete
+        await self.db.execute(delete(PortfolioChunk).where(PortfolioChunk.portfolio_id == portfolio_id))
+        await self.db.commit()
+        await self.db.refresh(portfolio)
+
+        # Re-calculate and save chunks
+        # We use description for embedding as it contains the refined project details
+        await self._calculate_and_save_chunks(portfolio, portfolio.description or "")
+        
+        await self.db.commit()
+        logger.info(f"Embedding re-sync completed for portfolio {portfolio_id}")

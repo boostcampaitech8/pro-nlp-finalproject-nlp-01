@@ -216,6 +216,10 @@ class PortfolioService:
         
         await self.db.commit()
         await self.db.refresh(portfolio)
+        
+        # Trigger re-embedding since content might have changed
+        job_service.trigger_portfolio_embedding(portfolio_id=portfolio.id)
+        
         return portfolio
 
     async def delete_portfolio(self, portfolio_id: int, user_id: int):
@@ -236,9 +240,10 @@ class PortfolioService:
         try:
             # 1. Create a placeholder record for analysis
             portfolio = Portfolio(
-                project_name=f"Analysis: {source[:20]}",
+                project_name="Manual Text Analysis" if p_type == "text" else f"Analysis: {source[:20]}",
                 type=p_type,
-                source_url=source,
+                source_url="manual" if p_type == "text" else source,
+                content=source if p_type == "text" else None,
                 user_id=user_id,
                 processing_status=ProcessingStatus.PENDING
             )

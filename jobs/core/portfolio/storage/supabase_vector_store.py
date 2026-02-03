@@ -6,6 +6,10 @@ from sqlalchemy import create_engine, text
 from typing import List, Dict
 from langchain_core.documents import Document
 from common.config import settings
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ManualRAG:
     def __init__(self, collection_name="portfolio_embeddings"):
@@ -21,6 +25,11 @@ class ManualRAG:
         self.collection_name = collection_name
         self.api_key = settings.NCP_CLOVASTUDIO_API_KEY
 
+    @retry(
+        retry=retry_if_exception_type((requests.exceptions.RequestError, requests.exceptions.HTTPError, Exception)),
+        stop=stop_after_attempt(5),
+        wait=wait_exponential(multiplier=2, min=4, max=60)
+    )
     def get_embedding(self, text_content):
         base_url = settings.NCP_CLOVASTUDIO_BASE_URL.strip()
         # Ensure it doesn't end with slash
@@ -38,10 +47,17 @@ class ManualRAG:
             headers=headers,
             json={"text": text_content}
         )
+        
+        # Handle specifically 429 for tenacity to retry
+        if res.status_code == 429:
+            logger.warning(f"Embedding API Rate Limit (429). Waiting to retry...")
+            res.raise_for_status()
+
         try:
             res.raise_for_status()
         except requests.exceptions.HTTPError as e:
             # Log the detailed response for debugging
+            logger.error(f"Embedding API Failed: {e}, Response: {res.text}")
             raise Exception(f"Embedding API Failed: {e}, Response: {res.text}")
 
         return res.json()["result"]["embedding"]

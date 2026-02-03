@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Portfolio, NotificationEventDetail } from "@/types";
 import { useToast } from "@/components/ui/toast-context";
-import { Plus, FileText, Link as LinkIcon, Github, LayoutGrid, List } from "lucide-react";
+import { Plus, FileText, Link as LinkIcon, Github, LayoutGrid, List, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { cn } from "@/lib/utils";
@@ -63,6 +63,7 @@ export default function PortfoliosPage() {
         switch (type) {
             case 'github': return <Github className="h-5 w-5" />;
             case 'link': return <LinkIcon className="h-5 w-5" />;
+            case 'blog': return <Globe className="h-5 w-5" />;
             default: return <FileText className="h-5 w-5" />;
         }
     };

@@ -178,8 +178,8 @@ class LLMRefiner:
 
     @from_tenacity_retry(
         retry=retry_if_exception_type((httpx.RequestError, httpx.HTTPStatusError, RuntimeError)), 
-        stop=stop_after_attempt(4), 
-        wait=wait_exponential(multiplier=2, min=2, max=20)
+        stop=stop_after_attempt(5), 
+        wait=wait_exponential(multiplier=4, min=4, max=60)
     )
     async def _execute_ncp_request(self, url: str, headers: dict, payload: dict) -> str:
         import httpx

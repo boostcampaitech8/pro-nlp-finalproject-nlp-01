@@ -15,16 +15,23 @@ async def get_recruitments(db: AsyncSession, skip: int = 0, limit: int = 10, cat
         'frontend': '프론트엔드',
         'backend': '서버/백엔드',
         'fullstack': '웹 풀스택',
+        'mobile': '모바일',
         'ai': 'AI/ML/NLP',
         'data': '데이터',
-        'mobile': '모바일',
-        'devops': 'DevOps'
+        'devops': 'DevOps',
+        'game': '게임 개발',
+        'security': '보안 엔지니어',
+        'qa': 'QA/테스트 엔지니어',
+        'embedded': '임베디드/HW 개발'
     }
 
     stmt = select(models.Recruitment)
     if category and category != 'all':
-        mapped_category = CATEGORY_MAP.get(category, category)
-        stmt = stmt.where(models.Recruitment.category == mapped_category)
+        # Support multiple categories separated by comma
+        categories = [c.strip() for c in category.split(',') if c.strip()]
+        if categories:
+            mapped_categories = [CATEGORY_MAP.get(c, c) for c in categories]
+            stmt = stmt.where(models.Recruitment.category.in_(mapped_categories))
     
     if keyword:
         if search_type == 'title':

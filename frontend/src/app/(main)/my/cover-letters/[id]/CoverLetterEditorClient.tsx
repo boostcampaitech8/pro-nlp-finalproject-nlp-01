@@ -8,19 +8,20 @@ import { Label } from "@/components/ui/label";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
     ArrowLeft, Save, Sparkles, Loader2, Building,
-    Plus, Trash2
+    Plus, Trash2, Clock, History
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { getApiUrl, fetchWithAuth } from "@/lib/apiUtils";
-import { CoverLetterItem, GapAnalysisResult, NotificationEventDetail } from "@/types";
+import { CoverLetterItem, GapAnalysisResult, NotificationEventDetail, CoverLetterVersion } from "@/types";
 
 // --- Sub-Components ---
 import { RecruitInfoPanel } from "./components/RecruitInfoPanel";
 import { GapAnalysisReport } from "./components/GapAnalysisReport";
 import { QuestionEditorItem } from "./components/QuestionEditorItem";
+import { VersionHistoryPanel } from "./components/VersionHistoryPanel";
 
 // --- Types ---
 interface QuestionItem {
@@ -65,6 +66,8 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
 
     const isNew = id === 'new';
     const [title, setTitle] = useState("");
+    const [versions, setVersions] = useState<CoverLetterVersion[]>([]);
+    const [showVersions, setShowVersions] = useState(false);
     const [questions, setQuestions] = useState<QuestionItem[]>([
         { id: 1, question: "1. 현재 회사에 지원한 이유와 앞으로 키워 나갈 커리어 계획을 작성해주시기 바랍니다.", answer: "" },
         { id: 2, question: "2. 지원 직무와 관련하여 어떠한 역량을(지식/기술 등) 강점으로 가지고 있는지, 그 역량을 갖추기 위해 무슨 노력과 경험을 했는지 구체적으로 작성해주시기 바랍니다.", answer: "" },
@@ -196,6 +199,9 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
                     } else {
                         console.warn("[CoverLetterEditor] No recruit_id found in cover letter data");
                     }
+
+                    // Fetch versions on load
+                    fetchVersions();
                 } catch (e) { console.error(e); }
             } else if (jobId) {
                 try {
@@ -212,6 +218,17 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
         };
         loadData();
     }, [id, isNew, jobId]);
+
+    const fetchVersions = async () => {
+        if (isNew) return;
+        try {
+            const res = await fetchWithAuth(getApiUrl(`/cover-letters/${id}/versions`));
+            if (res.ok) {
+                const data = await res.json();
+                setVersions(data);
+            }
+        } catch (e) { console.error("Failed to fetch versions", e); }
+    };
 
     const handleSave = async () => {
         try {
@@ -232,9 +249,28 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
             });
             if (res.ok) {
                 alert("성공적으로 저장되었습니다!");
-                router.push('/my/cover-letters');
+                if (isNew) {
+                    const saved = await res.json();
+                    router.push(`/my/cover-letters/${saved.id}`);
+                } else {
+                    fetchVersions();
+                }
             }
         } catch (e) { console.error(e); }
+    };
+
+    const handleRestoreVersion = (version: CoverLetterVersion) => {
+        if (!confirm("선택한 버전으로 복원하시겠습니까? 현재 작성 중인 내용은 사라집니다.")) return;
+
+        setTitle(version.title || "");
+        setQuestions(version.items_snapshot.map((snap, idx) => ({
+            id: Date.now() + idx, // Temp ID for UI
+            question: snap.question,
+            answer: snap.content || "",
+            max_length: 1000
+        })));
+        setShowVersions(false);
+        alert("버전이 복원되었습니다. 저장하기를 눌러 반영하세요.");
     };
 
     const addQuestion = () => setQuestions([...questions, { id: Date.now(), question: "", answer: "" }]);
@@ -430,6 +466,16 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
                                 </Button>
                             )}
 
+                            {!isNew && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setShowVersions(!showVersions)}
+                                    className={cn("h-10 px-4 font-semibold gap-2 border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all", showVersions && "bg-slate-900 text-white border-slate-900 shadow-md")}
+                                >
+                                    <History className="h-4 w-4" /> 버전 내역
+                                </Button>
+                            )}
+
                             {status === 'REVIEW_REQUIRED' ? (
                                 <>
                                     <Button variant="outline" onClick={() => router.back()} className="border-slate-200 h-10 px-6 font-semibold">취소</Button>
@@ -448,13 +494,13 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
                         </div>
                     </div>
 
-                    {/* Gap Analysis Dashboard */}
-                    <GapAnalysisReport gapAnalysis={gapAnalysis} />
-
                     <div className="space-y-4">
                         <Label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">문서 제목</Label>
                         <Input value={title} onChange={(e) => setTitle(e.target.value)} className="h-14 text-xl font-black border-2 border-slate-100 bg-white shadow-sm focus-visible:ring-blue-500 focus:border-blue-500 transition-all rounded-2xl" placeholder="자소서 제목을 입력하세요" />
                     </div>
+
+                    {/* Gap Analysis Dashboard */}
+                    <GapAnalysisReport gapAnalysis={gapAnalysis} />
 
                     <div className="space-y-12 pb-40">
                         <AnimatePresence mode="popLayout">
@@ -492,6 +538,14 @@ export default function CoverLetterEditorPage({ params }: { params: Promise<{ id
                     setTemperature={setTemperature}
                     isGenerating={isGenerating}
                     onRunGeneration={runAiGeneration}
+                />
+
+                {/* Version History */}
+                <VersionHistoryPanel
+                    isOpen={showVersions}
+                    onClose={() => setShowVersions(false)}
+                    versions={versions}
+                    onRestore={handleRestoreVersion}
                 />
             </div>
         </div>

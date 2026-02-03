@@ -43,7 +43,7 @@ export function AiStudioModal({
                     <motion.div initial={{ opacity: 0, scale: 0.95, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 30 }}
                         className="bg-white rounded-[3rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] w-full max-w-[700px] overflow-hidden relative border-none font-pretendard"
                     >
-                        <div className="bg-slate-900 text-white p-10 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                        <div className="bg-slate-900 text-white p-10 flex flex-col items-center justify-center text-center relative overflow-hidden rounded-t-[3rem]">
                             <Sparkles className="absolute -top-10 -left-10 h-40 w-40 text-blue-500/20" />
                             <div className="h-16 w-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-500/40 mb-6 relative z-10"><Brain className="h-8 w-8 text-white" /></div>
                             <h2 className="text-3xl font-black tracking-tight text-white mb-2 relative z-10">AI 라이팅 스튜디오</h2>

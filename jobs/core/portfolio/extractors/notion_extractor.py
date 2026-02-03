@@ -60,48 +60,51 @@ class NotionExtractor(BaseExtractor):
         # Determine if it's a page or database (try retrieval)
         try:
             # Try as page first
-            return await self._process_node(node_id, node_type="page")
+            title, content = await self._process_node(node_id, node_type="page")
+            return content
         except Exception:
             try:
-                return await self._process_node(node_id, node_type="database")
+                title, content = await self._process_node(node_id, node_type="database")
+                return content
             except Exception as e:
                 return f"Error extracting from Notion node {node_id}: {e}"
 
-    async def _process_node(self, node_id: str, node_type: str = "page") -> str:
+    async def _process_node(self, node_id: str, node_type: str = "page") -> tuple[str, str]:
         if node_id in self.visited_nodes:
-            return ""
+            return "", ""
         self.visited_nodes.add(node_id)
 
         content = ""
+        node_title = "Untitled"
         max_retries = 3
         base_delay = 1.0
 
         try:
             if node_type == "page":
                 page = await self._retrieve_page(node_id)
-                title = "Untitled"
                 for prop in page.get("properties", {}).values():
                     if prop["type"] == "title":
-                        title = "".join([t["plain_text"] for t in prop.get("title", [])])
+                        node_title = "".join([t["plain_text"] for t in prop.get("title", [])])
 
-                content += f"# {title}\n\n"
+                content += f"# {node_title}\n\n"
 
                 blocks = await self._get_all_blocks(node_id)
                 content += await self._process_blocks(blocks)
 
             elif node_type == "database":
                 db = await self._retrieve_database(node_id)
-                db_title = "".join([t["plain_text"] for t in db.get("title", [])])
-                content += f"# Database: {db_title}\n\n"
+                node_title = "".join([t["plain_text"] for t in db.get("title", [])])
+                content += f"# Database: {node_title}\n\n"
 
                 pages = await self._query_database_results(node_id)
                 for page in pages:
-                    content += await self._process_node(page["id"], "page")
+                    _, child_content = await self._process_node(page["id"], "page")
+                    content += child_content
 
         except Exception as e:
             logger.error(f"Error processing node {node_id}: {e}")
 
-        return content
+        return node_title, content
 
     async def _process_blocks(self, blocks, depth=0) -> str:
         content = ""
@@ -196,7 +199,7 @@ class NotionExtractor(BaseExtractor):
                 if item_id in self.visited_nodes:
                     continue
                     
-                content = await self._process_node(item_id, node_type=item_type)
+                _, content = await self._process_node(item_id, node_type=item_type)
                 if content.strip():
                     combined_content += f"{content}\n---\n\n"
 

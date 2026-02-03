@@ -35,3 +35,18 @@ async def run_profile_update(portfolio_id: int):
             logger.error(f"Profile Update Task Failed for Portfolio ID {portfolio_id}: {e}")
             raise
 
+async def run_portfolio_embedding(portfolio_id: int):
+    """
+    Task to re-chunk and re-embed portfolio content.
+    Triggered when a portfolio is updated.
+    """
+    logger.info(f"Starting Re-embedding for Portfolio ID: {portfolio_id}")
+    
+    async with AsyncSessionLocal() as db:
+        try:
+            service = PortfolioService(db)
+            await service.process_embedding(portfolio_id)
+            logger.info(f"Re-embedding Completed for Portfolio ID: {portfolio_id}")
+        except Exception as e:
+            logger.error(f"Re-embedding Failed for Portfolio ID {portfolio_id}: {e}")
+            raise

@@ -31,6 +31,9 @@ class JobService:
     def trigger_profile_update(self, portfolio_id: int):
         return self.trigger_job(task="profile_update", target_id=portfolio_id)
 
+    def trigger_portfolio_embedding(self, portfolio_id: int):
+        return self.trigger_job(task="portfolio_embedding", target_id=portfolio_id)
+
     def trigger_cover_letter_generation(self, cover_letter_id: int, **kwargs):
         return self.trigger_job(task="cover_letter_generation", target_id=cover_letter_id, **kwargs)
 

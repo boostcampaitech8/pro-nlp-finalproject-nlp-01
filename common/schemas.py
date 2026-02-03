@@ -210,6 +210,14 @@ class CoverLetterSummary(CoverLetterBase):
 class CoverLetter(CoverLetterSummary):
     pass
 
+class CoverLetterVersion(BaseModel):
+    id: int
+    cover_letter_id: int
+    title: Optional[str] = None
+    items_snapshot: List[dict] # Snapshot of questions and contents
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
 class CoverLetterDetail(CoverLetterSummary):
     gap_analysis: Optional[dict] = None
     job_analysis: Optional[dict] = None

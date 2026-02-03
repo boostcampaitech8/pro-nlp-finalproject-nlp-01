@@ -157,6 +157,8 @@ app.openapi = custom_openapi
 origins = [
     "http://localhost:3000",
     "http://localhost:8080",
+    "https://pro-nlp-finalproject-nlp-01.vercel.app",
+    "https://pro-nlp-finalproject-nlp-01-git-develop-boostcampaitech8.vercel.app",
 ]
 
 # Add Environment-based Frontend URLs
@@ -169,7 +171,7 @@ for url_setting in [settings.FRONTEND_URL, settings.PREVIEW_FRONTEND_URL, settin
             origins.append(url_setting)
 
 # Remove duplicates and empty strings
-origins = list(set([o for o in origins if o]))
+origins = list(set([o.rstrip("/") for o in origins if o]))
 
 app.add_middleware(
     CORSMiddleware,

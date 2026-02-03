@@ -38,7 +38,7 @@ export interface PortfolioStrength {
 export interface Portfolio {
     id: number;
     project_name: string;
-    type: 'link' | 'file' | 'github' | 'notion';
+    type: 'link' | 'file' | 'github' | 'notion' | 'blog';
     source_url?: string;
     content?: string;
     created_at: string;
@@ -87,6 +87,18 @@ export interface CoverLetter {
     processing_status?: 'PENDING' | 'PROCESSING' | 'REVIEW_REQUIRED' | 'COMPLETED' | 'FAILED';
     gap_analysis?: GapAnalysisResult;
     items?: CoverLetterItem[];
+}
+
+export interface CoverLetterVersion {
+    id: number;
+    cover_letter_id: number;
+    title?: string;
+    items_snapshot: {
+        question: string;
+        content: string;
+        order_index?: number;
+    }[];
+    created_at: string;
 }
 
 export interface User {

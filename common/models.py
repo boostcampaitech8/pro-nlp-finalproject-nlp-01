@@ -138,11 +138,24 @@ class CoverLetterItem(Base):
     # AI Analysis
     key_points = Column(JSON, nullable=True) # List of strings
     suggested_improvements = Column(JSON, nullable=True) # List of strings
+    order_index = Column(Integer, nullable=True) # Preserves question sequence
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     cover_letter = relationship("CoverLetter", back_populates="items")
+
+
+class CoverLetterVersion(Base):
+    __tablename__ = "cover_letter_versions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    cover_letter_id = Column(Integer, ForeignKey("cover_letters.id"), nullable=False)
+    title = Column(String, nullable=True)
+    items_snapshot = Column(JSON, nullable=False) # Snapshot of questions and contents
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    cover_letter = relationship("CoverLetter")
 
 
 class Recommendation(Base):

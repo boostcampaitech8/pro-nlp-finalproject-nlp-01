@@ -79,6 +79,16 @@ async def delete_cover_letter(
         raise HTTPException(status_code=404, detail="Cover letter not found") # Changed exception
     return {"success": True, "message": "Cover letter deleted"}
 
+@router.get("/{cl_id}/versions", response_model=List[schemas.CoverLetterVersion])
+async def list_cover_letter_versions(
+    cl_id: int,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: models.User = Depends(deps.get_current_user)
+):
+    """Retrieves version history for a specific cover letter."""
+    service = CoverLetterService(db)
+    return await service.get_cover_letter_versions(cl_id, current_user.id)
+
 @router.patch("/{cl_id}/confirm", response_model=schemas.CoverLetterDetail)
 async def confirm_cover_letter(
     cl_id: int,

@@ -77,8 +77,12 @@ class AICoverLetterService:
             generation_mode = os.getenv("JOB_EXTRA_MODE", "full") # 'full' or 'outline'
             temperature = float(os.getenv("JOB_EXTRA_TEMPERATURE", "0.0"))
             
-            # Fetch items created as placeholders in the backend
-            items_stmt = select(models.CoverLetterItem).where(models.CoverLetterItem.cover_letter_id == cl_id)
+            # Fetch items created as placeholders in the backend, ordered by order_index
+            items_stmt = (
+                select(models.CoverLetterItem)
+                .where(models.CoverLetterItem.cover_letter_id == cl_id)
+                .order_by(models.CoverLetterItem.order_index.asc())
+            )
             items_res = await db.execute(items_stmt)
             items = items_res.scalars().all()
             

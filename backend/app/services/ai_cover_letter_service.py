@@ -61,13 +61,14 @@ class AICoverLetterService:
         try:
             await db.flush() # Get ID if new
 
-            # 3. Create Placeholder Items for each question
-            for q_text in generate_req.questions:
+            # 3. Create Placeholder Items for each question with order preserving
+            for i, q_text in enumerate(generate_req.questions):
                 item = models.CoverLetterItem(
                     cover_letter_id=cover_letter.id,
                     question=q_text,
                     content="AI가 내용을 구성하고 있습니다...",
-                    category="general"
+                    category="general",
+                    order_index=i
                 )
                 db.add(item)
             

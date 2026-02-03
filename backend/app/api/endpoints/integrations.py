@@ -299,3 +299,59 @@ async def remove_integration(
     await db.commit()
     return {"success": True}
 
+@router.get("/blog/posts")
+async def list_blog_posts(url: str):
+    """
+    Fetches a list of blog posts from a profile URL (Velog/Tistory).
+    """
+    if not url:
+        raise HTTPException(status_code=400, detail="URL is required")
+    
+    # We use a simple scraping logic here to avoid dependency issues with 'jobs' package
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    
+    try:
+        async with httpx.AsyncClient(headers=headers, timeout=15.0) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(resp.text, "html.parser")
+            posts = []
+
+            if "velog.io" in url:
+                articles = soup.find_all("div", {"class": "sc-hHTYSt"}) or soup.find_all("article")
+                for article in articles:
+                    link_tag = article.find("a")
+                    title_tag = article.find("h2")
+                    if link_tag and title_tag and link_tag.get("href"):
+                        href = link_tag.get("href")
+                        full_url = href if href.startswith("http") else f"https://velog.io{href}"
+                        posts.append({
+                            "title": title_tag.get_text(strip=True),
+                            "url": full_url
+                        })
+            elif "tistory.com" in url:
+                links = soup.select("a[href*='/']")
+                for link in links:
+                    href = link.get("href", "")
+                    if any(x in href for x in ["/category", "?page="]) or len(href.split("/")) < 2:
+                        continue
+                    title = link.get_text(strip=True)
+                    if title and len(title) > 2:
+                        full_url = href if href.startswith("http") else f"https://{url.split('/')[2]}{href}"
+                        posts.append({"title": title, "url": full_url})
+            
+            seen = set()
+            unique_posts = []
+            for p in posts:
+                if p["url"] not in seen:
+                    unique_posts.append(p)
+                    seen.add(p["url"])
+            return unique_posts[:20]
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Blog discovery failed: {e}")
+        return []
+
