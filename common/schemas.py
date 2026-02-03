@@ -43,6 +43,7 @@ class RecruitmentBase(BaseModel):
     company_description: Optional[str] = None  # 기업 인재상/핵심 가치
     reason: Optional[str] = None
     view_count: Optional[int] = 0
+    tags: List[str] = []
 
 class RecruitmentCreate(RecruitmentBase):
     pass
