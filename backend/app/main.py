@@ -1,48 +1,77 @@
 import logging
 import sys
+import threading
+import shutil
+from pathlib import Path
+from contextlib import asynccontextmanager
 
-# Configure basic logging for startup
+# 1. Early Logging Setup
 from app.core.logging_utils import setup_structured_logging
 setup_structured_logging()
 logger = logging.getLogger("main")
 
-# Suppress pdfminer logs
+# Suppress noisy logs
 logging.getLogger("pdfminer").setLevel(logging.ERROR)
 
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.exceptions import AppBaseException
+
 from common.config import settings
+from app.core.exceptions import AppBaseException
 
-logger.info("Importing endpoints...")
-from app.api.endpoints import auth, recruits, portfolios, cover_letters, health, notifications, integrations
+# --- Background Startup Tasks ---
 
-from contextlib import asynccontextmanager
-import threading
+def run_db_initialization():
+    """Heavy DB tasks run in background thread to avoid blocking port binding."""
+    logger.info("Background: Starting database initialization...")
+    try:
+        from common.db_init import init_db
+        init_db()
+        logger.info("Background: Database initialization complete.")
+    except Exception as e:
+        logger.error(f"Background: Database initialization failed: {e}")
+
+def run_startup_cleanup():
+    """Cleanup temporary files in background."""
+    logger.info("Background: Starting temporary file cleanup...")
+    try:
+        upload_dir = Path("/tmp/uploads")
+        if upload_dir.exists():
+            for item in upload_dir.iterdir():
+                try:
+                    if item.is_file():
+                        item.unlink()
+                    elif item.is_dir():
+                        shutil.rmtree(item)
+                except Exception as e:
+                    logger.warning(f"Background Cleanup: Failed to delete {item}: {e}")
+        else:
+            upload_dir.mkdir(parents=True, exist_ok=True)
+        logger.info("Background: Temporary file cleanup complete.")
+    except Exception as e:
+        logger.error(f"Background: Cleanup task failed: {e}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize Database on startup
-    logger.info("Lifespan: Starting database initialization (Background Thread)...")
-    try:
-        from common.db_init import init_db
-        
-        # Run init_db in a separate thread so it doesn't block startup
-        db_thread = threading.Thread(target=init_db, daemon=True)
-        db_thread.start()
-        
-        logger.info("Lifespan: Database initialization thread started.")
-    except Exception as e:
-        logger.error(f"Lifespan: Failed to start database initialization thread: {e}")
+    # Fire off background tasks
+    logger.info("Lifespan: Starting background initialization tasks...")
+    
+    db_thread = threading.Thread(target=run_db_initialization, daemon=True)
+    cleanup_thread = threading.Thread(target=run_startup_cleanup, daemon=True)
+    
+    db_thread.start()
+    cleanup_thread.start()
     
     yield
     
-    # Cleanup on shutdown (if needed)
     logger.info("Lifespan: Shutting down...")
 
-logger.info("Initializing FastAPI app...")
+# --- FastAPI App Initialization ---
+
+logger.info("Express: Initializing FastAPI app...")
+
 app = FastAPI(
     title="Pro-NLP AI Recruitment Platform API",
     description="AI 기반 채용 플랫폼의 프론트엔드-백엔드 협업을 위한 표준 API 규격서입니다.",
@@ -51,27 +80,6 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan
 )
-
-# Initialize Database EARLY -> Moved to lifespan
-# from common.db_init import init_db
-# init_db()
-
-# Cleanup temporary files at startup
-import shutil
-from pathlib import Path
-UPLOAD_DIR = Path("/tmp/uploads")
-if UPLOAD_DIR.exists():
-    logger.info(f"Cleaning up temporary directory: {UPLOAD_DIR}")
-    for item in UPLOAD_DIR.iterdir():
-        try:
-            if item.is_file():
-                item.unlink()
-            elif item.is_dir():
-                shutil.rmtree(item)
-        except Exception as e:
-            logger.warning(f"Failed to delete {item}: {e}")
-else:
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 # CORS configuration
 origins = [
@@ -89,33 +97,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-async def root():
-    return {"status": "ok", "message": "Pro-NLP Backend is running", "docs": "/docs"}
-
-logger.info("FastAPI app READY for port binding.")
-
-# Global Exception Handlers
+# Exception Handlers
 @app.exception_handler(AppBaseException)
 async def app_base_exception_handler(request: Request, exc: AppBaseException):
     return JSONResponse(
         status_code=exc.status_code,
-        content={
-            "success": False,
-            "detail": exc.message,
-            "data": exc.detail
-        },
+        content={"success": False, "detail": exc.message, "data": exc.detail},
     )
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "success": False,
-            "detail": "입력값 검증에 실패했습니다.",
-            "errors": exc.errors()
-        },
+        content={"success": False, "detail": "입력값 검증에 실패했습니다.", "errors": exc.errors()},
     )
 
 @app.exception_handler(Exception)
@@ -130,14 +124,26 @@ async def general_exception_handler(request: Request, exc: Exception):
         },
     )
 
-# Include routers
+# --- Routes ---
+
+# Import routers locally to avoid module-level circular imports or slow loads if they import heavy services
+from app.api.endpoints import (
+    auth, recruits, portfolios, cover_letters, 
+    health, notifications, integrations, admin
+)
+
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "Pro-NLP Backend is running", "docs": "/docs"}
+
 app.include_router(health.router, prefix="/api/health", tags=["System"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-from app.api.endpoints import admin
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 app.include_router(recruits.router, prefix="/api/recruits", tags=["Recruitments"])
 app.include_router(portfolios.router, prefix="/api/portfolios", tags=["Portfolios"])
 app.include_router(cover_letters.router, prefix="/api/cover-letters", tags=["Cover Letters"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["Notifications"])
 app.include_router(integrations.router, prefix="/api/integrations", tags=["Integrations"])
+
+logger.info("Express: FastAPI app definition complete. Port binding should occur now.")
 
