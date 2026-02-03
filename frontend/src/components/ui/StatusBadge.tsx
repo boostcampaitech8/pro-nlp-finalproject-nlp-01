@@ -19,7 +19,8 @@ export function StatusBadge({ status, className, showIcon = true, variant = 'def
     const isCardTag = variant === 'card-tag';
 
     // Base styles for the tag variant (Modern Badge Style)
-    const cardTagStyles = isCardTag ? "absolute -top-3 right-6 z-10 px-4 py-1.5 shadow-xl rounded-xl whitespace-nowrap border-2 border-white ring-4 ring-slate-100/30 backdrop-blur-md transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-2xl" : "";
+    // Positioned inside the card at top-right for a cleaner look
+    const cardTagStyles = isCardTag ? "absolute top-5 right-5 z-10 px-3 py-1 shadow-md rounded-lg whitespace-nowrap border border-slate-100 ring-1 ring-slate-200/50 backdrop-blur-md transition-all duration-300" : "";
 
     const defaultStyles = !isCardTag ? "bg-white/80 backdrop-blur-xs border-slate-200/60 shadow-xs" : "";
 
