@@ -77,7 +77,7 @@ async def run_scraper():
     # Phase 2: Crawl (Long running, NO DB CONNECTION)
     try:
         # Read pages and limit from environment (passed via JobService)
-        target_pages = int(os.getenv("JOB_EXTRA_PAGES", "1"))
+        target_pages = int(os.getenv("JOB_EXTRA_PAGES", "3"))
         crawl_limit = os.getenv("JOB_EXTRA_LIMIT")
         crawl_limit = int(crawl_limit) if crawl_limit else None
         

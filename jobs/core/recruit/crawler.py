@@ -38,7 +38,7 @@ class RecruitmentCrawler:
     Crawls recruitment postings from inthiswork.com and processes them with NCP HCX-005.
     """
     
-    def __init__(self, target_pages: int = 1):
+    def __init__(self, target_pages: int = 3):
         self.target_pages = target_pages
         self.google_api_key = os.getenv("GOOGLE_API_KEY")
         self.ncp_api_key = os.getenv("NCP_CLOVASTUDIO_API_KEY")
