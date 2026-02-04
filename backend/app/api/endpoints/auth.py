@@ -118,12 +118,14 @@ async def test_login(
     role_emails = {
         "frontend": "exhibit_frontend@pro-nlp.ai",
         "backend": "exhibit_backend@pro-nlp.ai",
-        "data": "exhibit_data@pro-nlp.ai"
+        "data": "exhibit_data@pro-nlp.ai",
+        "ai": "exhibit_ai@pro-nlp.ai"
     }
     role_names = {
         "frontend": "Front-end Dev",
         "backend": "Back-end Dev",
-        "data": "Data Engineer"
+        "data": "Data Engineer",
+        "ai": "AI Engineer"
     }
     
     email = role_emails.get(req.role)
