@@ -157,7 +157,8 @@ def init_db():
                 heal_table("recruitments", {
                     "view_count": "INTEGER DEFAULT 0",
                     "embedding": "vector(1024)",
-                    "tags": "JSONB"
+                    "tags": "JSONB",
+                    "questions": "JSONB"
                 })
         except Exception as e:
             logger.error(f"Column healing failed: {e}")
