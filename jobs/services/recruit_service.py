@@ -81,10 +81,11 @@ async def _save_recommendations(db: AsyncSession, user_id: int, portfolio_name: 
              if r_obj: recruit_id = r_obj.id
 
         if recruit_id:
+            # Use with_for_update() to handle concurrent triggers for the same user/job
             existing_stmt = select(Recommendation).where(
                 Recommendation.user_id == user_id,
                 Recommendation.recruitment_id == recruit_id
-            )
+            ).with_for_update()
             existing_rec = (await db.execute(existing_stmt)).scalar_one_or_none()
             
             reasons_from_ai = rec.get('reason', [])
