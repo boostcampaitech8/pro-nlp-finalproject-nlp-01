@@ -61,7 +61,7 @@ export default function LoginPage() {
                 {/* Branding Section */}
                 <div className="text-center space-y-1 mb-6">
                     <h1 className="text-3xl font-black tracking-tight text-slate-900">
-                        모두취업 <span className="text-blue-600">로그인</span>
+                        <span className="font-paperozi font-black">모두취업</span> <span className="text-blue-600">로그인</span>
                     </h1>
                     <p className="text-xs text-slate-500 font-bold uppercase tracking-widest opacity-60">
                         Secure AI Recruitment Partner

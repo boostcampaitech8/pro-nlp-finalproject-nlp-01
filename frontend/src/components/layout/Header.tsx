@@ -37,7 +37,7 @@ export function Header() {
     if (!mounted) return (
         <header className="sticky top-0 z-50 w-full border-b bg-white">
             <div className="container max-w-screen-xl mx-auto flex h-16 items-center px-4 md:px-8">
-                <span className="font-bold text-xl tracking-tight">모두취업</span>
+                <span className="font-paperozi font-black text-xl tracking-tight">모두취업</span>
             </div>
         </header>
     );
@@ -48,7 +48,7 @@ export function Header() {
                 {/* Logo & Nav */}
                 <div className="flex items-center gap-8">
                     <Link href="/" className="flex items-center">
-                        <span className="font-extrabold text-xl tracking-tight text-foreground">모두취업</span>
+                        <span className="font-paperozi font-black text-xl tracking-tight text-foreground">모두취업</span>
                     </Link>
                     <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
                         <Link href="/recruit" className="hover:text-blue-600 transition-colors">

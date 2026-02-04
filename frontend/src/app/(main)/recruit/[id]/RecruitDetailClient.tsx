@@ -264,7 +264,7 @@ export default function RecruitDetailPage({ params }: { params: Promise<{ id: st
                     </Card>
 
                     <p className="text-xs text-center text-slate-400 leading-relaxed px-4">
-                        모두취업 AI가 공고 내용을 분석하여<br />
+                        <span className="font-paperozi font-black text-slate-500">모두취업</span> AI가 공고 내용을 분석하여<br />
                         합격 확률을 높이는 자소서 초안을 제안합니다.
                     </p>
                 </div>
