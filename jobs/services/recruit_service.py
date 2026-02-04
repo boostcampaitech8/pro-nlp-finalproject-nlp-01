@@ -81,11 +81,12 @@ async def _save_recommendations(db: AsyncSession, user_id: int, portfolio_name: 
              if r_obj: recruit_id = r_obj.id
 
         if recruit_id:
-            # Use with_for_update() to handle concurrent triggers for the same user/job
+            # We removed with_for_update() as per user request to avoid sequential blocking.
+            # Preemption logic in the orchestrator handles stale tasks.
             existing_stmt = select(Recommendation).where(
                 Recommendation.user_id == user_id,
                 Recommendation.recruitment_id == recruit_id
-            ).with_for_update()
+            )
             existing_rec = (await db.execute(existing_stmt)).scalar_one_or_none()
             
             reasons_from_ai = rec.get('reason', [])
@@ -116,30 +117,59 @@ async def _save_recommendations(db: AsyncSession, user_id: int, portfolio_name: 
 
 async def precompute_recommendations_for_portfolio(db: AsyncSession, portfolio_id: int):
     """
-    Refactored orchestrator for recommendation pre-computation.
+    Refactored orchestrator with Preemption logic: 
+    Only the latest request for a user is processed to completion.
     """
     from jobs.core.recruit.matcher import RecruitMatcher
+    from common.models import User
     
-    # 1. Prepare Data
+    # 1. Prepare Data & Versioning
     portfolio, portfolio_data = await _get_portfolio_context(db, portfolio_id)
     if not portfolio:
         logger.error(f"Portfolio {portfolio_id} not found")
         return []
 
+    # Increment and get the latest version for this user
+    user_id = portfolio.user_id
+    user_stmt = select(User).where(User.id == user_id).with_for_update()
+    user = (await db.execute(user_stmt)).scalar_one()
+    
+    # Increment our local version state
+    current_version = (user.recommendation_version or 0) + 1
+    user.recommendation_version = current_version
+    await db.commit() # Save the version immediately to preempt others
+    
+    logger.info(f"Triggered recommendation v{current_version} for User {user_id} via Portfolio {portfolio_id}")
+
+    # Helper to check if we are still the latest
+    async def is_stale():
+        # Re-fetch version to check for preemption
+        check_stmt = select(User.recommendation_version).where(User.id == user_id)
+        latest_v = (await db.execute(check_stmt)).scalar()
+        if latest_v and latest_v > current_version:
+            logger.info(f"Preempting stale recommendation task v{current_version} (Latest: v{latest_v})")
+            return True
+        return False
+
     # 2. Search Candidates
+    if await is_stale(): return []
     all_candidates = await _search_candidates(db, portfolio)
     if not all_candidates:
         logger.info("No candidates found.")
         return []
 
-    # 3. AI Rank and Reason
+    # 3. AI Rank and Reason (Expensive Step)
+    if await is_stale(): return []
     matcher = RecruitMatcher()
     ai_recommendations = await matcher.rank_final_recommendations(portfolio_data, all_candidates)
     
-    # 4. Save and Aggregate
-    saved_count = await _save_recommendations(db, portfolio.user_id, portfolio.project_name, ai_recommendations)
+    # Final check before saving
+    if await is_stale(): return []
     
-    logger.info(f"Aggregated {saved_count} recommendations for Portfolio {portfolio_id}")
+    # 4. Save and Aggregate
+    saved_count = await _save_recommendations(db, user_id, portfolio.project_name, ai_recommendations)
+    
+    logger.info(f"Aggregated {saved_count} recommendations for Portfolio {portfolio_id} (v{current_version})")
     return ai_recommendations
 
 async def bulk_precompute_recommendations(db: AsyncSession):

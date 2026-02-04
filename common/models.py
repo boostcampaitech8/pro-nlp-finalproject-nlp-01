@@ -29,6 +29,7 @@ class User(Base):
     # User Profile Fields (extracted from portfolios)
     profile_summary = Column(Text, nullable=True)  # Overall summary across all projects
     desired_job_title = Column(String, nullable=True)  # Desired job position
+    recommendation_version = Column(Integer, default=0, server_default="0")
 
     portfolios = relationship("Portfolio", back_populates="owner")
     cover_letters = relationship("CoverLetter", back_populates="owner")

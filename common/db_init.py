@@ -160,7 +160,8 @@ def init_db():
                 # Heal 'users'
                 heal_table("users", {
                     "profile_summary": "TEXT",
-                    "desired_job_title": "VARCHAR"
+                    "desired_job_title": "VARCHAR",
+                    "recommendation_version": "INTEGER DEFAULT 0"
                 })
 
                 # Heal 'recruitments'
