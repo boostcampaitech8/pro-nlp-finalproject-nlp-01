@@ -1,5 +1,6 @@
 # Common
 sqlalchemy==2.0.25
+psycopg2-binary==2.9.9
 psycopg[binary]
 asyncpg
 pydantic>=2.7.4
