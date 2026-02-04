@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     CLOUD_RUN_JOB_NAME: str = os.getenv("CLOUD_RUN_JOB_NAME", "pro-nlp-jobs")
     GCS_BUCKET_NAME: str = os.getenv("GCS_BUCKET_NAME", "")
 
+    JASOSEOL_COOKIE: Optional[str] = os.getenv("JASOSEOL_COOKIE")
+    
     # AI / LLM Keys
     NCP_CLOVASTUDIO_API_KEY: str = os.getenv("NCP_CLOVASTUDIO_API_KEY", "")
     NCP_CLOVASTUDIO_BASE_URL: str = os.getenv("NCP_CLOVASTUDIO_BASE_URL", "https://clovastudio.stream.ntruss.com")

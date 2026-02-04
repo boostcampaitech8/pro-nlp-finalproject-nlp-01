@@ -29,6 +29,7 @@ class RecruitmentItem(BaseModel):
     required_qualifications: Optional[str] = Field(None, description="자격 요건")
     preferred_qualifications: Optional[str] = Field(None, description="우대 사항")
     tags: Optional[List[str]] = Field(None, description="기술 스택 (리스트: React, TypeScript, Next.js, Java, Spring, Python, PyTorch, Node.js, Go, Swift, AWS, Kubernetes 중 해당되는 것 모두 선택)")
+    questions: Optional[List[Dict]] = Field(None, description="자기소개서 문항 리스트 (질문과 글자수 포함)")
 
 class RecruitmentList(BaseModel):
     items: List[RecruitmentItem] = Field(default_factory=list, description="채용 공고 리스트")
@@ -300,63 +301,107 @@ class RecruitmentCrawler:
             return "", "", ""
     
     async def crawl_and_parse(self, exclude_links: set = set(), limit: Optional[int] = None) -> List[Dict]:
-        """Main crawling and parsing logic."""
+        """Main crawling and parsing logic combining multiple sources."""
         loop = asyncio.get_event_loop()
-
-        # 1. Crawl job list
-        # job_list = self.get_job_list()
-        job_list = await loop.run_in_executor(None, self.get_job_list)
-        
-        # Filter existing jobs by link
-        original_count = len(job_list)
-        # Check against exclude_links set
-        filtered_list = []
-        for job in job_list:
-            link = job.get('url') or job.get('link', '')
-            if link not in exclude_links:
-                filtered_list.append(job)
-                
-        job_list = filtered_list
-        logger.info(f"Filtered {original_count - len(job_list)} existing jobs by link. {len(job_list)} new jobs available.")
-        
-        if limit:
-            logger.info(f"Applying limit: Processing only first {limit} items.")
-            job_list = job_list[:limit]
-
-        full_data = []
-        if not job_list:
-            logger.info("No new jobs to process.")
-            return []
-
-        logger.info(f"\n=== Collecting details for {len(job_list)} jobs ===")
-        
-        for idx, job in enumerate(job_list):
-            logger.info(f"[{idx+1}/{len(job_list)}] {job['company']} - {job['title']}")
-            # text, imgs, apply_url = self.get_job_detail(job['url'])
-            text, imgs, apply_url = await loop.run_in_executor(None, self.get_job_detail, job['url'])
-            
-            job['content_text'] = text
-            job['content_images'] = imgs
-            job['apply_url'] = apply_url
-            full_data.append(job)
-        
-        # 2. Analyze with NCP (OCR + LLM with Structured Outputs)
-        logger.info("\n=== Analyzing data with NCP HCX-007 ===")
         final_json_results = []
-        
-        for idx, row in enumerate(full_data):
-            logger.info(f"[{idx+1}/{len(full_data)}] Analyzing...")
-            # items = self._analyze_job_with_ncp(row)
-            items = await loop.run_in_executor(None, self._analyze_job_with_ncp, row)
-            final_json_results.extend(items)
+
+        # --- Source 1: Jasoseol ---
+        try:
+            from jobs.core.recruit.scrapers.jasoseol import JasoseolScraper
+            logger.info("\n=== Starting Jasoseol Scraper ===")
+            j_scraper = JasoseolScraper()
+            j_raw_results = await j_scraper.scrape(days=2)
             
-            # Rate limiting delay
-            time.sleep(2)
+            # Filter existing and apply limit
+            j_new_results = [r for r in j_raw_results if r['link'] not in exclude_links]
+            logger.info(f"Jasoseol: Found {len(j_raw_results)} total, {len(j_new_results)} new.")
             
-            if limit and len(final_json_results) >= limit:
-                logger.info(f"Reached limit of {limit} parsed items. Stopping.")
-                final_json_results = final_json_results[:limit]
-                break
-        
-        logger.info(f"\n[Complete] Parsed {len(final_json_results)} recruitment items")
-        return final_json_results
+            for row in j_new_results:
+                items = await loop.run_in_executor(None, self._analyze_job_with_ncp, {
+                    'company': row['company'],
+                    'title': row['title'],
+                    'url': row['link'],
+                    'apply_url': row['apply_url'],
+                    'content_text': row['content'],
+                    'content_images': ", ".join(row['image_urls'])
+                })
+                for item in items:
+                    item['questions'] = row.get('questions')
+                
+                final_json_results.extend(items)
+                if limit and len(final_json_results) >= limit:
+                    break
+                    
+        except Exception as e:
+            logger.error(f"Jasoseol scraping/parsing failed: {e}")
+
+        if limit and len(final_json_results) >= limit:
+            return final_json_results[:limit]
+
+        # --- Source 2: Saramin (New) ---
+        try:
+            from jobs.core.recruit.scrapers.saramin import SaraminScraper
+            logger.info("\n=== Starting Saramin Scraper ===")
+            s_scraper = SaraminScraper()
+            # Crawl for common developer keywords
+            keywords = ["백엔드", "프론트엔드", "데이터 엔지니어"]
+            for kw in keywords:
+                s_raw_results = await s_scraper.scrape(keyword=kw, pages=1)
+                s_new_results = [r for r in s_raw_results if r['link'] not in exclude_links]
+                logger.info(f"Saramin ({kw}): Found {len(s_raw_results)} total, {len(s_new_results)} new.")
+                
+                for row in s_new_results:
+                    items = await loop.run_in_executor(None, self._analyze_job_with_ncp, {
+                        'company': row['company'],
+                        'title': row['title'],
+                        'url': row['link'],
+                        'apply_url': row['link'], # for saramin link is often the detail
+                        'content_text': row['content'],
+                        'content_images': ", ".join(row['image_urls'])
+                    })
+                    final_json_results.extend(items)
+                    if limit and len(final_json_results) >= limit:
+                        break
+                
+                if limit and len(final_json_results) >= limit:
+                    break
+        except Exception as e:
+            logger.error(f"Saramin scraping/parsing failed: {e}")
+
+        if limit and len(final_json_results) >= limit:
+            return final_json_results[:limit]
+
+        # --- Source 3: inthiswork ---
+        try:
+            logger.info("\n=== Starting inthiswork Scraper ===")
+            job_list = await loop.run_in_executor(None, self.get_job_list)
+            
+            # Filter existing jobs by link
+            filtered_list = [j for j in job_list if j.get('url') not in exclude_links]
+            logger.info(f"inthiswork: Found {len(job_list)} total, {len(filtered_list)} new.")
+            
+            current_limit = limit - len(final_json_results) if limit else None
+            if current_limit is not None and current_limit <= 0:
+                return final_json_results
+            
+            if filtered_list:
+                process_list = filtered_list[:current_limit] if current_limit else filtered_list
+                
+                for idx, job in enumerate(process_list):
+                    text, imgs, apply_url = await loop.run_in_executor(None, self.get_job_detail, job['url'])
+                    job['content_text'] = text
+                    job['content_images'] = imgs
+                    job['apply_url'] = apply_url
+                    
+                    items = await loop.run_in_executor(None, self._analyze_job_with_ncp, job)
+                    final_json_results.extend(items)
+                    
+                    if limit and len(final_json_results) >= limit:
+                        break
+                    time.sleep(1)
+                    
+        except Exception as e:
+            logger.error(f"inthiswork scraping/parsing failed: {e}")
+
+        logger.info(f"\n[Complete] Total parsed {len(final_json_results)} recruitment items from all sources")
+        return final_json_results[:limit] if limit else final_json_results

@@ -217,44 +217,48 @@ class RecruitMatcher:
             logger.warning(f"NCP Reranker returned non-20000 code: {res_json.get('status')}")
             return candidates[:top_n]
 
-    async def rank_and_reason(self, portfolio_data: Dict, candidates: List[Any]) -> List[Dict]:
+    async def rank_final_recommendations(self, portfolio_data: Dict, candidates: List[Any], top_n: int = 10) -> List[Dict]:
         """
-        Re-ranks vector search results using NCP HCX and provides personalized recommendation reasons.
+        Final ranking of candidates using LLM with personalized reasoning.
+        Ported/Adapted from llm-pipeline's rank_final_recommendations.
         """
         if not candidates:
             return []
 
-        candidate_summaries = []
-        # Store index to retrieve full metadata later
+        # Limit candidates for LLM context window
+        candidates = candidates[:30]
+
+        candidate_texts = []
         for i, doc in enumerate(candidates):
             meta = doc.metadata
             summary = (
-                f"[공고 {i}]\n"
+                f"[공고 {i+1}]\n"
                 f"회사: {meta.get('company')}\n"
                 f"직무: {meta.get('title')}\n"
-                f"주요 업무: {(meta.get('key_responsibilities') or '')[:200]}...\n"
-                f"자격 요건: {(meta.get('required_qualifications') or '')[:200]}...\n"
-                f"우대 사항: {(meta.get('preferred_qualifications') or '')[:200]}...\n"
-                f"경험 수준: {meta.get('experience') or ''}\n"
-                f"학력: {meta.get('education') or ''}\n"
+                f"주요업무: {doc.page_content[:800]}\n"
                 "-------------------\n"
             )
-            candidate_summaries.append(summary)
+            candidate_texts.append(summary)
 
         system_prompt = """
-        당신은 전문 채용 컨설턴트입니다. 
-        사용자의 포트폴리오와 공고 후보군을 비교하여, 가장 적합한 TOP 3 공고를 선정하고 추천 사유를 작성하세요.
-        
-        응답은 반드시 'recommendations' 키를 가진 JSON 객체여야 합니다. 
-        각 추천 아이템은 'index'와 'reason' 필드를 가져야 합니다.
+        당신은 정교한 매칭을 수행하는 IT 전문 채용 컨설턴트입니다. 
+        사용자의 포트폴리오와 검색된 공고 후보군을 비교하여, 사용자의 성장에 가장 도움이 될 만한 최적의 공고를 선정하고 추천 사유를 작성하세요.
         """
 
         user_prompt = f"""
+        아래 사용자의 포트폴리오와 검색된 공고 후보군을 비교하여, 가장 적합한 TOP {top_n} 공고를 선정하고 추천 사유를 작성해주세요.
+
         [사용자 데이터]
         {json.dumps(portfolio_data, ensure_ascii=False)}
 
         [후보 공고 리스트]
-        {"".join(candidate_summaries)}
+        {"".join(candidate_texts)}
+
+        ### 요구 사항:
+        1. 후보군 중에서 사용자의 기술 스택, 프로젝트 성과, 강점에 가장 잘 맞는 공고를 최대 {top_n}개 선정하세요.
+        2. 각 추천 공고마다 왜 이 공고가 사용자에게 적합한지 '추천 사유'를 매우 구체적으로 작성하세요. 
+           (예: "사용자의 Redis 캐싱 최적화 경험이 이 공고의 '대규모 트래픽 처리' 요구사항에 매우 적합합니다")
+        3. 반드시 JSON 형식으로 응답하세요.
         """
 
         # Define schema for HCX-007 Structured Outputs
@@ -266,8 +270,8 @@ class RecruitMatcher:
                     "items": {
                         "type": "object",
                         "properties": {
-                            "index": {"type": "integer"},
-                            "reason": {"type": "string"}
+                            "index": {"type": "integer", "description": "공고 리스트에서의 인덱스 (1부터 시작)"},
+                            "reason": {"type": "string", "description": "구체적인 추천 사유"}
                         },
                         "required": ["index", "reason"],
                         "additionalProperties": False
@@ -283,25 +287,28 @@ class RecruitMatcher:
             {"role": "user", "content": user_prompt}
         ]
 
-        response_text = await self._call_ncp_chat_completion(messages, max_tokens=4096, response_schema=schema)
-
         try:
+            response_text = await self._call_ncp_chat_completion(messages, max_tokens=8000, response_schema=schema)
             res_json = json.loads(response_text)
             recs = res_json.get("recommendations", [])
             
             final_results = []
             for r in recs:
-                idx = r.get("index")
-                if idx is not None and 0 <= idx < len(candidates):
+                # index is 1-based in prompt
+                idx = r.get("index", 0) - 1
+                if 0 <= idx < len(candidates):
                     # Combine original metadata with the AI reason
                     item = dict(candidates[idx].metadata)
                     item["reason"] = r.get("reason", "매칭 사유를 생성하지 못했습니다.")
                     
-                    # Also include content if needed
-                    item["content_snippet"] = candidates[idx].page_content[:500]
+                    # Ensure reason is stored as a list if the database expects it
+                    # In common/models.py, Recommendation.reason is JSON (List of strings)
+                    if isinstance(item["reason"], str):
+                        item["reason"] = [item["reason"]]
+                        
                     final_results.append(item)
             
             return final_results
         except Exception as e:
-            logger.error(f"Error in reranking parsing: {e}, Raw: {response_text}")
+            logger.error(f"Error in rank_final_recommendations parsing: {e}, Raw: {response_text}")
             return []

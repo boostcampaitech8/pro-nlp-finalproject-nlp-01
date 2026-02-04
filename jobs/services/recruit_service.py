@@ -49,10 +49,8 @@ async def _search_candidates(db: AsyncSession, portfolio):
     
     for db_q in db_queries:
         if not db_q.query_text: continue
-        if db_q.embedding is not None:
-             initial_results = await indexer.search_by_vector(db, db_q.embedding, k=3)
-        else:
-             initial_results = await indexer.search(db, db_q.query_text, k=3)
+        # Always use hybrid search to leverage both keywords and vector space
+        initial_results = await indexer.search(db, db_q.query_text, k=10)
         
         for doc in initial_results:
             uid = doc.metadata.get('id')
@@ -89,19 +87,27 @@ async def _save_recommendations(db: AsyncSession, user_id: int, portfolio_name: 
             )
             existing_rec = (await db.execute(existing_stmt)).scalar_one_or_none()
             
-            new_reason = f"[{portfolio_name}] {rec.get('reason', '')}"
+            reasons_from_ai = rec.get('reason', [])
+            if isinstance(reasons_from_ai, str):
+                reasons_from_ai = [reasons_from_ai]
+            
+            new_reasons = [f"[{portfolio_name}] {r}" for r in reasons_from_ai]
+            
             if existing_rec:
-                reasons = existing_rec.reason or []
-                if not isinstance(reasons, list): reasons = [str(reasons)]
-                if not any(r.startswith(f"[{portfolio_name}]") for r in reasons):
-                    reasons.append(new_reason)
-                    existing_rec.reason = reasons
+                existing_reasons = existing_rec.reason or []
+                if not isinstance(existing_reasons, list): existing_reasons = [str(existing_reasons)]
+                
+                for nr in new_reasons:
+                    if not any(r.startswith(f"[{portfolio_name}]") for r in existing_reasons):
+                         existing_reasons.append(nr)
+                
+                existing_rec.reason = existing_reasons
             else:
                 db.add(Recommendation(
                     user_id=user_id,
                     recruitment_id=recruit_id,
                     rank_order=100 + i,
-                    reason=[new_reason]
+                    reason=new_reasons
                 ))
             saved_count += 1
     await db.commit()
@@ -127,7 +133,7 @@ async def precompute_recommendations_for_portfolio(db: AsyncSession, portfolio_i
 
     # 3. AI Rank and Reason
     matcher = RecruitMatcher()
-    ai_recommendations = await matcher.rank_and_reason(portfolio_data, all_candidates)
+    ai_recommendations = await matcher.rank_final_recommendations(portfolio_data, all_candidates)
     
     # 4. Save and Aggregate
     saved_count = await _save_recommendations(db, portfolio.user_id, portfolio.project_name, ai_recommendations)

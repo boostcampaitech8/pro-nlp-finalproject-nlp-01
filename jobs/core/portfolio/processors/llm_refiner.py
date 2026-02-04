@@ -22,7 +22,7 @@ class Profile(BaseModel):
 
 
 class QueryItem(BaseModel):
-    type: Literal["A", "B", "C"] = Field(..., description="쿼리 유형")
+    type: Literal["tech", "problem", "domain"] = Field(..., description="쿼리 유형")
     query: str = Field(..., description="기업 공고 검색용 자연어 쿼리 1문장")
     evidence: List[str] = Field(default_factory=list, description="근거 구절 1~3개")
 
@@ -216,7 +216,7 @@ class LLMRefiner:
 
 2. **각 프로젝트마다**:
    - **strengths(강점/역량) 3~7개**: tag/claim/evidence/level 포함
-   - **채용 공고 검색 쿼리 3개** (A, B, C 타입):
+    - **채용 공고 검색 쿼리 3개** (tech, problem, domain 타입):
 
 **중요 규칙:**
 - 모든 필드를 최대한 채우세요. 정보가 부족하면 문맥에서 추론하세요.
@@ -271,11 +271,11 @@ class LLMRefiner:
 - "결과"는 원문에 명시된 경우에만 작성하세요
 - 정보가 부족하면 "미기재"로 표시하세요
 
-**job_queries 생성 예시:**
+**job_queries 생성 가이드 및 예시:**
 프로젝트: "E-commerce 백엔드 API 개발" (Python, Django, Redis 사용)
-- A: "Python, Django, Redis 기반의 대규모 트래픽 처리 백엔드 개발자"
-- B: "E-commerce 플랫폼 결제 시스템 및 재고 관리 API 개발 경험자"
-- C: "MSA 아키텍처 전환 및 캐싱 전략 설계 경험이 있는 시니어 백엔드 개발자"
+- **tech**: 사용된 기술 스택과 직무 중심의 쿼리. (예: "Python, Django, Redis 기반의 백엔드 개발자 채용")
+- **problem**: 프로젝트에서 해결한 구체적인 기술적 문제 중심의 쿼리. (예: "Redis 캐싱을 이용한 API 성능 최적화 및 대규모 트래픽 처리 경험자")
+- **domain**: 프로젝트의 도메인 지식이나 비즈니스 로직 중심의 쿼리. (예: "E-commerce 플랫폼 결제 시스템 및 재고 관리 로직 개발자")
 """
 
         user_prompt = f"""
@@ -350,7 +350,7 @@ class LLMRefiner:
 4. **tech_stack**: 사용된 핵심 기술 스택 리스트 (소스 코드에서 발견된 숨겨진 라이브러리 포함)
 5. **description_for_embedding**: 아래 템플릿을 따라 작성
 6. **strengths**: 이 프로젝트에서 드러난 강점(역량) 3~7개 (tag/claim/evidence/level)
-7. **job_queries**: 이 프로젝트 경험을 바탕으로 지원 가능한 채용 공고 검색용 쿼리 3개 (A, B, C 타입)
+7. **job_queries**: 이 프로젝트 경험을 바탕으로 지원 가능한 채용 공고 검색용 쿼리 3개 (tech, problem, domain 타입)
 
 **정밀 분석 가이드 (Deep Analysis):**
 - **소스 코드 기반 통찰**: README에 명시되지 않았더라도 소스 코드에서 발견되는 아키텍처 패턴(layered, hex, clean 등), 에러 핸들링 전략, 모듈화 수준, 테스트 커버리지 및 전략을 통해 역량을 도출하세요.
@@ -434,7 +434,7 @@ class LLMRefiner:
 
 **추출 항목:**
 1. **strengths**: 이 설명에서 드러난 강점(역량) 3~7개 (tag/claim/evidence/level)
-2. **job_queries**: 이 프로젝트 경험을 바탕으로 지원 가능한 채용 공고 검색용 쿼리 3개 (A, B, C 타입)
+2. **job_queries**: 이 프로젝트 경험을 바탕으로 지원 가능한 채용 공고 검색용 쿼리 3개 (tech, problem, domain 타입)
 
 **주의사항:**
 - **입력된 설명(Description)에 근거해서만** 작성하세요.
@@ -456,7 +456,7 @@ class LLMRefiner:
         # Temporary schema combining strengths and job_queries
         class PartialResult(BaseModel):
             strengths: List[StrengthItem] = Field(..., description="강점 목록")
-            job_queries: List[QueryItem] = Field(..., description="잡 쿼리 목록 3개")
+            job_queries: List[QueryItem] = Field(..., description="잡 쿼리 목록 3개 (tech, problem, domain)")
 
         schema = PartialResult.model_json_schema()
 

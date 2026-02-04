@@ -51,6 +51,7 @@ class Recruitment(Base):
     embedding = Column(Vector(1024), nullable=True)  # Unified 1:1 embedding storage
     tags = Column(JSONB, nullable=True) # Direct JSON storage for tech stack tags
     view_count = Column(Integer, default=0) # View count for popularity sorting
+    questions = Column(JSONB, nullable=True) # Questions for self-introduction
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     cover_letters = relationship("CoverLetter", back_populates="recruitment")

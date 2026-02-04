@@ -7,6 +7,9 @@ python-dotenv==1.0.0
 requests
 pandas
 beautifulsoup4
+httpx
+kiwipiepy
+rank-bm25
 
 # AI / NLP (The heavy ones)
 langchain>=0.2.6

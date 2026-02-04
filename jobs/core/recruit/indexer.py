@@ -114,7 +114,8 @@ class RecruitIndexer:
                         key_responsibilities=sanitize_text(item.get('key_responsibilities')),
                         required_qualifications=sanitize_text(item.get('required_qualifications')),
                         preferred_qualifications=sanitize_text(item.get('preferred_qualifications')),
-                        tags=item.get('tags', [])
+                        tags=item.get('tags', []),
+                        questions=item.get('questions')
                     )
                     db.add(db_recruit)
                 else:
@@ -123,6 +124,7 @@ class RecruitIndexer:
                     db_recruit.company = item.get('company', db_recruit.company)
                     db_recruit.deadline = deadline_date or db_recruit.deadline
                     db_recruit.tags = item.get('tags', db_recruit.tags)
+                    db_recruit.questions = item.get('questions', db_recruit.questions)
                 
                 await db.flush() 
                 
@@ -150,8 +152,10 @@ class RecruitIndexer:
     async def search_by_vector(self, db: AsyncSession, embedding: List[float], k: int = 5):
         """
         Search for relevant recruitments using a pre-calculated embedding vector.
+        Returns a list of Documents with 'distance' in metadata.
         """
         from sqlalchemy import text
+        import json
         
         # SQL for cosine similarity search
         stmt = text("""
@@ -164,9 +168,6 @@ class RecruitIndexer:
             LIMIT :k
         """)
         
-        # pgvector expects string representation of vector like '[0.1, 0.2, ...]'
-        import json
-        # Ensure it's a list first (handle numpy arrays)
         if hasattr(embedding, 'tolist'):
             embedding = embedding.tolist()
         embedding_str = json.dumps(embedding)
@@ -188,7 +189,7 @@ class RecruitIndexer:
                 "required_qualifications": row.required_qualifications,
                 "preferred_qualifications": row.preferred_qualifications,
                 "unique_id": f"{row.company}_{row.title}",
-                "distance": row.distance
+                "distance": float(row.distance)
             }
             doc = Document(
                 page_content=f"{row.key_responsibilities}\n{row.required_qualifications}", 
@@ -197,9 +198,104 @@ class RecruitIndexer:
             matches.append(doc)
         return matches
 
+    def _kiwi_tokenize(self, text: str) -> List[str]:
+        """
+        Extract nouns using Kiwi for better BM25 matching.
+        """
+        try:
+            from kiwipiepy import Kiwi
+            if not hasattr(self, '_kiwi'):
+                self._kiwi = Kiwi()
+            
+            result = self._kiwi.tokenize(text)
+            return [t.form for t in result if t.tag in ['NNG', 'NNP', 'SL']]
+        except Exception as e:
+            logger.warning(f"Kiwi tokenization failed, falling back to split: {e}")
+            return text.split()
+
+    async def search_hybrid(self, db: AsyncSession, query: str, k: int = 5):
+        """
+        Hybrid Search: Combines Vector search and Keyword search (BM25).
+        Fuses results using Reciprocal Rank Fusion (RRF).
+        """
+        from sqlalchemy import select
+        from langchain_community.retrievers import BM25Retriever
+        import numpy as np
+
+        # 1. Vector Search
+        query_emb = await self.vector_store.get_embedding(query)
+        # Get more candidates for fusion
+        vector_results = await self.search_by_vector(db, query_emb, k=k*3)
+        
+        # 2. BM25 Search
+        # Fetch all active recruitments for BM25 corpus
+        # For performance, we only fetch id, content and metadata fields
+        stmt = select(Recruitment).where(Recruitment.embedding.isnot(None))
+        res = await db.execute(stmt)
+        all_recruits = res.scalars().all()
+        
+        if not all_recruits:
+            return vector_results[:k]
+            
+        corpus_docs = []
+        for r in all_recruits:
+            content = f"{r.title} {r.key_responsibilities} {r.required_qualifications} {r.preferred_qualifications}"
+            metadata = {
+                "id": r.id,
+                "title": r.title,
+                "company": r.company
+            }
+            corpus_docs.append(Document(page_content=content, metadata=metadata))
+            
+        bm25_retriever = BM25Retriever.from_documents(
+            corpus_docs, 
+            preprocess_func=self._kiwi_tokenize
+        )
+        bm25_retriever.k = k * 3
+        bm25_results = bm25_retriever.invoke(query)
+        
+        # 3. Reciprocal Rank Fusion (RRF)
+        # score = sum(1 / (rank + 60))
+        fused_scores = {} # id -> score
+        doc_map = {} # id -> Document
+        
+        for rank, doc in enumerate(vector_results):
+            rid = doc.metadata['id']
+            fused_scores[rid] = fused_scores.get(rid, 0) + 1.0 / (rank + 60)
+            doc_map[rid] = doc
+            
+        for rank, doc in enumerate(bm25_results):
+            rid = doc.metadata['id']
+            fused_scores[rid] = fused_scores.get(rid, 0) + 1.0 / (rank + 60)
+            # If not in doc_map, we need to fetch full metadata or use it as is
+            # For simplicity, if it's in vector results we have full info.
+            # If not, let's fetch it from the database or use the corpus version.
+            if rid not in doc_map:
+                # Find the original record
+                orig = next((r for r in all_recruits if r.id == rid), None)
+                if orig:
+                    metadata = {
+                        "id": orig.id,
+                        "title": orig.title,
+                        "company": orig.company,
+                        "category": orig.category,
+                        "location": orig.location,
+                        "start_date": orig.start_date.isoformat() if orig.start_date else None,
+                        "deadline": orig.deadline.isoformat() if orig.deadline else None,
+                        "key_responsibilities": orig.key_responsibilities,
+                        "required_qualifications": orig.required_qualifications,
+                        "unique_id": f"{orig.company}_{orig.title}",
+                        "distance": 1.0 # default distance for BM25-only
+                    }
+                    doc_map[rid] = Document(page_content=orig.key_responsibilities or "", metadata=metadata)
+
+        # Sort by fused score
+        final_ids = sorted(fused_scores.keys(), key=lambda x: fused_scores[x], reverse=True)[:k]
+        
+        return [doc_map[rid] for rid in final_ids]
+
     async def search(self, db: AsyncSession, query: str, k: int = 5):
         """
-        Search for relevant recruitments by generating embedding for query text first.
+        Default search now uses Hybrid Search for better accuracy.
         """
-        query_emb = await self.vector_store.get_embedding(query)
-        return await self.search_by_vector(db, query_emb, k)
+        return await self.search_hybrid(db, query, k)

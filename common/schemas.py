@@ -47,6 +47,7 @@ class RecruitmentBase(BaseModel):
     reason: Optional[str] = None
     view_count: Optional[int] = 0
     tags: List[str] = []
+    questions: Optional[List[dict]] = None
 
     @field_validator('tags', mode='before')
     @classmethod
