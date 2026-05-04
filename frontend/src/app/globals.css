@@ -1,0 +1,164 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+@layer base {
+    :root {
+        --background: 0 0% 100%;
+        --foreground: 222.2 84% 4.9%;
+        --card: 0 0% 100%;
+        --card-foreground: 222.2 84% 4.9%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 222.2 84% 4.9%;
+        --primary: 221.2 83.2% 53.3%;
+        --primary-foreground: 210 40% 98%;
+        --secondary: 210 40% 96.1%;
+        --secondary-foreground: 222.2 47.4% 11.2%;
+        --muted: 210 40% 96.1%;
+        --muted-foreground: 215.4 16.3% 46.9%;
+        --accent: 210 40% 96.1%;
+        --accent-foreground: 222.2 47.4% 11.2%;
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 210 40% 98%;
+        --border: 220 13% 95%;
+        --input: 220 13% 95%;
+        --ring: 221.2 83.2% 53.3%;
+        --radius: 0.5rem;
+    }
+
+    .dark {
+        /* Base Background: Zinc 950 (True Dark Neutral) */
+        --background: 240 10% 3.9%;
+        /* #09090b */
+        --foreground: 0 0% 98%;
+        /* #fafafa */
+
+        /* Card: Matches Background or slightly lighter for subtle depth */
+        --card: 240 10% 3.9%;
+        /* #09090b - Clean, border-based depth */
+        --card-foreground: 0 0% 98%;
+
+        /* Popover */
+        --popover: 240 10% 3.9%;
+        --popover-foreground: 0 0% 98%;
+
+        /* Primary: Vibrant Blue (Brand Color) */
+        --primary: 217 91% 60%;
+        /* #3b82f6 - Blue 500 */
+        --primary-foreground: 222.2 47.4% 11.2%;
+
+        /* Secondary: Zinc 800 (Subtle Gray) */
+        --secondary: 240 3.7% 15.9%;
+        /* #27272a */
+        --secondary-foreground: 0 0% 98%;
+
+        /* Muted: Zinc 800/900 mix */
+        --muted: 240 3.7% 15.9%;
+        /* #27272a */
+        --muted-foreground: 240 5% 64.9%;
+        /* #a1a1aa - Zinc 400 */
+
+        /* Accent: Hover states */
+        --accent: 240 3.7% 15.9%;
+        --accent-foreground: 0 0% 98%;
+
+        /* Destructive */
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98%;
+
+        /* Border/Input: Zinc 800 - Crisp borders */
+        --border: 240 3.7% 15.9%;
+        /* #27272a */
+        --input: 240 3.7% 15.9%;
+        --ring: 240 4.9% 83.9%;
+        /* #d4d4d8 */
+    }
+}
+
+@layer base {
+    body {
+        background-color: hsl(var(--background));
+        color: hsl(var(--foreground));
+        overflow-y: scroll;
+        /* Force vertical scrollbar track to maintain layout */
+    }
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide,
+html,
+body {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Thin.woff2') format('woff2');
+    font-weight: 100;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-ExtraLight.woff2') format('woff2');
+    font-weight: 200;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-ExtraBold.woff2') format('woff2');
+    font-weight: 800;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Black.woff2') format('woff2');
+    font-weight: 900;
+    font-display: swap;
+}

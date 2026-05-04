@@ -1,0 +1,233 @@
+name: Backend GCP Deploy
+
+on:
+  # push:
+  #   branches: [ "main" ]
+  #   paths:
+  #     - 'backend/**'
+  #     - 'jobs/**'
+  #     - 'common/**'
+  #     - '.github/workflows/gcp-deploy.yml'
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GAR_LOCATION: asia-northeast3
+  REPOSITORY: pro-nlp-repo
+  REGION: asia-northeast3
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        # Re-checkout to ensure clean state
+
+      - name: Set Environment Variables
+        id: env-vars
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "ENV_TYPE=production" >> $GITHUB_OUTPUT
+            echo "BACKEND_SERVICE=pro-nlp-backend" >> $GITHUB_OUTPUT
+            echo "JOB_SERVICE=pro-nlp-jobs" >> $GITHUB_OUTPUT
+            echo "IMAGE_TAG=latest" >> $GITHUB_OUTPUT
+            # Secrets Prefixes
+            DB_URL="${{ secrets.PROD_DATABASE_URL }}"
+            SEC_KEY="${{ secrets.PROD_SECRET_KEY }}"
+            G_API_KEY="${{ secrets.PROD_GOOGLE_API_KEY }}"
+            K_REDIRECT="${{ secrets.PROD_KAKAO_REDIRECT_URI }}"
+            K_SECRET="${{ secrets.PROD_KAKAO_CLIENT_SECRET }}"
+            NCP_BASE="${{ secrets.PROD_NCP_CLOVASTUDIO_BASE_URL }}"
+            NCP_KEY="${{ secrets.PROD_NCP_CLOVASTUDIO_API_KEY }}"
+            REDIS_URL="${{ secrets.REDIS_URL }}"
+
+            B_URL="${{ secrets.PROD_BACKEND_URL }}"
+            if [[ -n "$B_URL" && ! "$B_URL" =~ ^http ]]; then
+              B_URL="https://$B_URL"
+            fi
+
+            echo "DB_URL=$DB_URL" >> $GITHUB_OUTPUT
+            echo "SEC_KEY=$SEC_KEY" >> $GITHUB_OUTPUT
+            echo "G_API_KEY=$G_API_KEY" >> $GITHUB_OUTPUT
+            echo "K_REDIRECT=$B_URL" >> $GITHUB_OUTPUT
+            echo "K_SECRET=$K_SECRET" >> $GITHUB_OUTPUT
+            echo "NCP_BASE=$NCP_BASE" >> $GITHUB_OUTPUT
+            echo "NCP_KEY=$NCP_KEY" >> $GITHUB_OUTPUT
+            echo "REDIS_URL=$REDIS_URL" >> $GITHUB_OUTPUT
+            echo "BACKEND_URL=$B_URL" >> $GITHUB_OUTPUT
+            echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_OUTPUT
+            echo "NO_TOKEN=${{ secrets.NOTION_TOKEN }}" >> $GITHUB_OUTPUT
+            echo "GH_CLIENT_ID=${{ secrets.PROD_GH_OAUTH_CLIENT_ID }}" >> $GITHUB_OUTPUT
+            echo "GH_CLIENT_SECRET=${{ secrets.PROD_GH_OAUTH_CLIENT_SECRET }}" >> $GITHUB_OUTPUT
+            echo "GH_REDIRECT_URI=$B_URL" >> $GITHUB_OUTPUT
+            echo "NO_CLIENT_ID=${{ secrets.NOTION_OAUTH_CLIENT_ID || secrets.PROD_NOTION_OAUTH_CLIENT_ID }}" >> $GITHUB_OUTPUT
+            echo "NO_CLIENT_SECRET=${{ secrets.NOTION_OAUTH_CLIENT_SECRET || secrets.PROD_NOTION_OAUTH_CLIENT_SECRET }}" >> $GITHUB_OUTPUT
+            echo "NO_REDIRECT_URI=$B_URL" >> $GITHUB_OUTPUT
+          # else
+          #   echo "ENV_TYPE=preview" >> $GITHUB_OUTPUT
+          #   echo "BACKEND_SERVICE=pro-nlp-backend-preview" >> $GITHUB_OUTPUT
+          #   echo "JOB_SERVICE=pro-nlp-jobs-preview" >> $GITHUB_OUTPUT
+          #   echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_OUTPUT
+          #   # Secrets Prefixes (Fallback to PROD if PREVIEW is missing)
+          #   DB_URL="${{ secrets.PREVIEW_DATABASE_URL || secrets.PROD_DATABASE_URL }}"
+          #   SEC_KEY="${{ secrets.PREVIEW_SECRET_KEY || secrets.PROD_SECRET_KEY }}"
+          #   G_API_KEY="${{ secrets.PREVIEW_GOOGLE_API_KEY || secrets.PROD_GOOGLE_API_KEY }}"
+          #   K_REDIRECT="${{ secrets.PREVIEW_KAKAO_REDIRECT_URI || secrets.PROD_KAKAO_REDIRECT_URI }}"
+          #   K_SECRET="${{ secrets.PREVIEW_KAKAO_CLIENT_SECRET || secrets.PROD_KAKAO_CLIENT_SECRET }}"
+          #   NCP_BASE="${{ secrets.PREVIEW_NCP_CLOVASTUDIO_BASE_URL || secrets.PROD_NCP_CLOVASTUDIO_BASE_URL }}"
+          #   NCP_KEY="${{ secrets.PREVIEW_NCP_CLOVASTUDIO_API_KEY || secrets.PROD_NCP_CLOVASTUDIO_API_KEY }}"
+          #   REDIS_URL="${{ secrets.REDIS_URL }}"
+
+          #   B_URL="${{ secrets.PREVIEW_BACKEND_URL || secrets.PROD_BACKEND_URL }}"
+          #   if [[ -n "$B_URL" && ! "$B_URL" =~ ^http ]]; then
+          #     B_URL="https://$B_URL"
+          #   fi
+
+          #   echo "DB_URL=$DB_URL" >> $GITHUB_OUTPUT
+          #   echo "SEC_KEY=$SEC_KEY" >> $GITHUB_OUTPUT
+          #   echo "G_API_KEY=$G_API_KEY" >> $GITHUB_OUTPUT
+          #   echo "K_REDIRECT=$B_URL" >> $GITHUB_OUTPUT
+          #   echo "K_SECRET=$K_SECRET" >> $GITHUB_OUTPUT
+          #   echo "NCP_BASE=$NCP_BASE" >> $GITHUB_OUTPUT
+          #   echo "NCP_KEY=$NCP_KEY" >> $GITHUB_OUTPUT
+          #   echo "REDIS_URL=$REDIS_URL" >> $GITHUB_OUTPUT
+          #   echo "BACKEND_URL=$B_URL" >> $GITHUB_OUTPUT
+          #   echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_OUTPUT
+          #   echo "NO_TOKEN=${{ secrets.NOTION_TOKEN }}" >> $GITHUB_OUTPUT
+          #   echo "GH_CLIENT_ID=${{ secrets.PREVIEW_GH_OAUTH_CLIENT_ID }}" >> $GITHUB_OUTPUT
+          #   echo "GH_CLIENT_SECRET=${{ secrets.PREVIEW_GH_OAUTH_CLIENT_SECRET }}" >> $GITHUB_OUTPUT
+          #   echo "GH_REDIRECT_URI=$B_URL" >> $GITHUB_OUTPUT
+          #   echo "NO_CLIENT_ID=${{ secrets.PREVIEW_NOTION_OAUTH_CLIENT_ID || secrets.NOTION_OAUTH_CLIENT_ID }}" >> $GITHUB_OUTPUT
+          #   echo "NO_CLIENT_SECRET=${{ secrets.PREVIEW_NOTION_OAUTH_CLIENT_SECRET || secrets.NOTION_OAUTH_CLIENT_SECRET }}" >> $GITHUB_OUTPUT
+          #   echo "NO_REDIRECT_URI=$B_URL" >> $GITHUB_OUTPUT
+          fi
+
+
+      - name: Google Auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Docker Auth
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GAR_LOCATION }}-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Build & Push Backend
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ steps.env-vars.outputs.BACKEND_SERVICE }}:${{ steps.env-vars.outputs.IMAGE_TAG }}" -f backend/Dockerfile .
+          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ steps.env-vars.outputs.BACKEND_SERVICE }}:${{ steps.env-vars.outputs.IMAGE_TAG }}"
+
+      - name: Build & Push Jobs
+        if: github.ref == 'refs/heads/main'
+        run: |
+          docker build -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ steps.env-vars.outputs.JOB_SERVICE }}:${{ steps.env-vars.outputs.IMAGE_TAG }}" -f jobs/Dockerfile .
+          docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ steps.env-vars.outputs.JOB_SERVICE }}:${{ steps.env-vars.outputs.IMAGE_TAG }}"
+
+      - name: Deploy Backend Service
+        if: github.ref == 'refs/heads/main'
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ steps.env-vars.outputs.BACKEND_SERVICE }}
+          region: ${{ env.REGION }}
+          image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ steps.env-vars.outputs.BACKEND_SERVICE }}:${{ steps.env-vars.outputs.IMAGE_TAG }}
+          env_vars: |
+            DATABASE_URL=${{ steps.env-vars.outputs.DB_URL }}
+            SECRET_KEY=${{ steps.env-vars.outputs.SEC_KEY }}
+            ALGORITHM=HS256
+            PYTHONPATH=/app
+            GOOGLE_API_KEY=${{ steps.env-vars.outputs.G_API_KEY }}
+            KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }}
+            KAKAO_CLIENT_SECRET=${{ steps.env-vars.outputs.K_SECRET }}
+            KAKAO_REDIRECT_URI=${{ steps.env-vars.outputs.K_REDIRECT }}
+            NCP_CLOVASTUDIO_API_KEY=${{ steps.env-vars.outputs.NCP_KEY }}
+            NCP_CLOVASTUDIO_BASE_URL=${{ steps.env-vars.outputs.NCP_BASE }}
+            REDIS_URL=${{ steps.env-vars.outputs.REDIS_URL }}
+            ENV=${{ steps.env-vars.outputs.ENV_TYPE }}
+            GCP_PROJECT_ID=${{ env.PROJECT_ID }}
+            GCP_REGION=${{ env.REGION }}
+            CLOUD_RUN_JOB_NAME=${{ steps.env-vars.outputs.JOB_SERVICE }}
+            INTERNAL_API_SECRET=${{ secrets.INTERNAL_API_SECRET }}
+            GITHUB_TOKEN=${{ steps.env-vars.outputs.GH_TOKEN }}
+            NOTION_TOKEN=${{ steps.env-vars.outputs.NO_TOKEN }}
+            GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}
+            BACKEND_URL=${{ steps.env-vars.outputs.BACKEND_URL }}
+            FRONTEND_URL=${{ secrets.PREVIEW_FRONTEND_URL || secrets.PROD_FRONTEND_URL || secrets.FRONTEND_URL }}
+            PREVIEW_FRONTEND_URL=${{ secrets.PREVIEW_FRONTEND_URL }}
+            PROD_FRONTEND_URL=${{ secrets.PROD_FRONTEND_URL }}
+            GH_OAUTH_CLIENT_ID=${{ steps.env-vars.outputs.GH_CLIENT_ID }}
+            GH_OAUTH_CLIENT_SECRET=${{ steps.env-vars.outputs.GH_CLIENT_SECRET }}
+            GH_OAUTH_REDIRECT_URI=${{ steps.env-vars.outputs.GH_REDIRECT_URI }}
+            NOTION_OAUTH_CLIENT_ID=${{ steps.env-vars.outputs.NO_CLIENT_ID }}
+            NOTION_OAUTH_CLIENT_SECRET=${{ steps.env-vars.outputs.NO_CLIENT_SECRET }}
+            NOTION_OAUTH_REDIRECT_URI=${{ steps.env-vars.outputs.NO_REDIRECT_URI }}
+          flags: |-
+            --min-instances=0
+            --max-instances=5
+            --memory=2Gi
+            --cpu=2
+            --timeout=600s
+            --allow-unauthenticated
+
+      - name: Update Cloud Run Job
+        if: github.ref == 'refs/heads/main'
+        # Dynamic update/creation of the job
+        run: |
+          gcloud run jobs update ${{ steps.env-vars.outputs.JOB_SERVICE }} \
+            --image ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ steps.env-vars.outputs.JOB_SERVICE }}:${{ steps.env-vars.outputs.IMAGE_TAG }} \
+            --region ${{ env.REGION }} \
+            --tasks 1 \
+            --task-timeout 3600s \
+            --set-env-vars "DATABASE_URL=${{ steps.env-vars.outputs.DB_URL }}" \
+            --set-env-vars "PYTHONPATH=/app" \
+            --set-env-vars "GOOGLE_API_KEY=${{ steps.env-vars.outputs.G_API_KEY }}" \
+            --set-env-vars "NCP_CLOVASTUDIO_API_KEY=${{ steps.env-vars.outputs.NCP_KEY }}" \
+            --set-env-vars "NCP_CLOVASTUDIO_BASE_URL=${{ steps.env-vars.outputs.NCP_BASE }}" \
+            --set-env-vars "ENV=${{ steps.env-vars.outputs.ENV_TYPE }}" \
+            --set-env-vars "INTERNAL_API_SECRET=${{ secrets.INTERNAL_API_SECRET }}" \
+            --set-env-vars "GITHUB_TOKEN=${{ steps.env-vars.outputs.GH_TOKEN }}" \
+            --set-env-vars "NOTION_TOKEN=${{ steps.env-vars.outputs.NO_TOKEN }}" \
+            --set-env-vars "GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}" \
+            --set-env-vars "BACKEND_URL=${{ steps.env-vars.outputs.BACKEND_URL }}" \
+            --set-env-vars "FRONTEND_URL=${{ secrets.PREVIEW_FRONTEND_URL || secrets.PROD_FRONTEND_URL || secrets.FRONTEND_URL }}" \
+            --set-env-vars "PREVIEW_FRONTEND_URL=${{ secrets.PREVIEW_FRONTEND_URL }}" \
+            --set-env-vars "PROD_FRONTEND_URL=${{ secrets.PROD_FRONTEND_URL }}" \
+            --set-env-vars "GCP_PROJECT_ID=${{ env.PROJECT_ID }}" \
+            --set-env-vars "GH_OAUTH_CLIENT_ID=${{ steps.env-vars.outputs.GH_CLIENT_ID }}" \
+            --set-env-vars "GH_OAUTH_CLIENT_SECRET=${{ steps.env-vars.outputs.GH_CLIENT_SECRET }}" \
+            --set-env-vars "NOTION_OAUTH_CLIENT_ID=${{ steps.env-vars.outputs.NO_CLIENT_ID }}" \
+            --set-env-vars "NOTION_OAUTH_CLIENT_SECRET=${{ steps.env-vars.outputs.NO_CLIENT_SECRET }}" \
+            || gcloud run jobs create ${{ steps.env-vars.outputs.JOB_SERVICE }} \
+            --image ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ steps.env-vars.outputs.JOB_SERVICE }}:${{ steps.env-vars.outputs.IMAGE_TAG }} \
+            --region ${{ env.REGION }} \
+            --tasks 1 \
+            --memory 2Gi \
+            --task-timeout 3600s \
+            --set-env-vars "DATABASE_URL=${{ steps.env-vars.outputs.DB_URL }}" \
+            --set-env-vars "PYTHONPATH=/app" \
+            --set-env-vars "GOOGLE_API_KEY=${{ steps.env-vars.outputs.G_API_KEY }}" \
+            --set-env-vars "NCP_CLOVASTUDIO_API_KEY=${{ steps.env-vars.outputs.NCP_KEY }}" \
+            --set-env-vars "NCP_CLOVASTUDIO_BASE_URL=${{ steps.env-vars.outputs.NCP_BASE }}" \
+            --set-env-vars "ENV=${{ steps.env-vars.outputs.ENV_TYPE }}" \
+            --set-env-vars "INTERNAL_API_SECRET=${{ secrets.INTERNAL_API_SECRET }}" \
+            --set-env-vars "GITHUB_TOKEN=${{ steps.env-vars.outputs.GH_TOKEN }}" \
+            --set-env-vars "NOTION_TOKEN=${{ steps.env-vars.outputs.NO_TOKEN }}" \
+            --set-env-vars "GCS_BUCKET_NAME=${{ secrets.GCS_BUCKET_NAME }}" \
+            --set-env-vars "BACKEND_URL=${{ steps.env-vars.outputs.BACKEND_URL }}" \
+            --set-env-vars "FRONTEND_URL=${{ secrets.PREVIEW_FRONTEND_URL || secrets.PROD_FRONTEND_URL || secrets.FRONTEND_URL }}" \
+            --set-env-vars "PREVIEW_FRONTEND_URL=${{ secrets.PREVIEW_FRONTEND_URL }}" \
+            --set-env-vars "PROD_FRONTEND_URL=${{ secrets.PROD_FRONTEND_URL }}" \
+            --set-env-vars "GCP_PROJECT_ID=${{ env.PROJECT_ID }}" \
+            --set-env-vars "GH_OAUTH_CLIENT_ID=${{ steps.env-vars.outputs.GH_CLIENT_ID }}" \
+            --set-env-vars "GH_OAUTH_CLIENT_SECRET=${{ steps.env-vars.outputs.GH_CLIENT_SECRET }}" \
+            --set-env-vars "NOTION_OAUTH_CLIENT_ID=${{ steps.env-vars.outputs.NO_CLIENT_ID }}" \
+            --set-env-vars "NOTION_OAUTH_CLIENT_SECRET=${{ steps.env-vars.outputs.NO_CLIENT_SECRET }}"

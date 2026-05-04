@@ -1,0 +1,81 @@
+name: Frontend Build & Deploy (Vercel)
+
+on:
+  # push:
+  #   branches: [ "main" ]
+  #   paths:
+  #     - 'frontend/**'
+  #     - '.github/workflows/frontend-deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build, Test & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Deployment Args
+        id: args
+        env:
+          PREVIEW_URL: ${{ secrets.PREVIEW_BACKEND_URL }}
+          PROD_URL: ${{ secrets.PROD_BACKEND_URL }}
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "VERCEL_ARGS=--prod" >> $GITHUB_OUTPUT
+            echo "ENV_TYPE=Production" >> $GITHUB_OUTPUT
+            echo "API_URL=$PROD_URL" >> $GITHUB_OUTPUT
+          # else
+          #   echo "VERCEL_ARGS=" >> $GITHUB_OUTPUT
+          #   echo "ENV_TYPE=Preview" >> $GITHUB_OUTPUT
+            
+          #   if [[ -n "$PREVIEW_URL" ]]; then
+          #     echo "API_URL=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          #   else
+          #     echo "::error::PREVIEW_BACKEND_URL secret is missing! Cannot deploy preview."
+          #     exit 1
+          #   fi
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run Lint
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: Run Tests
+        working-directory: ./frontend
+        run: npm test
+
+      - name: Deploy to Vercel
+        if: github.ref == 'refs/heads/main'
+        id: deploy-vercel
+        uses: amondnet/vercel-action@v25.2.0
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-version: latest
+          working-directory: ./frontend
+          vercel-args: '${{ steps.args.outputs.VERCEL_ARGS }} -e NEXT_PUBLIC_API_MOCKING=disabled -b NEXT_PUBLIC_API_MOCKING=disabled -e NEXT_PUBLIC_API_URL=${{ steps.args.outputs.API_URL }} -b NEXT_PUBLIC_API_URL=${{ steps.args.outputs.API_URL }}'
+
+      - name: Display Deployment Summary
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "## 🚀 Deployment Successful!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Preview URL:** [${{ steps.deploy-vercel.outputs.preview-url }}](${{ steps.deploy-vercel.outputs.preview-url }})" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ steps.args.outputs.ENV_TYPE }} (Cloud API Enabled)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "테스트가 성공적으로 완료되었으며, Vercel에 최신 버전이 배포되었습니다." >> $GITHUB_STEP_SUMMARY

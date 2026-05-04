@@ -1,0 +1,13 @@
+requests
+beautifulsoup4
+pandas
+surya-ocr
+google-genai
+python-dotenv
+Pillow
+langchain-core
+langchain-huggingface
+langchain-chroma
+chromadb
+sentence-transformers
+torch

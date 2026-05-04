@@ -1,0 +1,35 @@
+# Common
+sqlalchemy==2.0.25
+psycopg2-binary==2.9.9
+psycopg[binary]
+asyncpg
+pydantic>=2.7.4
+email-validator>=2.0.0
+python-dotenv==1.0.0
+requests
+pandas
+beautifulsoup4
+httpx
+kiwipiepy
+rank-bm25
+
+# AI / NLP (The heavy ones)
+langchain>=0.2.6
+langchain-community>=0.2.6
+langchain-naver>=0.1.1
+langchain-core>=0.2.10
+langchain-text-splitters>=0.2.0
+langchain-openai>=0.1.0
+google-genai
+google-cloud-vision
+google-cloud-storage
+
+# Utils
+pypdf
+pdfplumber
+pillow
+# pypdf
+numpy
+pgvector
+notion-client
+gitingest

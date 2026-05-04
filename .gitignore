@@ -1,0 +1,48 @@
+# --- Global / OS ---
+.DS_Store
+Thumbs.db
+*.pem
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Secrets Fallback (Just in case) ---
+.env
+.env.*
+!.env.example
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Environments ---
+venv/
+env/
+.venv/
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Temporary / Local Data ---
+backend/dummy_recruitment_data.json
+backend/temp_recruit.json
+backend/test_ncp_api.py
+backend/fix_extension.py
+backend/index_recruitments.py
+backend/precompute_recs.py
+backend/clear_recruits.py
+
+# --- Frontend ---
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
+
+# --- Database ---
+database_sample/

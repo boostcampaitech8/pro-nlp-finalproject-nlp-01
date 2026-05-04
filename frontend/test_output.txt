@@ -1,0 +1,58 @@
+
+> frontend@0.1.0 test
+> jest --ci --detectOpenHandles --forceExit
+
+PASS __tests__/recruit.test.tsx
+PASS __tests__/portfolio.test.tsx
+PASS __tests__/auth.test.ts
+PASS __tests__/environment.test.ts
+
+Test Suites: 4 passed, 4 total
+Tests:       11 passed, 11 total
+Snapshots:   0 total
+Time:        3.493 s, estimated 7 s
+Ran all test suites.
+
+Jest has detected the following 2 open handles potentially keeping Jest from exiting:
+
+  ●  MESSAGEPORT
+
+    [0m [90m 26 |[39m [90m// Mock scrollTo[39m
+     [90m 27 |[39m window[33m.[39mscrollTo [33m=[39m jest[33m.[39mfn()[33m;[39m
+    [31m[1m>[22m[39m[90m 28 |[39m
+     [90m    |[39m [31m[1m^[22m[39m
+     [90m 29 |[39m describe([32m'RecruitPage'[39m[33m,[39m () [33m=>[39m {
+     [90m 30 |[39m     it([32m'renders the hero section and search input'[39m[33m,[39m () [33m=>[39m {
+     [90m 31 |[39m         render([33m<[39m[33mRecruitPage[39m [33m/[39m[33m>[39m)[33m;[39m[0m
+
+      at node_modules/scheduler/cjs/scheduler.development.js:221:21
+      at Object.<anonymous> (node_modules/scheduler/cjs/scheduler.development.js:364:5)
+      at Object.<anonymous> (node_modules/scheduler/index.js:6:20)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:24190:21
+      at Object.<anonymous> (node_modules/react-dom/cjs/react-dom-client.development.js:28121:5)
+      at Object.<anonymous> (node_modules/react-dom/client.js:37:20)
+      at Object.<anonymous> (node_modules/@testing-library/react/dist/pure.js:45:46)
+      at Object.<anonymous> (node_modules/@testing-library/react/dist/index.js:7:13)
+      at Object.<anonymous> (__tests__/recruit.test.tsx:28:16)
+
+
+  ●  MESSAGEPORT
+
+    [0m [90m 20 |[39m         render([33m<[39m[33mPortfoliosPage[39m [33m/[39m[33m>[39m)[33m;[39m
+     [90m 21 |[39m         expect(screen[33m.[39mgetByText([32m'내 포트폴리오'[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
+    [31m[1m>[22m[39m[90m 22 |[39m         expect(screen[33m.[39mgetByText([35m/등록된 포트폴리오를 관리하고/i[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
+     [90m    |[39m                [31m[1m^[22m[39m
+     [90m 23 |[39m     })[33m;[39m
+     [90m 24 |[39m
+     [90m 25 |[39m     it([32m'fetches and displays portfolios from the mock API'[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
+
+      at node_modules/scheduler/cjs/scheduler.development.js:221:21
+      at Object.<anonymous> (node_modules/scheduler/cjs/scheduler.development.js:364:5)
+      at Object.<anonymous> (node_modules/scheduler/index.js:6:20)
+      at node_modules/react-dom/cjs/react-dom-client.development.js:24190:21
+      at Object.<anonymous> (node_modules/react-dom/cjs/react-dom-client.development.js:28121:5)
+      at Object.<anonymous> (node_modules/react-dom/client.js:37:20)
+      at Object.<anonymous> (node_modules/@testing-library/react/dist/pure.js:45:46)
+      at Object.<anonymous> (node_modules/@testing-library/react/dist/index.js:7:13)
+      at Object.<anonymous> (__tests__/portfolio.test.tsx:22:16)
+
