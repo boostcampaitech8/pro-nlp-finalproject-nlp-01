@@ -1,0 +1,1850 @@
+[
+  {
+    "id": "55",
+    "user_id": "6",
+    "recruitment_id": "102",
+    "rank_order": "19",
+    "reason": "[\"[GitHub Project] 크몽의 Front-end Developer 직무는 React(Next.js), TypeScript 등을 사용하여 UI 컴포넌트와 공통 라이브러리를 개발하므로, 사용자의 프로젝트 경험과 기술 스택에 매우 적합합니다.\"]",
+    "created_at": "2026-02-04 01:44:49.127429+00"
+  },
+  {
+    "id": "56",
+    "user_id": "6",
+    "recruitment_id": "54",
+    "rank_order": "21",
+    "reason": "[\"[GitHub Project] 넛지헬스케어의 프론트엔드 개발 직무는 Next.js를 이용한 웹 애플리케이션 개발 및 상용 서비스 사용자 단 프론트엔드 개발에 중점을 두고 있으며, 이는 사용자가 원하는 Front-end Dev 역할과 일치합니다.\"]",
+    "created_at": "2026-02-04 01:44:49.127429+00"
+  },
+  {
+    "id": "57",
+    "user_id": "6",
+    "recruitment_id": "32",
+    "rank_order": "23",
+    "reason": "[\"[GitHub Project] 주식회사 두꺼비세상의 백엔드 개발자는 NestJS 기반의 서버 애플리케이션 개발과 MySQL/MongoDB 데이터 모델링을 포함하며, React/Next.js를 통한 프론트엔드 개발 지원도 포함되어 있어 풀스택 역량을 발휘하기에 좋습니다.\"]",
+    "created_at": "2026-02-04 01:44:49.127429+00"
+  },
+  {
+    "id": "58",
+    "user_id": "8",
+    "recruitment_id": "129",
+    "rank_order": "12",
+    "reason": "[\"[Analysis: data_engineer_persona.txt] 공고 0은 데이터 인프라 구축 및 운영, 데이터 파이프라인 구축 및 운영 등의 주요 업무가 포함되어 있어 사용자가 원하는 Data Engineer 역할에 잘 맞습니다.\"]",
+    "created_at": "2026-02-04 01:47:27.070992+00"
+  },
+  {
+    "id": "59",
+    "user_id": "8",
+    "recruitment_id": "83",
+    "rank_order": "4",
+    "reason": "[\"[Analysis: data_engineer_persona.txt] 공고 1은 클라우드 환경에서 데이터 수집, 정제, 적재 실무 경험과 데이터 파이프라인 구축 과정 이해 등을 요구하는 직무로서, 사용자의 목표 직무에 매우 적합합니다.\"]",
+    "created_at": "2026-02-04 01:47:27.070992+00"
+  },
+  {
+    "id": "60",
+    "user_id": "8",
+    "recruitment_id": "70",
+    "rank_order": "5",
+    "reason": "[\"[Analysis: data_engineer_persona.txt] 공고 3은 AWS, EKS, EMR 및 Redshift 기반의 데이터 웨어하우스/레이크 설계와 대규모 데이터 거버넌스 시스템 구축 등이 포함되어 있어, 사용자의 기술적 배경과 일치합니다.\"]",
+    "created_at": "2026-02-04 01:47:27.070992+00"
+  },
+  {
+    "id": "61",
+    "user_id": "8",
+    "recruitment_id": "55",
+    "rank_order": "0",
+    "reason": "[\"[마케팅 성과 분석을 위한 GA4 데이터 수집 파이프라인 개발] 공고 0에서는 Google Analytics 4를 사용한 데이터 수집 및 분석 업무가 포함되어 있어, 사용자가 이전에 GA4 API를 통해 데이터 수집 파이프라인을 개발한 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 01:49:05.922492+00"
+  },
+  {
+    "id": "62",
+    "user_id": "9",
+    "recruitment_id": "112",
+    "rank_order": "1",
+    "reason": "[\"[Open-Domain Question Answering (ODQA)] 디노티시아의 Storage System Software Engineer 직무는 대규모 데이터 처리 및 성능 최적화와 관련된 경험을 요구하며, 이는 사용자가 원하는 AI Engineer 역할과 관련이 있습니다.\"]",
+    "created_at": "2026-02-04 01:49:50.323117+00"
+  },
+  {
+    "id": "63",
+    "user_id": "9",
+    "recruitment_id": "114",
+    "rank_order": "29",
+    "reason": "[\"[Open-Domain Question Answering (ODQA)] 디노티시아의 System Architect 직무는 시스템 아키텍처 정의와 관련된 작업을 포함하며, 특히 Vector DB와 같은 최신 AI 기술에 대한 이해를 필요로 하여 사용자 포트폴리오와의 연관성이 높습니다.\"]",
+    "created_at": "2026-02-04 01:49:50.323117+00"
+  },
+  {
+    "id": "64",
+    "user_id": "9",
+    "recruitment_id": "115",
+    "rank_order": "7",
+    "reason": "[\"[Open-Domain Question Answering (ODQA)] 디노티시아의 Vector Platform Engineer 직무는 고성능 Vector Index 및 검색 알고리즘 연구 및 구현을 포함하여, AI 관련 시스템 개발에 직접적으로 연결됩니다.\"]",
+    "created_at": "2026-02-04 01:49:50.323117+00"
+  },
+  {
+    "id": "65",
+    "user_id": "9",
+    "recruitment_id": "94",
+    "rank_order": "10",
+    "reason": "[\"[Open-Domain Question Answering (ODQA)] 네이버랩스의 Data-centric AI Research 인턴십은 차세대 통합 모델을 개발하는 연구 역할을 제공하므로, 질문 답변 시스템을 포함한 다양한 도메인에서 작업해 본 사용자에게 적합합니다.\"]",
+    "created_at": "2026-02-04 01:51:49.304161+00"
+  },
+  {
+    "id": "66",
+    "user_id": "7",
+    "recruitment_id": "73",
+    "rank_order": "26",
+    "reason": "[\"[리플 트립] 투믹스의 AI 서비스 풀스택 개발자는 사용자가 보유한 기술과 일치하며 특히 Stable Diffusion과 관련된 프로젝트 경험이 있어 매우 적합합니다.\"]",
+    "created_at": "2026-02-04 01:52:39.694684+00"
+  },
+  {
+    "id": "67",
+    "user_id": "7",
+    "recruitment_id": "35",
+    "rank_order": "11",
+    "reason": "[\"[리플 트립] 엔키화이트햇의 보안 솔루션 웹 개발자는 Python 및 FastAPI 기반의 백엔드 개발 경험이 필요하므로 사용자의 기존 프로젝트와 잘 맞습니다.\"]",
+    "created_at": "2026-02-04 01:52:39.694684+00"
+  },
+  {
+    "id": "68",
+    "user_id": "7",
+    "recruitment_id": "108",
+    "rank_order": "28",
+    "reason": "[\"[리플 트립] Superb AI의 Machine Learning Engineer는 다양한 산업 현장에서의 문제 해결을 목표로 하며, 이는 사용자의 광범위한 AI 프로젝트 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 01:52:39.694684+00"
+  },
+  {
+    "id": "69",
+    "user_id": "8",
+    "recruitment_id": "32",
+    "rank_order": "26",
+    "reason": "[\"[레거시 프로시저 Airflow 이관] 주식회사 두꺼비세상의 백엔드 개발자 직무는 MySQL과 MongoDB를 사용하여 데이터 모델링과 쿼리 최적화를 진행하며, NestJS 기반 서버 애플리케이션을 개발합니다. 이는 사용자가 이전에 수행했던 데이터 엔지니어 역할과 유사하며, 특히 레거시 코드 리팩토링 경험을 잘 활용할 수 있을 것입니다.\"]",
+    "created_at": "2026-02-04 02:24:13.892477+00"
+  },
+  {
+    "id": "70",
+    "user_id": "8",
+    "recruitment_id": "81",
+    "rank_order": "22",
+    "reason": "[\"[레거시 프로시저 Airflow 이관] 메가존클라우드의 Backend Developer 직무는 AI agent 배포 및 RAG 시스템 백엔드 개발에 초점을 맞추며, Kubernetes 환경에서의 애플리케이션 개발 경험이 필요합니다. 이는 사용자가 현재 가지고 있는 클라우드 및 데이터 파이프라인 설계 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 02:24:13.892477+00"
+  },
+  {
+    "id": "71",
+    "user_id": "8",
+    "recruitment_id": "35",
+    "rank_order": "26",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 공고 0은 Python 및 FastAPI 기반의 백엔드 개발 역량을 필요로 하며, Docker를 활용한 개발 및 배포 환경 구성 경험이 요구됩니다. 이는 사용자가 보유한 기술과 일치하며, 특히 보안 솔루션을 다루는 점에서 사용자의 이전 프로젝트 경험과도 연관성이 있습니다.\"]",
+    "created_at": "2026-02-04 02:27:43.402174+00"
+  },
+  {
+    "id": "72",
+    "user_id": "8",
+    "recruitment_id": "49",
+    "rank_order": "27",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 공고 1에서는 MySQL, DynamoDB, PostgreSQL 등과 같은 다양한 데이터베이스를 다루며, REST API 및 GraphQL 서버 개발을 요구합니다. 이는 사용자가 이전에 사용한 SQLAlchemy와 유사한 데이터베이스 기술을 포함하고 있어 적합하다고 판단됩니다.\"]",
+    "created_at": "2026-02-04 02:27:43.402174+00"
+  },
+  {
+    "id": "73",
+    "user_id": "8",
+    "recruitment_id": "73",
+    "rank_order": "28",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 공고 6은 AI 서비스 개발에 중점을 두고 있으며, Python 기반 개발이나 데이터 처리 경험을 선호합니다. 또한, Docker와 같은 기술 스택을 사용하는 점에서 사용자의 현재 스킬셋과 잘 맞습니다.\"]",
+    "created_at": "2026-02-04 02:27:43.402174+00"
+  },
+  {
+    "id": "74",
+    "user_id": "8",
+    "recruitment_id": "67",
+    "rank_order": "19",
+    "reason": "[\"[내부 운영용 어드민 API 개발] EY의 사이버 보안 컨설턴트는 데이터 보호 및 프라이버시와 관련된 업무를 담당하며, 이는 사용자가 프로젝트에서 민감한 고객 정보를 안전하게 관리하는 솔루션을 개발한 경험과 관련이 있습니다.\"]",
+    "created_at": "2026-02-04 02:29:09.529057+00"
+  },
+  {
+    "id": "75",
+    "user_id": "8",
+    "recruitment_id": "47",
+    "rank_order": "21",
+    "reason": "[\"[내부 운영용 어드민 API 개발] EY의 Cyber Security 팀 컨설턴트 역할은 데이터 보호 및 프라이버시와 관련이 있습니다. 이는 사용자가 내부 운영용 어드민 API 개발 시 보안 문제를 해결했던 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 02:31:12.426423+00"
+  },
+  {
+    "id": "76",
+    "user_id": "8",
+    "recruitment_id": "53",
+    "rank_order": "22",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 풀스택 개발 경험을 쌓고자 하며, 특히 AWS 환경을 활용한 배포 시스템 관리와 Next.js를 통한 프론트엔드 개발에 강점이 있습니다.\"]",
+    "created_at": "2026-02-04 02:31:08.62333+00"
+  },
+  {
+    "id": "77",
+    "user_id": "8",
+    "recruitment_id": "120",
+    "rank_order": "17",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 사용자의 경력인 FastAPI 서비스 개발과 Docker 사용 경험이 공고 0의 주요 업무와 자격 요건에 잘 맞아 떨어집니다.\"]",
+    "created_at": "2026-02-04 02:31:51.417134+00"
+  },
+  {
+    "id": "78",
+    "user_id": "8",
+    "recruitment_id": "42",
+    "rank_order": "4",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 클라우드 기반 서비스 개발 및 운영을 포함한 백엔드 API 및 서버 어플리케이션 개발 경험이 요구되는 공고 1은 사용자가 이전에 수행한 유사한 역할과 일치합니다.\"]",
+    "created_at": "2026-02-04 02:31:51.417134+00"
+  },
+  {
+    "id": "79",
+    "user_id": "9",
+    "recruitment_id": "86",
+    "rank_order": "28",
+    "reason": "[\"[ResumeGap AI — JD 기반 갭 분석 & 개선안 생성] 삼일회계법인의 생성형 AI & AX 개발자/컨설턴트 포지션은 RAG, Agent 기반 챗봇 및 자동화 솔루션을 다루며, 이는 사용자의 프로젝트에서 RAG와 관련된 작업과 유사합니다. 또한 Python을 기반으로 한 개발 경험이 요구되며, 이는 사용자의 기술 스택과도 일치합니다.\"]",
+    "created_at": "2026-02-04 02:47:17.315639+00"
+  },
+  {
+    "id": "80",
+    "user_id": "7",
+    "recruitment_id": "81",
+    "rank_order": "23",
+    "reason": "[\"[StudyMate] 메가존클라우드는 사용자가 보유한 Spring Framework 기반 개발 경험과 RESTful API 설계 능력을 활용할 수 있습니다. 또한, 사용자가 AWS EC2와 유사한 클라우드 환경에서 서비스를 운영한 경험이 있어 클라우드 기반 개발에도 잘 맞습니다.\"]",
+    "created_at": "2026-02-04 02:52:24.335461+00"
+  },
+  {
+    "id": "81",
+    "user_id": "7",
+    "recruitment_id": "43",
+    "rank_order": "0",
+    "reason": "[\"[StudyMate] NAVER Cloud의 LLM Studio Backend Engineer 직무는 사용자가 Spring Boot와 관련된 역량을 보유하고 있기 때문에 매우 적합합니다. 특히, k8s(Kubernetes) 환경에서의 서비스 배포 및 운영 경험이 요구되므로, 사용자의 AWS EC2 경험이 도움이 될 것입니다.\"]",
+    "created_at": "2026-02-04 02:52:24.335461+00"
+  },
+  {
+    "id": "82",
+    "user_id": "7",
+    "recruitment_id": "124",
+    "rank_order": "29",
+    "reason": "[\"[StudyMate] 포스타입의 백엔드 엔지니어 직무는 Spring Boot와 관련된 경험을 활용할 수 있으며, AWS 등 클라우드 환경에서의 서비스 운영 및 보안 개선 경험이 요구됩니다. 이는 사용자의 AWS EC2 경험과 일치하므로 적합하다고 판단됩니다.\"]",
+    "created_at": "2026-02-04 02:52:24.335461+00"
+  },
+  {
+    "id": "83",
+    "user_id": "9",
+    "recruitment_id": "81",
+    "rank_order": "29",
+    "reason": "[\"[LLM 서비스에서 라우팅·캐시·폴백 전략의 비용-지연-품질 트레이드오프 분석] 메가존클라우드의 Backend Developer 직무는 RAG 시스템 백엔드 개발과 AI/ML 워크플로우 및 파이프라인 연동을 포함하며, 이는 사용자가 수행한 RAG 관련 작업과 직접적으로 관련이 있습니다.\"]",
+    "created_at": "2026-02-04 02:52:29.920814+00"
+  },
+  {
+    "id": "84",
+    "user_id": "9",
+    "recruitment_id": "118",
+    "rank_order": "27",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] LG AI연구원의 인턴십 포지션은 파운데이션 모델 관련 연구 및 개발에 중점을 두고 있으며, 이는 사용자가 Open-Domain Question Answering(ODQA) 프로젝트를 통해 얻은 경험과 잘 맞습니다. 특히 파운데이션 모델 관련 연구와 개발이라는 점에서 사용자의 기술과 경험이 큰 도움이 될 것입니다.\"]",
+    "created_at": "2026-02-04 02:54:26.352671+00"
+  },
+  {
+    "id": "85",
+    "user_id": "9",
+    "recruitment_id": "127",
+    "rank_order": "26",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] NAVER Cloud의 Omni-Foundation Model Evaluation Research Engineer 포지션에서는 Foundation Model의 성능 평가와 분석을 담당하며, 이는 사용자가 이전에 수행했던 연구 및 실험 설계 경험과 일치합니다. 이 직책은 또한 멀티 모달리티 연구 및 개발 경험을 필요로 하며, 이는 사용자의 포트폴리오와 매우 관련이 있습니다.\"]",
+    "created_at": "2026-02-04 02:54:26.352671+00"
+  },
+  {
+    "id": "86",
+    "user_id": "9",
+    "recruitment_id": "108",
+    "rank_order": "25",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] Superb AI의 Machine Learning Engineer 포지션은 모델의 연구 개발부터 제품화에 이르는 모든 과정에 깊이 관여하며, 이는 사용자가 ODQA 프로젝트를 통해 얻은 폭넓은 경험을 활용할 수 있는 기회를 제공합니다. 특히 안전 관제와 공정 분석 등에서 AI 솔루션을 개발하는 역할이므로 사용자의 기술적 배경과 잘 맞아떨어집니다.\"]",
+    "created_at": "2026-02-04 02:54:26.352671+00"
+  },
+  {
+    "id": "87",
+    "user_id": "9",
+    "recruitment_id": "111",
+    "rank_order": "12",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] 디노티시아의 LLM Engineer 포지션은 사용자의 LLM 관련 경험과 매우 관련이 깊습니다. 특히, LLM Pre-Training 및 Post-Training 작업과 관련된 연구는 사용자의 이전 프로젝트와 유사한 점이 많아, 해당 역할을 통해 더 발전된 기술과 경험을 얻을 수 있을 것입니다.\"]",
+    "created_at": "2026-02-04 02:54:27.517821+00"
+  },
+  {
+    "id": "88",
+    "user_id": "7",
+    "recruitment_id": "99",
+    "rank_order": "2",
+    "reason": "[\"[OrderFlow] 마이다스아이티는 대규모 데이터 처리와 DB 구조 설계를 주요 업무로 하고 있으며, 이는 사용자가 이전에 대규모 트래픽을 처리하기 위해 비동기 시스템을 개발한 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 02:59:57.080135+00"
+  },
+  {
+    "id": "89",
+    "user_id": "7",
+    "recruitment_id": "32",
+    "rank_order": "22",
+    "reason": "[\"[OrderFlow] 주식회사 두꺼비세상은 NestJS 기반의 백엔드 개발과 MySQL/MongoDB를 사용하는 데이터 모델링을 필요로 하며, 이는 사용자의 Spring Boot와 다양한 데이터베이스 활용 경험과 잘 맞습니다.\"]",
+    "created_at": "2026-02-04 02:59:57.080135+00"
+  },
+  {
+    "id": "92",
+    "user_id": "7",
+    "recruitment_id": "44",
+    "rank_order": "3",
+    "reason": "[\"[ApiShield] NAVER Cloud의 대규모 GPU기반 MLOps Platform Backend Engineer 직무는 사용자가 개발한 ApiShield 프로젝트와 유사한 대규모 트래픽 처리 및 고성능 시스템 개발에 관한 경험을 활용할 수 있습니다.\"]",
+    "created_at": "2026-02-04 03:02:59.128127+00"
+  },
+  {
+    "id": "93",
+    "user_id": "7",
+    "recruitment_id": "42",
+    "rank_order": "28",
+    "reason": "[\"[ApiShield] NAVER Cloud의 NCP BE 개발 직무는 클라우드 기반의 서비스 개발 및 운영을 다루며, 이는 사용자가 현재 목표로 하고 있는 클라우드 환경에서의 백엔드 개발 역량을 발휘하기에 적합합니다.\"]",
+    "created_at": "2026-02-04 03:02:59.128127+00"
+  },
+  {
+    "id": "94",
+    "user_id": "7",
+    "recruitment_id": "38",
+    "rank_order": "1",
+    "reason": "[\"[ApiShield] 현재 사용자님의 기술과 역할에 가장 잘 맞는 직무는 백엔드 개발자로서 Java와 Spring Boot 기반의 프로젝트 경험이 중요한 역할을 할 것입니다. 따라서, 해당 기술을 요구하는 공고 중에서 가장 적합한 것은 NAVER Cloud의 '지도기반 슈퍼앱 서비스 개발 DevOps 엔지니어' 직무입니다. 이 직무에서는 클라우드 네이티브 인프라 및 CI/CD 프로세스를 다루며, 이는 사용자가 이미 보유한 기술들과 잘 맞아떨어집니다.\"]",
+    "created_at": "2026-02-04 03:03:10.599801+00"
+  },
+  {
+    "id": "95",
+    "user_id": "7",
+    "recruitment_id": "135",
+    "rank_order": "27",
+    "reason": "[\"[ApiShield] 마지막으로 추천드릴 만한 직무는 '메가존클라우드의 Backend Developer'입니다. 이 직무는 해외 법인의 요구사항을 충족시키기 위한 개발 및 고도화와 함께 AI agent 배포, 실행, 모니터링 백엔드 개발을 포함합니다. 이러한 역할들은 사용자의 프로젝트 경험과 매우 유사하며, 특히 Kubernetes 환경에서의 애플리케이션 개발이나 운영 경험이 필요한 점에서 사용자의 기술과 잘 맞습니다.\"]",
+    "created_at": "2026-02-04 03:03:10.599801+00"
+  },
+  {
+    "id": "96",
+    "user_id": "9",
+    "recruitment_id": "134",
+    "rank_order": "24",
+    "reason": "[\"[Manual Text Analysis] LG AI연구원의 Research Scientist/Engineer 역할은 사용자가 Open-Domain Question Answering 및 NewsBrief AI 프로젝트에서 보여준 평가 파이프라인 구축 및 성능 지표 보고 시스템 구현 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 03:04:08.770394+00"
+  },
+  {
+    "id": "97",
+    "user_id": "9",
+    "recruitment_id": "131",
+    "rank_order": "29",
+    "reason": "[\"[Manual Text Analysis] 디노티시아의 [AI] LLM Engineer 역할은 사용자가 LLM 관련 다양한 프로젝트에서 쌓아온 경험들과 매우 밀접하게 연관되어 있으며, 특히 LLM Pre-Training 및 Post-Training 성능 개선 등의 업무가 사용자의 전문성을 활용할 수 있게 해줍니다.\"]",
+    "created_at": "2026-02-04 03:04:08.770394+00"
+  },
+  {
+    "id": "98",
+    "user_id": "9",
+    "recruitment_id": "79",
+    "rank_order": "14",
+    "reason": "[\"[Manual Text Analysis] Superb AI의 머신러닝 엔지니어 직무는 사용자가 보유한 머신러닝/딥러닝 이론적 지식과 실제 구현 경험, 그리고 최신 AI 및 컴퓨터 비전 연구 동향에 대한 관심을 잘 활용할 수 있을 것으로 보입니다.\"]",
+    "created_at": "2026-02-04 03:04:25.522704+00"
+  },
+  {
+    "id": "99",
+    "user_id": "6",
+    "recruitment_id": "133",
+    "rank_order": "7",
+    "reason": "[\"[FileUploadUI] 파일 업로드 UI 프로젝트 경험과 사용자 피드백을 통한 UI/UX 개선 경험이 있으며, 이는 네이버웹툰 iOS 앱의 UI/UX 개선 업무와 일치합니다.\"]",
+    "created_at": "2026-02-04 03:11:27.803632+00"
+  },
+  {
+    "id": "100",
+    "user_id": "6",
+    "recruitment_id": "73",
+    "rank_order": "5",
+    "reason": "[\"[FileUploadUI] 비동기 작업 처리와 사용자 피드백 중심의 UI 설계 경험이 있으며, AI 이미지 생성 기능 연동 및 서비스화에 기여할 수 있습니다.\"]",
+    "created_at": "2026-02-04 03:11:27.803632+00"
+  },
+  {
+    "id": "101",
+    "user_id": "6",
+    "recruitment_id": "46",
+    "rank_order": "28",
+    "reason": "[\"[FileUploadUI] 네이버웹툰의 iOS 개발 직무는 사용자 피드백을 바탕으로 UI/UX를 개선하는 역할이므로, 사용자의 프로젝트 경험과 잘 맞습니다.\"]",
+    "created_at": "2026-02-04 03:15:23.906974+00"
+  },
+  {
+    "id": "102",
+    "user_id": "6",
+    "recruitment_id": "43",
+    "rank_order": "2",
+    "reason": "[\"[FileUploadUI] NAVER Cloud의 LLM Studio Backend Engineer 직무는 LLM 인퍼런스 서버 구축 및 운영을 포함하며, 이는 사용자의 백엔드에 대한 이해도를 활용할 수 있습니다.\"]",
+    "created_at": "2026-02-04 03:15:23.906974+00"
+  },
+  {
+    "id": "105",
+    "user_id": "6",
+    "recruitment_id": "53",
+    "rank_order": "29",
+    "reason": "[\"[FileUploadUI] 넛지헬스케어의 풀스택 개발 직무는 REST API, GraphQL 서버 개발 및 다양한 데이터베이스를 다루며, 이는 사용자가 다양한 업로드 시나리오를 테스트하고 예외 상황을 점검한 경험과 관련이 있습니다.\"]",
+    "created_at": "2026-02-04 03:23:38.583538+00"
+  },
+  {
+    "id": "108",
+    "user_id": "9",
+    "recruitment_id": "140",
+    "rank_order": "16",
+    "reason": "[\"[추출 실패] 디노티시아의 LLM Engineer 역할은 사용자가 LLM 프로젝트들에서 쌓아온 다양한 경험들과 매우 밀접하게 연관되어 있으며, 특히 LLM Pre-Training 및 Post-Training 성능 개선과 관련된 업무들이 사용자의 과거 성과와 일치합니다.\"]",
+    "created_at": "2026-02-04 03:57:44.212006+00"
+  },
+  {
+    "id": "109",
+    "user_id": "9",
+    "recruitment_id": "49",
+    "rank_order": "5",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] 현재 지원자의 기술과 경력으로는 해당 직무와의 연관성이 부족합니다.\"]",
+    "created_at": "2026-02-04 04:05:23.458066+00"
+  },
+  {
+    "id": "110",
+    "user_id": "9",
+    "recruitment_id": "41",
+    "rank_order": "11",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] NAVER Cloud의 Multimodal VLOps 인턴십은 대규모 멀티모달 데이터 파이프라인 구축 및 이벤트 기반 시스템 개발에 중점을 두고 있어, 지원자의 데이터 중심 훈련 및 파이프라인 관리 경험과 잘 맞습니다.\"]",
+    "created_at": "2026-02-04 04:05:23.458066+00"
+  },
+  {
+    "id": "111",
+    "user_id": "9",
+    "recruitment_id": "88",
+    "rank_order": "3",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] 지능형 교통 시스템의 AI 모델 개발은 현재 지원자의 전문성과는 다소 거리가 있습니다.\"]",
+    "created_at": "2026-02-04 04:05:23.458066+00"
+  },
+  {
+    "id": "112",
+    "user_id": "6",
+    "recruitment_id": "81",
+    "rank_order": "3",
+    "reason": "[\"[FileUploadUI] 메가존클라우드의 백엔드 개발 직무는 AI/ML 워크플로우 및 파이프라인 연동 백엔드 개발을 포함하여, AI와 관련된 다양한 경험을 쌓을 수 있는 기회를 제공합니다.\"]",
+    "created_at": "2026-02-04 04:48:38.551083+00"
+  },
+  {
+    "id": "151",
+    "user_id": "8",
+    "recruitment_id": "227",
+    "rank_order": "27",
+    "reason": "[\"[GA4 마케팅 데이터 파이프라인 구축] 사용자는 Apache NiFi 및 Airflow를 사용한 데이터 파이프라인 설계 및 운영 경험이 있으며, 이는 공고 1의 주요 업무와 일치합니다.\"]",
+    "created_at": "2026-02-04 14:22:56.70324+00"
+  },
+  {
+    "id": "152",
+    "user_id": "8",
+    "recruitment_id": "228",
+    "rank_order": "28",
+    "reason": "[\"[GA4 마케팅 데이터 파이프라인 구축] 사용자는 GCP, AWS 기반의 데이터 인프라 구축 및 운영 경험이 있으며, 이는 공고 2의 주요 업무와 일치합니다.\"]",
+    "created_at": "2026-02-04 14:22:56.70324+00"
+  },
+  {
+    "id": "153",
+    "user_id": "8",
+    "recruitment_id": "238",
+    "rank_order": "26",
+    "reason": "[\"[GA4 마케팅 데이터 파이프라인 구축] 사용자는 Pandas, PySpark를 활용한 데이터 처리 및 자동화 스크립트 작성 경험이 있으며, 이는 공고 7의 요구사항과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:22:56.70324+00"
+  },
+  {
+    "id": "154",
+    "user_id": "8",
+    "recruitment_id": "235",
+    "rank_order": "29",
+    "reason": "[\"[GA4 마케팅 데이터 파이프라인 구축] 사용자는 다양한 소스 데이터를 수집·가공하는 데이터 파이프라인 설계 및 운영 경험이 있으며, 이는 공고 8의 주요 업무와 일치합니다.\"]",
+    "created_at": "2026-02-04 14:22:56.70324+00"
+  },
+  {
+    "id": "155",
+    "user_id": "9",
+    "recruitment_id": "178",
+    "rank_order": "23",
+    "reason": "[\"[StudyBuddy AI (강의자료 기반 Q&A/요약/퀴즈 생성 웹서비스)] 사용자가 OpenAI API와 Spring Boot를 사용하여 AI 프로젝트를 개발한 경험이 있으며, 이는 공고 6의 AI 기반 보안관제 업무 자동화와 RAG 파이프라인 구축에 필요한 기술과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:23:12.777057+00"
+  },
+  {
+    "id": "156",
+    "user_id": "9",
+    "recruitment_id": "124",
+    "rank_order": "24",
+    "reason": "[\"[StudyBuddy AI (강의자료 기반 Q&A/요약/퀴즈 생성 웹서비스)] 사용자가 React와 TypeScript를 사용한 웹 서비스 개발 경험이 있고, 이는 공고 7의 백엔드 개발 및 RAG 시스템 백엔드 개발 요구사항과 관련이 있습니다.\"]",
+    "created_at": "2026-02-04 14:23:12.777057+00"
+  },
+  {
+    "id": "157",
+    "user_id": "9",
+    "recruitment_id": "194",
+    "rank_order": "29",
+    "reason": "[\"[StudyBuddy AI (강의자료 기반 Q&A/요약/퀴즈 생성 웹서비스)] 사용자가 Spring Boot와 PostgreSQL을 사용한 백엔드 시스템 개발 경험이 있으며, 이는 공고 12의 백엔드 시스템 개발 및 운영 요구사항과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:23:12.777057+00"
+  },
+  {
+    "id": "158",
+    "user_id": "9",
+    "recruitment_id": "225",
+    "rank_order": "23",
+    "reason": "[\"[StudyBuddy AI (강의자료 기반 Q&A/요약/퀴즈 생성 웹서비스)] 사용자가 Docker와 Nginx를 사용한 배포 및 운영 경험이 있으며, 이는 공고 5의 GCP 기반 클라우드 인프라 구축 및 운영 요구사항과 관련이 있습니다.\"]",
+    "created_at": "2026-02-04 14:23:12.777057+00"
+  },
+  {
+    "id": "159",
+    "user_id": "9",
+    "recruitment_id": "172",
+    "rank_order": "21",
+    "reason": "[\"[StudyBuddy AI (강의자료 기반 Q&A/요약/퀴즈 생성 웹서비스)] 사용자가 OpenAI API와 LLM 관련 프로젝트 경험이 있으며, 이는 공고 18의 LLM Pre-Training 및 Post-Training 성능 개선과 관련된 요구사항과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:23:12.777057+00"
+  },
+  {
+    "id": "160",
+    "user_id": "9",
+    "recruitment_id": "36",
+    "rank_order": "2",
+    "reason": "[\"[StudyBuddy AI (강의자료 기반 Q&A/요약/퀴즈 생성 웹서비스)] 사용자가 여러 AI 프로젝트에서 성과를 거두었으며, 이는 공고 24의 머신러닝 엔지니어로서의 다양한 산업 현장 문제 해결 경험과 관련이 있습니다.\"]",
+    "created_at": "2026-02-04 14:23:12.777057+00"
+  },
+  {
+    "id": "161",
+    "user_id": "9",
+    "recruitment_id": "34",
+    "rank_order": "29",
+    "reason": "[\"[StudyBuddy AI (강의자료 기반 Q&A/요약/퀴즈 생성 웹서비스)] 사용자가 여러 AI 프로젝트를 성공적으로 완료한 경험이 있으며, 이는 공고 22의 생성형 AI 서비스 개발 및 연구 역할에 적합합니다.\"]",
+    "created_at": "2026-02-04 14:23:12.777057+00"
+  },
+  {
+    "id": "162",
+    "user_id": "9",
+    "recruitment_id": "180",
+    "rank_order": "6",
+    "reason": "[\"[ResumeGap AI — JD 기반 갭 분석 & 개선안 생성] 사용자는 FastAPI와 Python을 사용한 백엔드 서비스 개발에 경험이 있으며, 이 공고는 Node.js나 Python을 사용한 백엔드 서비스 개발을 요구하므로 적합합니다.\"]",
+    "created_at": "2026-02-04 14:23:30.294243+00"
+  },
+  {
+    "id": "163",
+    "user_id": "9",
+    "recruitment_id": "239",
+    "rank_order": "28",
+    "reason": "[\"[ResumeGap AI — JD 기반 갭 분석 & 개선안 생성] 사용자는 LLM 기반 서비스 개발 경험이 있고, LangChain과 같은 최신 AI 스택을 활용한 경험이 있습니다. 이 공고는 LLM 기반 서비스 개발과 관련된 경험을 요구하므로 적합합니다.\"]",
+    "created_at": "2026-02-04 14:23:30.294243+00"
+  },
+  {
+    "id": "164",
+    "user_id": "9",
+    "recruitment_id": "30",
+    "rank_order": "29",
+    "reason": "[\"[ResumeGap AI — JD 기반 갭 분석 & 개선안 생성] 사용자는 LLM 기반 애플리케이션 개발 경험이 있으며, 이 공고는 LLM 기반 애플리케이션 개발과 관련된 경험을 요구하므로 적합합니다.\"]",
+    "created_at": "2026-02-04 14:23:30.294243+00"
+  },
+  {
+    "id": "165",
+    "user_id": "9",
+    "recruitment_id": "68",
+    "rank_order": "15",
+    "reason": "[\"[ResumeGap AI — JD 기반 갭 분석 & 개선안 생성] 사용자는 LLM, RAG, Agent 기반 서비스의 데이터 요구사항을 충족하기 위한 구조를 설계한 경험이 있으며, 이 공고는 이러한 경험을 요구하므로 적합합니다.\"]",
+    "created_at": "2026-02-04 14:23:30.294243+00"
+  },
+  {
+    "id": "166",
+    "user_id": "9",
+    "recruitment_id": "58",
+    "rank_order": "13",
+    "reason": "[\"[ResumeGap AI — JD 기반 갭 분석 & 개선안 생성] 사용자는 LLM 기반 서비스 개발 경험이 있으며, 이 공고는 LLM 기반 서비스 개발과 관련된 경험을 요구하므로 적합합니다.\"]",
+    "created_at": "2026-02-04 14:23:30.294243+00"
+  },
+  {
+    "id": "167",
+    "user_id": "8",
+    "recruitment_id": "50",
+    "rank_order": "28",
+    "reason": "[\"[영업 실적 대시보드 데이터 마트 자동화] 사용자는 SQL과 데이터 파이프라인 설계 및 운영 경험이 있으며, 특히 Airflow를 사용한 경험이 있습니다. 그러나 이 공고에서는 백엔드 개발자를 찾고 있으므로, 사용자의 경험이 직접적으로 일치하지 않습니다. 따라서 이 공고는 추천되지 않습니다.\"]",
+    "created_at": "2026-02-04 14:23:48.625714+00"
+  },
+  {
+    "id": "168",
+    "user_id": "8",
+    "recruitment_id": "99",
+    "rank_order": "29",
+    "reason": "[\"[영업 실적 대시보드 데이터 마트 자동화] 사용자는 SQL과 데이터 파이프라인 설계 및 운영 경험이 있으며, 특히 Airflow를 사용한 경험이 있습니다. 그러나 이 공고에서는 대규모 데이터 처리를 위한 DB 구조 설계 및 구현을 요구하므로, 사용자의 경험이 일부 일치하지만 완전히 적합하지는 않습니다. 따라서 이 공고는 추천되지 않습니다.\"]",
+    "created_at": "2026-02-04 14:23:48.625714+00"
+  },
+  {
+    "id": "169",
+    "user_id": "8",
+    "recruitment_id": "43",
+    "rank_order": "7",
+    "reason": "[\"[이탈 예측(Churn Prediction) 학습 데이터셋 생성] 사용자가 데이터 파이프라인 구축 및 운영 경험이 있으며, LLM 인퍼런스 서버 구축 및 운영, 다양한 환경에서의 서비스 패키징 및 배포 자동화 경험이 필요하다.\"]",
+    "created_at": "2026-02-04 14:24:09.161694+00"
+  },
+  {
+    "id": "170",
+    "user_id": "8",
+    "recruitment_id": "41",
+    "rank_order": "8",
+    "reason": "[\"[이탈 예측(Churn Prediction) 학습 데이터셋 생성] 사용자가 대규모 데이터 처리 및 파이프라인 구축 경험이 있으며, 이벤트 드리븐 시스템 개발 및 대규모 멀티모달 데이터 파이프라인 구축 경험이 필요하다.\"]",
+    "created_at": "2026-02-04 14:24:09.161694+00"
+  },
+  {
+    "id": "171",
+    "user_id": "8",
+    "recruitment_id": "108",
+    "rank_order": "9",
+    "reason": "[\"[이탈 예측(Churn Prediction) 학습 데이터셋 생성] 사용자가 대규모 GPU기반 MLOps Platform Backend Engineer로서, Kubernetes 기반 MLOps 플랫폼 설계 및 개발 경험이 있으며, 대규모 데이터 저장, 처리, 관리를 위한 데이터 플랫폼 개발 경험이 있다.\"]",
+    "created_at": "2026-02-04 14:24:09.161694+00"
+  },
+  {
+    "id": "172",
+    "user_id": "8",
+    "recruitment_id": "226",
+    "rank_order": "27",
+    "reason": "[\"[이탈 예측(Churn Prediction) 학습 데이터셋 생성] 사용자가 대규모 데이터 수집/적재/처리를 위한 빅데이터 파이프라인 설계 및 구축 경험이 있으며, AI/머신러닝, 딥러닝 모델 개발 및 운영 경험이 있다.\"]",
+    "created_at": "2026-02-04 14:24:09.161694+00"
+  },
+  {
+    "id": "173",
+    "user_id": "8",
+    "recruitment_id": "44",
+    "rank_order": "28",
+    "reason": "[\"[이탈 예측(Churn Prediction) 학습 데이터셋 생성] 사용자가 대규모 GPU기반 MLOps Platform Backend Engineer로서, Kubernetes 기반 MLOps 플랫폼 설계 및 개발 경험이 있으며, 대규모 데이터 저장, 처리, 관리를 위한 데이터 플랫폼 개발 경험이 있다.\"]",
+    "created_at": "2026-02-04 14:24:09.161694+00"
+  },
+  {
+    "id": "174",
+    "user_id": "8",
+    "recruitment_id": "45",
+    "rank_order": "29",
+    "reason": "[\"[레거시 프로시저 Airflow 이관] 사용자는 데이터 파이프라인 설계 및 운영 경험이 있으며, 특히 Airflow를 사용한 워크플로우 재구축 경험이 있습니다. 또한, 클라우드 환경에서 데이터 파이프라인 설계 및 운영 경험이 요구되는 공고 11에도 적합합니다.\"]",
+    "created_at": "2026-02-04 14:24:29.064292+00"
+  },
+  {
+    "id": "175",
+    "user_id": "8",
+    "recruitment_id": "198",
+    "rank_order": "24",
+    "reason": "[\"[레거시 프로시저 Airflow 이관] 사용자는 데이터 파이프라인 설계 및 운영 경험이 있으며, 특히 Airflow를 사용한 워크플로우 재구축 경험이 있습니다. 또한, 다양한 데이터 소스(RDB, API, 로그 등)로부터 데이터를 수집하고 ETL 파이프라인을 운영하는 경험이 있어, 이러한 기술이 요구되는 공고 14에도 적합합니다.\"]",
+    "created_at": "2026-02-04 14:24:29.064292+00"
+  },
+  {
+    "id": "176",
+    "user_id": "8",
+    "recruitment_id": "220",
+    "rank_order": "2",
+    "reason": "[\"[실시간 주문 지연 알림 서비스 개발] 사용자는 Spring Boot와 유사한 Spring Framework를 사용한 경험이 있어, 백엔드 개발 및 유지보수에 적합합니다.\"]",
+    "created_at": "2026-02-04 14:24:50.830328+00"
+  },
+  {
+    "id": "177",
+    "user_id": "8",
+    "recruitment_id": "231",
+    "rank_order": "24",
+    "reason": "[\"[실시간 주문 지연 알림 서비스 개발] 사용자는 Kafka를 사용한 실시간 데이터 처리 경험이 있고, 이는 Azure를 활용한 데이터 파이프라인 구축 및 운영에 유용할 것입니다.\"]",
+    "created_at": "2026-02-04 14:24:50.830328+00"
+  },
+  {
+    "id": "178",
+    "user_id": "8",
+    "recruitment_id": "236",
+    "rank_order": "3",
+    "reason": "[\"[실시간 주문 지연 알림 서비스 개발] 사용자는 TypeScript와 비슷한 Python을 사용한 경험이 있으며, 실시간 요청/응답 처리 시스템에 대한 이해가 높아 이 공고에 적합합니다.\"]",
+    "created_at": "2026-02-04 14:24:50.830328+00"
+  },
+  {
+    "id": "179",
+    "user_id": "8",
+    "recruitment_id": "124",
+    "rank_order": "26",
+    "reason": "[\"[실시간 주문 지연 알림 서비스 개발] 사용자는 Kafka를 사용한 분산 시스템 운영 경험이 있으며, 이는 수백만 건의 요청을 안정적으로 처리하는 백엔드 시스템 설계 및 구현에 도움이 됩니다.\"]",
+    "created_at": "2026-02-04 14:24:50.830328+00"
+  },
+  {
+    "id": "180",
+    "user_id": "8",
+    "recruitment_id": "31",
+    "rank_order": "27",
+    "reason": "[\"[실시간 주문 지연 알림 서비스 개발] 사용자는 비동기 이벤트 처리 및 모니터링 시스템 구축 경험이 있어, 서비스 유지보수 및 신규 서비스 개발 업무에 유리합니다.\"]",
+    "created_at": "2026-02-04 14:24:50.830328+00"
+  },
+  {
+    "id": "181",
+    "user_id": "8",
+    "recruitment_id": "223",
+    "rank_order": "28",
+    "reason": "[\"[데이터 품질 자동 검증(Data Quality Check) 도입] 사용자는 데이터 품질 관리 프로젝트를 성공적으로 수행했으며, 이는 공고 1의 주요 업무인 '데이터 품질 관리 및 최적화'와 직접 관련이 있습니다.\"]",
+    "created_at": "2026-02-04 14:25:07.610789+00"
+  },
+  {
+    "id": "182",
+    "user_id": "8",
+    "recruitment_id": "106",
+    "rank_order": "9",
+    "reason": "[\"[데이터 품질 자동 검증(Data Quality Check) 도입] 사용자는 대규모 데이터 처리 및 분석 경험이 있으며, 이는 공고 7의 주요 업무인 '대용량 빅데이터 실시간 분석'과 관련성이 높습니다.\"]",
+    "created_at": "2026-02-04 14:25:07.610789+00"
+  },
+  {
+    "id": "183",
+    "user_id": "8",
+    "recruitment_id": "171",
+    "rank_order": "5",
+    "reason": "[\"[비정형 로그 데이터 정제 파이프라인] 사용자가 로그 데이터 처리와 관련하여 쌓은 경험이 NHN Cloud의 로그 플랫폼 백엔드 개발 직무와 일치합니다. 특히, Log & Crash Search 서비스 개발에 있어 사용자의 로그 데이터 처리 경험이 큰 도움이 될 것입니다.\"]",
+    "created_at": "2026-02-04 14:25:25.212664+00"
+  },
+  {
+    "id": "184",
+    "user_id": "8",
+    "recruitment_id": "221",
+    "rank_order": "8",
+    "reason": "[\"[비정형 로그 데이터 정제 파이프라인] 도로시의 대규모 트래픽 및 데이터 처리를 위한 클러스터링 구조 개발 업무가 사용자의 로그 데이터 처리 및 병렬 처리 경험과 일치합니다. 특히, 대규모 데이터 처리에 대한 경험이 중요한 역할을 할 것입니다.\"]",
+    "created_at": "2026-02-04 14:25:25.212664+00"
+  },
+  {
+    "id": "185",
+    "user_id": "8",
+    "recruitment_id": "187",
+    "rank_order": "7",
+    "reason": "[\"[비정형 로그 데이터 정제 파이프라인] 올티칭의 백엔드 시스템 설계 및 대용량 트래픽 처리 경험이 사용자의 로그 데이터 정제 파이프라인 개발 경험과 잘 맞습니다. 특히, 데이터베이스 설계 및 쿼리 최적화 경험이 중요합니다.\"]",
+    "created_at": "2026-02-04 14:25:25.212664+00"
+  },
+  {
+    "id": "186",
+    "user_id": "8",
+    "recruitment_id": "239",
+    "rank_order": "13",
+    "reason": "[\"[데이터 카탈로그(Data Catalog) 구축 및 문서화] 사용자는 데이터 카탈로그 구축 프로젝트를 통해 데이터 처리 및 분석 도구 사용 경험을 쌓았으며, 이는 데이터 엔지니어링의 기반이 됩니다.\"]",
+    "created_at": "2026-02-04 14:25:44.962281+00"
+  },
+  {
+    "id": "187",
+    "user_id": "8",
+    "recruitment_id": "112",
+    "rank_order": "10",
+    "reason": "[\"[AWS S3 스토리지 비용 최적화] 사용자는 AWS S3 스토리지 비용 최적화 프로젝트를 성공적으로 수행하였으며, 이는 대규모 분산 스토리지 시스템의 성능, 안정성, 확장성 개선과 관련된 디노티시아의 요구사항과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:26:02.262841+00"
+  },
+  {
+    "id": "188",
+    "user_id": "8",
+    "recruitment_id": "80",
+    "rank_order": "6",
+    "reason": "[\"[AWS S3 스토리지 비용 최적화] 사용자는 클라우드 인프라 비용 절감과 관련된 경험이 있으며, 이는 메가존클라우드의 AI Full-Stack Engineer 직무에서 요구하는 클라우드 기반 인프라 이해와 관련된 요구사항과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:26:02.262841+00"
+  },
+  {
+    "id": "189",
+    "user_id": "8",
+    "recruitment_id": "225",
+    "rank_order": "10",
+    "reason": "[\"[AWS S3 스토리지 비용 최적화] 사용자는 AWS S3를 사용한 경험이 있으며, 이는 에이클런의 클라우드 인프라 및 데이터 엔지니어 직무에서 요구하는 GCP, AWS 등 클라우드 환경에서의 인프라 구축 및 운영 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:26:02.262841+00"
+  },
+  {
+    "id": "190",
+    "user_id": "8",
+    "recruitment_id": "185",
+    "rank_order": "11",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 사용자는 FastAPI를 사용한 API 서버 개발 경험이 있으며, 해당 공고는 FastAPI를 사용하는 백엔드 개발자를 찾고 있습니다.\"]",
+    "created_at": "2026-02-04 14:26:20.565798+00"
+  },
+  {
+    "id": "191",
+    "user_id": "8",
+    "recruitment_id": "130",
+    "rank_order": "16",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 사용자는 보안 통제를 위한 미들웨어 레벨에서의 화이트리스트 로직을 구현한 경험이 있으므로, 정보보안 관련 업무에 유리합니다.\"]",
+    "created_at": "2026-02-04 14:26:20.565798+00"
+  },
+  {
+    "id": "192",
+    "user_id": "8",
+    "recruitment_id": "122",
+    "rank_order": "17",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 사용자는 보안 통제에 관한 경험이 있으며, 이는 인프라 취약점 진단 및 평가 업무에 큰 도움이 됩니다.\"]",
+    "created_at": "2026-02-04 14:26:20.565798+00"
+  },
+  {
+    "id": "193",
+    "user_id": "8",
+    "recruitment_id": "30",
+    "rank_order": "18",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 사용자는 LLM 기반 애플리케이션에 대한 이해도와 Python을 활용한 백엔드 개발 경험이 있어 AI 백엔드 엔지니어 역할에 적합합니다.\"]",
+    "created_at": "2026-02-04 14:26:20.565798+00"
+  },
+  {
+    "id": "194",
+    "user_id": "9",
+    "recruitment_id": "185",
+    "rank_order": "4",
+    "reason": "[\"[TeamLog Bot] 사용자는 Python과 FastAPI를 사용한 백엔드 개발 경험이 있으며, 해당 기술이 공고 1에서 요구하는 주요 기술 스택과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:26:37.858073+00"
+  },
+  {
+    "id": "195",
+    "user_id": "9",
+    "recruitment_id": "35",
+    "rank_order": "17",
+    "reason": "[\"[TeamLog Bot] 사용자는 Python 및 FastAPI를 사용한 백엔드 시스템 개발 경험이 있으며, 이는 공고 3에서 요구하는 주요 기술 스택과 일치합니다. 또한, Docker를 활용한 배포 환경 구성 경험도 있어 해당 공고의 요구사항에 부합합니다.\"]",
+    "created_at": "2026-02-04 14:26:37.858073+00"
+  },
+  {
+    "id": "196",
+    "user_id": "9",
+    "recruitment_id": "187",
+    "rank_order": "18",
+    "reason": "[\"[TeamLog Bot] 사용자는 Python과 FastAPI를 사용한 백엔드 시스템 개발 경험이 있으며, 이는 공고 6에서 요구하는 기술 스택과 일치합니다. 또한, 클라우드 환경에서의 서비스 운영 경험도 있어 해당 공고의 요구사항에 부합합니다.\"]",
+    "created_at": "2026-02-04 14:26:37.858073+00"
+  },
+  {
+    "id": "197",
+    "user_id": "9",
+    "recruitment_id": "80",
+    "rank_order": "19",
+    "reason": "[\"[TeamLog Bot] 사용자는 여러 AI 프로젝트를 통해 모델 디자인, 실험, 평가를 수행한 경험이 있으며, 이는 공고 7에서 요구하는 AI 모델 및 서비스 구현 역량과 일치합니다. 또한, Docker와 같은 컨테이너 기술을 사용한 경험이 있어 해당 공고의 요구사항에도 부합합니다.\"]",
+    "created_at": "2026-02-04 14:26:37.858073+00"
+  },
+  {
+    "id": "198",
+    "user_id": "9",
+    "recruitment_id": "120",
+    "rank_order": "20",
+    "reason": "[\"[TeamLog Bot] 사용자는 FastAPI 서비스 개발 경험이 있으며, 이는 공고 10에서 요구하는 기술 스택과 일치합니다. 또한, 컨테이너 기술(Docker)과 관련된 경험이 있어 해당 공고의 요구사항에도 부합합니다.\"]",
+    "created_at": "2026-02-04 14:26:37.858073+00"
+  },
+  {
+    "id": "199",
+    "user_id": "9",
+    "recruitment_id": "43",
+    "rank_order": "21",
+    "reason": "[\"[TeamLog Bot] 사용자는 LLM 관련 프로젝트 경험이 풍부하며, 특히 LLM 인퍼런스 서버 구축 및 운영 경험이 있습니다. 이는 공고 14에서 요구하는 LLM 인퍼런스 서버 구축 및 운영 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:26:37.858073+00"
+  },
+  {
+    "id": "200",
+    "user_id": "9",
+    "recruitment_id": "142",
+    "rank_order": "22",
+    "reason": "[\"[NewsBrief AI] 사용자는 LLM 모델 연구 및 개발 경험이 있으며, 이는 NHN Cloud의 AI/ML 리서치 및 개발 역할에 적합합니다.\"]",
+    "created_at": "2026-02-04 14:26:58.029598+00"
+  },
+  {
+    "id": "201",
+    "user_id": "9",
+    "recruitment_id": "44",
+    "rank_order": "23",
+    "reason": "[\"[EvalLab] NAVER Cloud의 대규모 GPU 기반 MLOps Platform Backend Engineer 역할은 대규모 분산 학습 효율 최적화 및 모델 서빙 시스템 개발과 관련이 있으며, 이는 사용자가 대규모 데이터셋을 관리하고 실험 추적 시스템을 구축한 경험과 매우 유사합니다.\"]",
+    "created_at": "2026-02-04 14:27:16.40315+00"
+  },
+  {
+    "id": "202",
+    "user_id": "9",
+    "recruitment_id": "244",
+    "rank_order": "24",
+    "reason": "[\"[Korean Text Classification Cup] 이론적 문제 정의와 최신 딥러닝 논문의 파악 및 구현 경험이 요구되며, 사용자가 이전에 보여준 연구 능력은 이 직무에 매우 적합합니다.\"]",
+    "created_at": "2026-02-04 14:27:36.893627+00"
+  },
+  {
+    "id": "203",
+    "user_id": "9",
+    "recruitment_id": "29",
+    "rank_order": "25",
+    "reason": "[\"[DocQA Challenge (RAG 기반 문서 질의응답)] 사용자는 LLM Engineer로서의 프로젝트 경험이 있으며, 이는 레브잇의 Product Engineer (AI & Data) 직무에서 요구하는 LLM 기반 쇼핑 AI Agent 서비스 개발 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:27:55.077942+00"
+  },
+  {
+    "id": "204",
+    "user_id": "9",
+    "recruitment_id": "198",
+    "rank_order": "26",
+    "reason": "[\"[DocQA Challenge (RAG 기반 문서 질의응답)] 사용자는 데이터 중심 훈련과 실험 추적 관리 경험이 있으며, 이는 윈클의 풀스택/백엔드엔지니어 직무에서 요구하는 데이터 레이크 및 ELT 파이프라인 설계 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:27:55.077942+00"
+  },
+  {
+    "id": "205",
+    "user_id": "9",
+    "recruitment_id": "220",
+    "rank_order": "27",
+    "reason": "[\"[LLM 서비스에서 라우팅·캐시·폴백 전략의 비용-지연-품질 트레이드오프 분석] 사용자가 FastAPI와 유사한 백엔드 개발 경험이 있고, 클라우드 기반 서비스 운영 경험이 있어 데이터솔루션의 클라우드 기반 업무 시스템 개발 및 유지보수 직무에 적합합니다.\"]",
+    "created_at": "2026-02-04 14:28:14.995105+00"
+  },
+  {
+    "id": "206",
+    "user_id": "9",
+    "recruitment_id": "242",
+    "rank_order": "28",
+    "reason": "[\"[LLM 서비스에서 라우팅·캐시·폴백 전략의 비용-지연-품질 트레이드오프 분석] 사용자는 대규모 LLM 학습 및 선행 연구 경험이 있으며, 딥러닝 관련 분야에서 성공적인 프로젝트를 수행했으므로 크래프톤의 Research Scientist Intern 직무에 적합합니다.\"]",
+    "created_at": "2026-02-04 14:28:14.995105+00"
+  },
+  {
+    "id": "207",
+    "user_id": "7",
+    "recruitment_id": "184",
+    "rank_order": "3",
+    "reason": "[\"[StudyMate] 사용자는 SpringBoot 기반의 REST API 설계 및 구현 경험이 있으며, 공고에서도 Java, Spring, Spring Boot 등의 기술을 사용하여 백엔드 개발자를 찾고 있어 사용자의 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:28:52.323259+00"
+  },
+  {
+    "id": "208",
+    "user_id": "7",
+    "recruitment_id": "196",
+    "rank_order": "19",
+    "reason": "[\"[StudyMate] 사용자는 SpringBoot를 사용한 백엔드 개발 경험이 있고, RESTful API 설계 및 구현 역량을 보유하고 있으므로, 해당 공고의 요구사항에 부합합니다.\"]",
+    "created_at": "2026-02-04 14:28:52.323259+00"
+  },
+  {
+    "id": "209",
+    "user_id": "7",
+    "recruitment_id": "171",
+    "rank_order": "5",
+    "reason": "[\"[StudyMate] 사용자는 SpringBoot와 관련된 다양한 프로젝트를 통해 백엔드 개발에 대한 깊은 이해를 가지고 있으며, 특히 로그 플랫폼 백엔드 개발이라는 구체적인 분야에 적합할 것으로 보입니다.\"]",
+    "created_at": "2026-02-04 14:28:52.323259+00"
+  },
+  {
+    "id": "210",
+    "user_id": "7",
+    "recruitment_id": "182",
+    "rank_order": "6",
+    "reason": "[\"[StudyMate] 사용자가 Spring 프레임워크를 사용한 경험이 많고, RESTful API 설계 및 구현 경험이 있기 때문에 이 공고에 적합합니다.\"]",
+    "created_at": "2026-02-04 14:28:52.323259+00"
+  },
+  {
+    "id": "211",
+    "user_id": "7",
+    "recruitment_id": "206",
+    "rank_order": "7",
+    "reason": "[\"[StudyMate] 사용자는 SpringBoot뿐만 아니라 Redis와 같은 다양한 백엔드 기술을 경험했으며, 이러한 기술이 공고에서 요구하는 백엔드 개발 역량과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:28:52.323259+00"
+  },
+  {
+    "id": "212",
+    "user_id": "7",
+    "recruitment_id": "190",
+    "rank_order": "18",
+    "reason": "[\"[StudyMate] 사용자는 웹 애플리케이션 개발 및 유지보수 경험이 풍부하며, 특히 전자정부프레임웍을 사용한 경험이 있어 이 공고에 적합합니다.\"]",
+    "created_at": "2026-02-04 14:28:52.323259+00"
+  },
+  {
+    "id": "213",
+    "user_id": "7",
+    "recruitment_id": "187",
+    "rank_order": "21",
+    "reason": "[\"[StudyMate] 사용자는 마이크로서비스 아키텍처(MSA) 기반의 인프라 개선 및 유지보수와 관련된 경험이 있으며, 이는 자사의 백엔드 시스템 설계 및 개발에 큰 도움이 됩니다.\"]",
+    "created_at": "2026-02-04 14:28:52.323259+00"
+  },
+  {
+    "id": "214",
+    "user_id": "7",
+    "recruitment_id": "193",
+    "rank_order": "7",
+    "reason": "[\"[QueueNow] 사용자는 Java, Spring Boot, Redis 등의 기술 스택을 보유하고 있으며, 이는 팀오투의 백엔드 개발에 필요한 Java, NodeJs, PHP 등의 프로그래밍 언어 요구사항에 부합합니다.\"]",
+    "created_at": "2026-02-04 14:29:09.086484+00"
+  },
+  {
+    "id": "215",
+    "user_id": "7",
+    "recruitment_id": "185",
+    "rank_order": "8",
+    "reason": "[\"[QueueNow] 사용자는 Spring Boot와 Redis를 활용한 분산 락 구현 경험이 있으며, 이는 매드업의 FastAPI 및 백엔드 개발 요구사항에 적합합니다.\"]",
+    "created_at": "2026-02-04 14:29:09.086484+00"
+  },
+  {
+    "id": "216",
+    "user_id": "7",
+    "recruitment_id": "220",
+    "rank_order": "27",
+    "reason": "[\"[QueueNow] 사용자는 Spring Boot와 Redis를 사용한 분산 락 구현 경험이 있으며, 이는 데이타솔루션의 Spring Boot 기반 백엔드 개발 요구사항에 부합합니다.\"]",
+    "created_at": "2026-02-04 14:29:09.086484+00"
+  },
+  {
+    "id": "217",
+    "user_id": "7",
+    "recruitment_id": "189",
+    "rank_order": "24",
+    "reason": "[\"[QueueNow] 사용자는 Spring Boot와 Redis를 활용한 분산 락 구현 경험이 있으며, 이는 샘랩의 신뢰성과 확장성을 갖춘 서버 설계 요구사항에 적합합니다.\"]",
+    "created_at": "2026-02-04 14:29:09.086484+00"
+  },
+  {
+    "id": "218",
+    "user_id": "7",
+    "recruitment_id": "198",
+    "rank_order": "25",
+    "reason": "[\"[QueueNow] 사용자는 Spring Boot와 Redis를 활용한 분산 락 구현 경험이 있으며, 이는 윈클의 Spring Boot(Kotlin) 또는 NestJS(TypeScript)를 활용한 복잡한 비즈니스 로직 개발 요구사항에 부합합니다.\"]",
+    "created_at": "2026-02-04 14:29:09.086484+00"
+  },
+  {
+    "id": "219",
+    "user_id": "7",
+    "recruitment_id": "228",
+    "rank_order": "20",
+    "reason": "[\"[OpsHelper] 윈클(주)의 풀스택/백엔드엔지니어 직무는 데이터 레이크 및 ELT 파이프라인 설계를 요구하며, 이는 사용자가 로그 수집 및 분석 시스템을 개발한 경험과 관련이 있습니다.\"]",
+    "created_at": "2026-02-04 14:29:28.000922+00"
+  },
+  {
+    "id": "220",
+    "user_id": "7",
+    "recruitment_id": "172",
+    "rank_order": "4",
+    "reason": "[\"[OpsHelper] 씨앤토트의 Bigdata, 데이터 엔지니어 모집 공고는 Microsoft Azure를 활용한 빅데이터 시스템 구축을 요구하며, 이는 사용자가 AWS EC2를 사용한 경험이 있어 클라우드 환경에 익숙함을 보여줍니다.\"]",
+    "created_at": "2026-02-04 14:29:28.000922+00"
+  },
+  {
+    "id": "221",
+    "user_id": "7",
+    "recruitment_id": "58",
+    "rank_order": "6",
+    "reason": "[\"[OpsHelper] 포스타입의 백엔드 엔지니어 직무는 서비스 성장과 이용자 만족에 기여하는 문제 정의 및 해결안 도출을 요구하며, 이는 사용자의 문제 해결 능력과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:29:28.000922+00"
+  },
+  {
+    "id": "222",
+    "user_id": "7",
+    "recruitment_id": "194",
+    "rank_order": "8",
+    "reason": "[\"[OpsHelper] (주)포스타입의 백엔드엔지니어 직무는 서비스 성장과 이용자 만족에 기여하는 문제 정의 및 해결안 도출을 요구하며, 이는 사용자의 문제 해결 능력과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:29:28.000922+00"
+  },
+  {
+    "id": "223",
+    "user_id": "7",
+    "recruitment_id": "83",
+    "rank_order": "1",
+    "reason": "[\"[AuthCore - 인증·권한 공통 모듈 리팩토링] 메가존클라우드의 Data Engineer는 다양한 데이터 소스 처리, ETL 파이프라인 구축 등이 필요하며, 이는 사용자가 DataCleaner 프로젝트에서 보여준 데이터 처리 능력과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:29:46.556907+00"
+  },
+  {
+    "id": "224",
+    "user_id": "7",
+    "recruitment_id": "116",
+    "rank_order": "0",
+    "reason": "[\"[AuthCore - 인증·권한 공통 모듈 리팩토링] 소크라에이아이의 산타 BE Engineer는 Kotlin, SpringBoot, PostgreSQL 등을 활용하며, 이는 사용자의 기술 스택과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:29:46.556907+00"
+  },
+  {
+    "id": "225",
+    "user_id": "7",
+    "recruitment_id": "195",
+    "rank_order": "2",
+    "reason": "[\"[AuthCore - 인증·권한 공통 모듈 리팩토링] (주)시큐포인트의 네트워크·보안 솔루션 서버/백엔드개발자는 SSH/Telnet/FTP/SFTP 기반 원격 접속 프록시 서버 개발, 명령어 제어, 접근통제 등을 필요로 하며, 이는 사용자의 네트워크 및 보안 관련 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:29:46.556907+00"
+  },
+  {
+    "id": "226",
+    "user_id": "7",
+    "recruitment_id": "127",
+    "rank_order": "25",
+    "reason": "[\"[AuthCore - 인증·권한 공통 모듈 리팩토링] NAVER Cloud의 Omni-Foundation Model Evaluation Research Engineer는 모델 성능 평가 및 분석을 필요로 하며, 이는 사용자가 다양한 프로젝트를 통해 얻은 분석 및 평가 능력과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:29:46.556907+00"
+  },
+  {
+    "id": "227",
+    "user_id": "7",
+    "recruitment_id": "197",
+    "rank_order": "26",
+    "reason": "[\"[AuthCore - 인증·권한 공통 모듈 리팩토링] (주)건강누리의 백엔드개발자는 데이터베이스 관리, API 설계 및 구현 능력을 필요로 하며, 이는 사용자의 AuthCore 프로젝트에서 보여준 역량과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:29:46.556907+00"
+  },
+  {
+    "id": "228",
+    "user_id": "7",
+    "recruitment_id": "41",
+    "rank_order": "27",
+    "reason": "[\"[OrderFlow] 사용자는 비동기 처리 및 분산 시스템에 대한 경험이 많아, 대규모 멀티모달 데이터 파이프라인 구축 요구사항에 적합합니다.\"]",
+    "created_at": "2026-02-04 14:30:05.659184+00"
+  },
+  {
+    "id": "229",
+    "user_id": "7",
+    "recruitment_id": "76",
+    "rank_order": "27",
+    "reason": "[\"[OrderFlow] 사용자는 AI 도구와 시스템 설계에 관심이 많으며, 이는 NHN Cloud의 AI 전환 백엔드 개발 요구사항에 잘 맞습니다.\"]",
+    "created_at": "2026-02-04 14:30:05.659184+00"
+  },
+  {
+    "id": "230",
+    "user_id": "7",
+    "recruitment_id": "59",
+    "rank_order": "17",
+    "reason": "[\"[SearchBoost] 현재 공고들 중에서는 사용자의 기술 스택이나 프로젝트 성과와 직접적으로 일치하지 않는 부분이 많아 보입니다. 하지만 일부 공고들은 잠재적으로 사용자의 기술과 경험이 유용할 수 있는 부분들이 있습니다.\"]",
+    "created_at": "2026-02-04 14:30:23.754896+00"
+  },
+  {
+    "id": "231",
+    "user_id": "7",
+    "recruitment_id": "238",
+    "rank_order": "29",
+    "reason": "[\"[SearchBoost] 레진엔터테인먼트의 데이터 엔지니어 공고는 Python 및 SQL을 활용한 데이터 처리 경험이 필요하며, 이는 사용자가 가진 다양한 데이터 처리 및 분석 프로젝트 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:30:23.754896+00"
+  },
+  {
+    "id": "232",
+    "user_id": "7",
+    "recruitment_id": "180",
+    "rank_order": "28",
+    "reason": "[\"[SearchBoost] (주)세르딕의 백엔드 개발자 공고는 Node.js, Python 기반의 백엔드 서비스 개발 및 운영 경험이 필요하며, 이는 사용자가 가진 다양한 백엔드 시스템 개발 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:30:23.754896+00"
+  },
+  {
+    "id": "233",
+    "user_id": "7",
+    "recruitment_id": "45",
+    "rank_order": "16",
+    "reason": "[\"[SearchBoost] NAVER Cloud의 클라우드 인프라 및 데이터 엔지니어 공고는 GCP 기반 클라우드 인프라 구축 및 운영 경험이 필요하며, 이는 사용자가 가진 클라우드 환경에서의 서비스 개발 및 운영 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:30:23.754896+00"
+  },
+  {
+    "id": "234",
+    "user_id": "7",
+    "recruitment_id": "225",
+    "rank_order": "27",
+    "reason": "[\"[CleanCode-CI/CD] 사용자는 JUnit5와 Mockito를 활용한 테스트 자동화와 GitHub Actions를 이용한 CI/CD 파이프라인 설계 경험이 있으며, 이는 공고 2의 클라우드 네이티브 인프라 및 CI/CD 프로세스 설계와 일치합니다.\"]",
+    "created_at": "2026-02-04 14:30:42.205565+00"
+  },
+  {
+    "id": "235",
+    "user_id": "7",
+    "recruitment_id": "120",
+    "rank_order": "28",
+    "reason": "[\"[CleanCode-CI/CD] 사용자의 Docker 및 CI/CD 파이프라인 설계 경험은 공고 5의 컨테이너 구축 및 관리, CI/CD 구축 가능자 요구사항에 부합합니다.\"]",
+    "created_at": "2026-02-04 14:30:42.205565+00"
+  },
+  {
+    "id": "236",
+    "user_id": "7",
+    "recruitment_id": "80",
+    "rank_order": "29",
+    "reason": "[\"[CleanCode-CI/CD] 사용자의 Docker 및 GitHub Actions를 활용한 배포 자동화 경험은 공고 7의 컨테이너 및 서빙 기본 운용, CI/CD 파이프라인 이해 및 실행 요구사항에 적합합니다.\"]",
+    "created_at": "2026-02-04 14:30:42.205565+00"
+  },
+  {
+    "id": "237",
+    "user_id": "7",
+    "recruitment_id": "30",
+    "rank_order": "9",
+    "reason": "[\"[ChatLive - 실시간 알림 및 채팅 서버] 사용자는 LLM 기반 애플리케이션 개발에 관심이 있으며, 이는 AI 백엔드 엔지니어로서 LLM 기반 애플리케이션 개발 경험과 관련이 있습니다.\"]",
+    "created_at": "2026-02-04 14:31:00.831129+00"
+  },
+  {
+    "id": "238",
+    "user_id": "7",
+    "recruitment_id": "231",
+    "rank_order": "28",
+    "reason": "[\"[DataCleaner] Microsoft Azure를 활용한 빅데이터 시스템 구축과 데이터 파이프라인 구축 경험이 사용자의 대규모 데이터 처리 및 ETL 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:31:17.873251+00"
+  },
+  {
+    "id": "239",
+    "user_id": "7",
+    "recruitment_id": "221",
+    "rank_order": "29",
+    "reason": "[\"[DataCleaner] Spring Boot와 JPA를 기반으로 한 백엔드 개발 경험이 요구되며, 대규모 트래픽 및 데이터 처리 경험이 필요합니다.\"]",
+    "created_at": "2026-02-04 14:31:17.873251+00"
+  },
+  {
+    "id": "242",
+    "user_id": "6",
+    "recruitment_id": "215",
+    "rank_order": "16",
+    "reason": "[\"[TaskFlow] 스마트핀텍의 공고에서는 React와 Next.js를 사용한 프론트엔드 개발자를 찾고 있으며, 이는 사용자가 주로 사용하는 기술 스택과 일치합니다. 또한 기존 프로젝트 유지보수와 성능 최적화가 포함되어 있어, 사용자의 트러블슈팅 경험과 성과를 활용할 수 있습니다.\"]",
+    "created_at": "2026-02-04 14:32:12.221625+00"
+  },
+  {
+    "id": "243",
+    "user_id": "6",
+    "recruitment_id": "200",
+    "rank_order": "1",
+    "reason": "[\"[TaskFlow] (주)이너버즈는 React와 Next.js를 사용하여 비디오 편집기의 UI를 개발하고 유지보수하는 역할을 하고 있습니다. 이는 사용자가 React와 JavaScript를 활용한 다양한 프로젝트를 성공적으로 수행한 경험과 잘 맞아떨어집니다.\"]",
+    "created_at": "2026-02-04 14:32:12.221625+00"
+  },
+  {
+    "id": "244",
+    "user_id": "6",
+    "recruitment_id": "210",
+    "rank_order": "22",
+    "reason": "[\"[TaskFlow] (주)애드캡슐소프트는 React, Next.js, Vue.js 등을 사용하여 웹 및 모바일웹 서비스를 개발하고 유지보수하는 역할로, 사용자의 다양한 프로젝트 경험과 기술 스택에 부합합니다.\"]",
+    "created_at": "2026-02-04 14:32:12.221625+00"
+  },
+  {
+    "id": "245",
+    "user_id": "6",
+    "recruitment_id": "205",
+    "rank_order": "20",
+    "reason": "[\"[TaskFlow] 왓트의 프론트엔드 전문 인력 모집에서는 React 및 TypeScript를 활용한 UI 로직 구현과 상태 관리 도구 사용 경험이 필요하므로, 사용자의 과거 프로젝트 성과와 일치합니다.\"]",
+    "created_at": "2026-02-04 14:32:12.221625+00"
+  },
+  {
+    "id": "246",
+    "user_id": "6",
+    "recruitment_id": "209",
+    "rank_order": "25",
+    "reason": "[\"[TaskFlow] (주)인피아드의 프론트엔드 개발자는 Vue.js와 React 기반의 UI 컴포넌트를 개발하고, 성능 최적화와 웹 접근성 개선 경험이 필요합니다. 이는 사용자의 프로젝트 성과와 일치합니다.\"]",
+    "created_at": "2026-02-04 14:32:12.221625+00"
+  },
+  {
+    "id": "247",
+    "user_id": "6",
+    "recruitment_id": "216",
+    "rank_order": "11",
+    "reason": "[\"[TaskFlow] 오픈마일의 프론트엔드 개발자는 React/React Native를 이용한 모빌리티 관련 웹/앱 개발 경험이 중요하며, 사용자의 다양한 프로젝트 경험과 기술 스택에 적합합니다.\"]",
+    "created_at": "2026-02-04 14:32:12.221625+00"
+  },
+  {
+    "id": "248",
+    "user_id": "6",
+    "recruitment_id": "206",
+    "rank_order": "17",
+    "reason": "[\"[TaskFlow] (주)블랙라임은 TypeScript와 React/Vue를 활용한 프론트엔드 개발 경험이 중요한 포지션이며, 이는 사용자의 기술 스택과 프로젝트 성과에 부합합니다.\"]",
+    "created_at": "2026-02-04 14:32:12.221625+00"
+  },
+  {
+    "id": "249",
+    "user_id": "6",
+    "recruitment_id": "201",
+    "rank_order": "29",
+    "reason": "[\"[TaskFlow] (주)위뉴는 React/TypeScript 기반 웹 개발 경험이 필요하며, 실시간 스트리밍 UI 구현 경험이 중요합니다. 이는 사용자가 다양한 프로젝트에서 쌓은 경험과 일치합니다.\"]",
+    "created_at": "2026-02-04 14:32:12.221625+00"
+  },
+  {
+    "id": "250",
+    "user_id": "6",
+    "recruitment_id": "211",
+    "rank_order": "29",
+    "reason": "[\"[AuthUI] (주)엘핀의 공고에서는 React, Next 등 최신 기술을 활용한 웹/모바일 기능 개발 및 운영이 주요 업무로, 이는 사용자의 다양한 프론트엔드 프로젝트 경험과 잘 맞아 떨어집니다.\"]",
+    "created_at": "2026-02-04 14:32:49.3996+00"
+  },
+  {
+    "id": "251",
+    "user_id": "6",
+    "recruitment_id": "106",
+    "rank_order": "29",
+    "reason": "[\"[ChartView] 카운터포인트리서치의 데이터 엔지니어 인턴 포지션에서는 데이터 시각화와 관련된 업무가 포함되어 있으며, 이는 사용자의 데이터 시각화 프로젝트 경험과 관련이 있습니다.\"]",
+    "created_at": "2026-02-04 14:33:28.925235+00"
+  },
+  {
+    "id": "268",
+    "user_id": "9",
+    "recruitment_id": "310",
+    "rank_order": "8",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] 사용자가 프롬프트 엔지니어링 및 AI 에이전트에 대한 경험이 있으며, 특히 RAG 및 성능 최적화에 대한 경험이 있어 이 직무에 적합합니다.\"]",
+    "created_at": "2026-02-05 01:24:29.740404+00"
+  },
+  {
+    "id": "269",
+    "user_id": "9",
+    "recruitment_id": "241",
+    "rank_order": "20",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] 사용자가 OAI 모델 경량화 및 추론 엔진 최적화에 대한 경험이 있으며, 이는 이 직무의 주요 요구사항과 일치합니다.\"]",
+    "created_at": "2026-02-05 01:24:29.740404+00"
+  },
+  {
+    "id": "270",
+    "user_id": "7",
+    "recruitment_id": "261",
+    "rank_order": "25",
+    "reason": "[\"[ApiShield] 사용자는 Spring Boot와 Resilience4j를 사용하여 외부 API 연동의 안정성을 높이는 프로젝트를 수행했으며, 이는 티켓팅 플랫폼의 핵심 API 개발과 외부 서비스 통합 경험을 요구하는 이 공고에 매우 적합합니다.\"]",
+    "created_at": "2026-02-05 01:24:46.247815+00"
+  },
+  {
+    "id": "271",
+    "user_id": "7",
+    "recruitment_id": "311",
+    "rank_order": "26",
+    "reason": "[\"[ApiShield] 사용자는 Java와 Spring Framework를 활용한 프로젝트 경험이 풍부하며, 이는 다날의 결제 서비스 개발 및 운영 직무에 매우 적합합니다. 또한, 네트워크 프로그래밍과 인프라 이해도가 높아 요구사항에 부합합니다.\"]",
+    "created_at": "2026-02-05 01:24:46.247815+00"
+  },
+  {
+    "id": "272",
+    "user_id": "7",
+    "recruitment_id": "175",
+    "rank_order": "12",
+    "reason": "[\"[ApiShield] 사용자의 Java 및 Spring 프레임워크 개발 경험은 NHN Cloud의 인프라 서비스 개발 직무에 적합하며, 특히 리눅스 환경에서의 개발 및 운영 경험이 요구되는 점에서 부합합니다.\"]",
+    "created_at": "2026-02-05 01:24:46.247815+00"
+  },
+  {
+    "id": "273",
+    "user_id": "7",
+    "recruitment_id": "287",
+    "rank_order": "13",
+    "reason": "[\"[ApiShield] 사용자는 Spring Boot를 사용한 프로젝트 경험이 많으며, 전자정부 프레임워크를 사용하는 이 공고에 적합합니다. 특히, 외부 연계 개발 경험이 요구되는 점에서 일치합니다.\"]",
+    "created_at": "2026-02-05 01:24:46.247815+00"
+  },
+  {
+    "id": "274",
+    "user_id": "7",
+    "recruitment_id": "265",
+    "rank_order": "15",
+    "reason": "[\"[ApiShield] 사용자는 Spring Framework 및 Spring Boot를 사용한 웹서비스 개발 경험이 풍부하며, 이는 백엔드 웹 개발자 역할에 매우 적합합니다. 또한, JPA 및 Spring Framework 사용 경험이 요구되는 점에서 일치합니다.\"]",
+    "created_at": "2026-02-05 01:24:46.247815+00"
+  },
+  {
+    "id": "275",
+    "user_id": "7",
+    "recruitment_id": "312",
+    "rank_order": "27",
+    "reason": "[\"[ApiShield] 사용자는 Spring Boot와 Resilience4j를 사용한 경험이 있으며, 이는 라스트마일 물류 플랫폼 관련 백엔드 시스템 개발에 유용하게 활용될 수 있습니다. 또한, RDBMS 및 Docker/Kubernetes 경험이 요구되는 점에서 부합합니다.\"]",
+    "created_at": "2026-02-05 01:24:46.247815+00"
+  },
+  {
+    "id": "276",
+    "user_id": "7",
+    "recruitment_id": "251",
+    "rank_order": "26",
+    "reason": "[\"[ApiShield] 사용자의 Spring 프레임워크(Spring Boot) 및 JPA 기반 웹 애플리케이션 개발 경험은 알서포트의 웹 백엔드 개발자에 적합하며, RDBMS 경험 역시 요구사항에 부합합니다.\"]",
+    "created_at": "2026-02-05 01:24:46.247815+00"
+  },
+  {
+    "id": "277",
+    "user_id": "6",
+    "recruitment_id": "282",
+    "rank_order": "2",
+    "reason": "[\"[FileUploadUI] 스마트핀텍의 React/Next.js 프론트엔드 개발자 직무는 기존 프로젝트 유지보수와 신규 프로젝트 개발을 모두 다루며, HTML/CSS 마크업, 반응형 웹 디자인 구현, RESTful API 연동 등 사용자의 기술과 일치하는 부분이 많습니다.\"]",
+    "created_at": "2026-02-05 03:42:55.860073+00"
+  },
+  {
+    "id": "278",
+    "user_id": "6",
+    "recruitment_id": "277",
+    "rank_order": "29",
+    "reason": "[\"[FileUploadUI] (주)애드캡슐소프트의 고도화 프로젝트 경력 프론트엔드 개발자는 React, Next.js, Vue.js를 사용한 다양한 프로젝트 경험을 필요로 하며, 이는 사용자가 쌓아온 다양한 프로젝트 경험과 일치합니다.\"]",
+    "created_at": "2026-02-05 03:42:55.860073+00"
+  },
+  {
+    "id": "279",
+    "user_id": "6",
+    "recruitment_id": "269",
+    "rank_order": "29",
+    "reason": "[\"[FileUploadUI] (주)위뉴의 헬스케어 프론트엔드 엔지니어는 React/TypeScript 기반 웹 개발 경험과 실시간 스트리밍 UI 구현 능력을 요구하며, 이는 사용자의 기술 스택과 일치합니다.\"]",
+    "created_at": "2026-02-05 03:42:55.860073+00"
+  },
+  {
+    "id": "280",
+    "user_id": "6",
+    "recruitment_id": "288",
+    "rank_order": "1",
+    "reason": "[\"[FileUploadUI] (주)플랜티엠의 프론트엔드 개발자는 Vue.js 및 Nuxtjs 기반의 서비스 개발 경험이 필요하며, 이는 사용자가 가진 다양한 프론트엔드 기술 경험과 잘 맞습니다.\"]",
+    "created_at": "2026-02-05 03:42:55.860073+00"
+  },
+  {
+    "id": "281",
+    "user_id": "6",
+    "recruitment_id": "219",
+    "rank_order": "10",
+    "reason": "[\"[FileUploadUI] 사용자는 다양한 프로젝트를 통해 REST API 연동 및 성능 최적화 경험을 가지고 있으며, 이는 공고에서 요구하는 REST API 설계 및 연동, 성능 최적화 경험과 일치합니다.\"]",
+    "created_at": "2026-02-05 03:52:16.351658+00"
+  },
+  {
+    "id": "282",
+    "user_id": "6",
+    "recruitment_id": "286",
+    "rank_order": "28",
+    "reason": "[\"[FileUploadUI] 사용자는 React와 JavaScript를 사용한 다양한 프로젝트를 성공적으로 수행하였으며, 특히 비동기 작업 처리와 사용자 경험 향상에 강점을 가지고 있습니다. 이 공고는 REST API 연동 및 웹 성능 최적화 경험을 요구하므로, 사용자의 경험과 일치합니다.\"]",
+    "created_at": "2026-02-05 07:58:36.973179+00"
+  },
+  {
+    "id": "283",
+    "user_id": "6",
+    "recruitment_id": "272",
+    "rank_order": "12",
+    "reason": "[\"[FileUploadUI] 공고 6은 공고 4와 유사하게 React와 TypeScript를 사용하며, 성능 최적화와 UI 시스템 설계 경험이 필요합니다. 이는 사용자의 성능 최적화 및 UI 설계 경험과 일치합니다.\"]",
+    "created_at": "2026-02-05 08:02:06.779457+00"
+  },
+  {
+    "id": "284",
+    "user_id": "6",
+    "recruitment_id": "276",
+    "rank_order": "4",
+    "reason": "[\"[FileUploadUI] 공고 9는 Vue.js와 React를 사용한 UI 컴포넌트 개발과 성능 최적화를 요구합니다. 이는 사용자의 다양한 프론트엔드 기술 경험과 일치합니다.\"]",
+    "created_at": "2026-02-05 08:02:06.779457+00"
+  },
+  {
+    "id": "285",
+    "user_id": "9",
+    "recruitment_id": "308",
+    "rank_order": "19",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] 사용자의 프로젝트에서 데이터 중심 훈련(Data-centric Training)과 실험 추적 관리를 통해 데이터 품질 개선과 성능 향상을 이루었던 경험은 공고 18의 데이터 품질 관리 및 모니터링 체계 마련과 관련이 있습니다.\"]",
+    "created_at": "2026-02-05 10:47:21.812219+00"
+  },
+  {
+    "id": "286",
+    "user_id": "9",
+    "recruitment_id": "266",
+    "rank_order": "9",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] 사용자가 다양한 프로젝트에서 팀 내 속도와 성능 사이의 우선순위를 조율하고 지표를 설정한 경험은 공고 7의 대규모 멀티모달 데이터 파이프라인 구축 및 이벤트 드리븐 시스템 개발과 관련이 있습니다.\"]",
+    "created_at": "2026-02-05 10:47:21.812219+00"
+  },
+  {
+    "id": "287",
+    "user_id": "8",
+    "recruitment_id": "257",
+    "rank_order": "23",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 인텔렉투스의 백엔드 개발자로서 자율주행 플랫폼 서비스 API 설계 및 구현, 분산 환경에서의 백엔드 시스템 개발 등은 사용자의 풀스택 엔지니어링 역량을 활용할 수 있는 좋은 기회입니다.\"]",
+    "created_at": "2026-02-05 10:50:09.180119+00"
+  },
+  {
+    "id": "288",
+    "user_id": "8",
+    "recruitment_id": "310",
+    "rank_order": "15",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 센드버드의 AI Agent Engineer 포지션에서는 Python, Django, FastAPI 등 사용자의 주요 기술 스택을 활용하여 AI 기반 백엔드 API 개발 경험을 쌓을 수 있습니다.\"]",
+    "created_at": "2026-02-05 10:50:09.180119+00"
+  },
+  {
+    "id": "289",
+    "user_id": "8",
+    "recruitment_id": "95",
+    "rank_order": "16",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 토스플레이스의 Security Researcher 직책은 사용자의 보안 측면의 트러블슈팅 경험과 관련이 있으며, 클라우드 및 네트워크 보안 진단 능력을 발전시킬 수 있습니다.\"]",
+    "created_at": "2026-02-05 10:50:09.180119+00"
+  },
+  {
+    "id": "290",
+    "user_id": "8",
+    "recruitment_id": "252",
+    "rank_order": "24",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 사용자가 FastAPI와 Docker를 사용하여 내부 운영용 어드민 API를 개발한 경험이 있으며, 해당 공고에서도 동일한 기술 스택(FastAPI)을 사용하고 있습니다.\"]",
+    "created_at": "2026-02-05 10:50:29.862633+00"
+  },
+  {
+    "id": "291",
+    "user_id": "8",
+    "recruitment_id": "180",
+    "rank_order": "25",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 사용자는 Python, FastAPI, SQLAlchemy, Docker 등의 기술 스택을 보유하고 있으며, 이 공고에서는 Node.js와 Python을 기반으로 한 백엔드 서비스 개발 및 운영이 주요 업무로 명시되어 있어 적합합니다.\"]",
+    "created_at": "2026-02-05 10:50:29.862633+00"
+  },
+  {
+    "id": "292",
+    "user_id": "6",
+    "recruitment_id": "381",
+    "rank_order": "0",
+    "reason": "[\"[FileUploadUI] 사용자는 React와 TypeScript를 사용한 프로젝트 경험이 있으며, 다양한 프로젝트를 통해 UI/UX 구현 능력을 입증했습니다. 공고 9는 React, Next.js, TypeScript 기반의 웹 프로덕트 개발에 초점을 맞추고 있으며, 사용자의 기술적 역량과 잘 맞습니다.\"]",
+    "created_at": "2026-02-05 17:39:33.873397+00"
+  },
+  {
+    "id": "293",
+    "user_id": "6",
+    "recruitment_id": "377",
+    "rank_order": "27",
+    "reason": "[\"[FileUploadUI] 사용자는 모바일 및 웹 서비스 개발에 대한 경험이 있으며, 특히 사용자 경험 개선에 중점을 둔 프로젝트 경험이 많습니다. 공고 14는 웹/모바일 서비스 프론트엔드 개발 및 운영을 요구하며, 사용자의 경험과 잘 맞습니다.\"]",
+    "created_at": "2026-02-05 17:39:33.873397+00"
+  },
+  {
+    "id": "294",
+    "user_id": "8",
+    "recruitment_id": "351",
+    "rank_order": "20",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 세르딕의 백엔드 개발자는 Node.js와 Python 기반으로 RESTful API 및 WebSocket 통신을 설계하며, 이는 사용자가 FastAPI와 유사한 기술을 다룬 경험과 일치합니다.\"]",
+    "created_at": "2026-02-06 01:08:56.344306+00"
+  },
+  {
+    "id": "295",
+    "user_id": "8",
+    "recruitment_id": "264",
+    "rank_order": "25",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 윈클의 또 다른 풀스택/백엔드 엔지니어 포지션은 현대적 데이터 파이프라인 구축과 실시간 분석 스트리밍을 다루며, 이는 사용자가 데이터 파이프라인 구축 경험이 있음을 감안하면 적합합니다.\"]",
+    "created_at": "2026-02-06 01:08:56.344306+00"
+  },
+  {
+    "id": "296",
+    "user_id": "7",
+    "recruitment_id": "364",
+    "rank_order": "14",
+    "reason": "[\"[ApiShield] 병원 경영 특화 마이데이터 플랫폼 백엔드 시스템 설계 및 개발과 관련된 경험이 사용자의 이전 프로젝트와 유사하므로 적합합니다.\"]",
+    "created_at": "2026-02-06 04:53:55.689227+00"
+  },
+  {
+    "id": "297",
+    "user_id": "7",
+    "recruitment_id": "257",
+    "rank_order": "11",
+    "reason": "[\"[ApiShield] 사용자의 백엔드 시스템 개발 경력과 특히 이벤트 기반 비동기 처리 및 분산 환경에 대한 경험이 인텔렉투스의 요구사항과 잘 맞습니다.\"]",
+    "created_at": "2026-02-06 04:53:55.689227+00"
+  },
+  {
+    "id": "298",
+    "user_id": "7",
+    "recruitment_id": "360",
+    "rank_order": "10",
+    "reason": "[\"[ApiShield] Spring Framework 및 Spring Boot를 기반으로 한 웹서비스 개발 및 유지보수 경험이 많아, 해당 직무의 요구사항에 부합합니다.\"]",
+    "created_at": "2026-02-06 05:07:54.777967+00"
+  },
+  {
+    "id": "299",
+    "user_id": "8",
+    "recruitment_id": "348",
+    "rank_order": "17",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 사용자는 FastAPI와 Docker를 사용한 백엔드 API 개발 경험이 있으며, 해당 공고는 FastAPI를 사용하여 솔루션을 개발하고 운영하는 직무를 포함하고 있습니다.\"]",
+    "created_at": "2026-02-06 05:36:36.328915+00"
+  },
+  {
+    "id": "300",
+    "user_id": "8",
+    "recruitment_id": "172",
+    "rank_order": "18",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 사용자는 데이터 파이프라인 구축과 관련된 경험을 가지고 있으며, 이 공고는 데이터 기반의 비즈니스 가치를 창출하는 분석 플랫폼 개발을 주도하는 역할을 포함하고 있어 적합합니다.\"]",
+    "created_at": "2026-02-06 05:36:36.328915+00"
+  },
+  {
+    "id": "301",
+    "user_id": "8",
+    "recruitment_id": "175",
+    "rank_order": "24",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 사용자는 리눅스 환경에서의 개발 및 운영 경험이 있으며, 이 공고에서는 리눅스 환경에서의 백엔드 시스템 개발이 요구되므로 사용자의 경력과 일치합니다.\"]",
+    "created_at": "2026-02-06 05:39:33.530897+00"
+  },
+  {
+    "id": "302",
+    "user_id": "6",
+    "recruitment_id": "374",
+    "rank_order": "6",
+    "reason": "[\"[FileUploadUI] 공고 10에서는 Vue.js와 React 기반의 UI 컴포넌트 개발, REST API 연동, 상태 관리 및 전역 스토어 설계 등을 요구합니다. 이는 사용자가 이미 여러 프로젝트를 통해 쌓아온 경험과 일치하며, 특히 성능 최적화와 웹 접근성 개선 부분에서 사용자의 역량이 발휘될 수 있습니다.\"]",
+    "created_at": "2026-02-06 05:51:14.37489+00"
+  },
+  {
+    "id": "303",
+    "user_id": "6",
+    "recruitment_id": "367",
+    "rank_order": "29",
+    "reason": "[\"[FileUploadUI] 사용자는 React와 JavaScript를 사용하여 다양한 프로젝트를 성공적으로 완료하였으며, 특히 FileUploadUI 프로젝트에서 비동기 작업 처리 및 사용자 경험을 개선한 경험이 있습니다. 공고 7은 React / React Native 기반 프론트엔드 구조 설계 및 개발, 비동기 처리 및 사용자 경험 최적화에 초점을 맞추고 있어 사용자의 경험과 일치합니다.\"]",
+    "created_at": "2026-02-06 05:51:57.933748+00"
+  },
+  {
+    "id": "304",
+    "user_id": "6",
+    "recruitment_id": "278",
+    "rank_order": "29",
+    "reason": "[\"[FileUploadUI] 사용자는 React와 JavaScript를 사용하여 다양한 프로젝트를 성공적으로 완료하였으며, 특히 FileUploadUI 프로젝트에서 비동기 작업 처리 및 사용자 경험을 개선한 경험이 있습니다. 공고 17은 웹/모바일 기능 검토 및 설계, 개발, 운영 등 다양한 프론트엔드 업무를 포함하고 있어 사용자의 경험과 일치합니다.\"]",
+    "created_at": "2026-02-06 05:51:57.933748+00"
+  },
+  {
+    "id": "305",
+    "user_id": "6",
+    "recruitment_id": "379",
+    "rank_order": "24",
+    "reason": "[\"[FileUploadUI] 공고 2 역시 React와 Next.js를 사용하는 프로젝트로, 사용자가 이미 보유한 기술과 경험이 잘 부합됩니다. 또한, UX/UI 개선과 관련된 내용이 포함되어 있어 사용자의 UI 설계 능력을 발휘할 기회가 많습니다.\"]",
+    "created_at": "2026-02-06 05:54:36.052909+00"
+  },
+  {
+    "id": "306",
+    "user_id": "6",
+    "recruitment_id": "383",
+    "rank_order": "26",
+    "reason": "[\"[FileUploadUI] 사용자는 React와 JavaScript를 사용한 프로젝트 경험이 있으며, 특히 비동기 작업 처리 및 사용자 피드백을 중심으로 한 UI 설계 경험이 뛰어납니다. 이 공고는 Next.js를 이용한 웹 애플리케이션 개발을 필요로 하며, 상용 서비스 사용자 단 프론트엔드 개발 및 운영을 포함하므로 사용자의 경험과 잘 맞습니다.\"]",
+    "created_at": "2026-02-06 05:55:01.529548+00"
+  },
+  {
+    "id": "308",
+    "user_id": "6",
+    "recruitment_id": "280",
+    "rank_order": "18",
+    "reason": "[\"[FileUploadUI] 사용자는 헬스케어 플랫폼과 관련된 프론트엔드/백엔드 개발 경험이 있으며, React, JavaScript, TypeScript 기반의 프론트엔드 개발 경험이 공고 25에서 요구하는 바와 일치합니다.\"]",
+    "created_at": "2026-02-06 12:20:59.221297+00"
+  },
+  {
+    "id": "309",
+    "user_id": "7",
+    "recruitment_id": "442",
+    "rank_order": "3",
+    "reason": "[\"[ApiShield] 사용자는 Spring Boot, JPA, MyBatis를 사용하여 데이터 처리 및 성능 최적화 경험이 있어, 이 공고의 Spring Framework 및 Spring Boot 기반 웹서비스 개발 및 유지보수 역할에 적합합니다.\"]",
+    "created_at": "2026-02-06 22:51:44.146365+00"
+  },
+  {
+    "id": "310",
+    "user_id": "7",
+    "recruitment_id": "445",
+    "rank_order": "4",
+    "reason": "[\"[ApiShield] 사용자는 RESTful API 설계 및 구현 경험이 많아, 백엔드 개발자로서 API 설계 및 구현 업무에 적합합니다.\"]",
+    "created_at": "2026-02-06 22:51:44.146365+00"
+  },
+  {
+    "id": "311",
+    "user_id": "7",
+    "recruitment_id": "447",
+    "rank_order": "5",
+    "reason": "[\"[ApiShield] 사용자는 RESTful API 설계 및 구현 경험이 많아, 백엔드 개발자로서 API 설계 및 구현 업무에 적합합니다.\"]",
+    "created_at": "2026-02-06 22:51:44.146365+00"
+  },
+  {
+    "id": "312",
+    "user_id": "8",
+    "recruitment_id": "260",
+    "rank_order": "3",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 사용자는 SQL을 사용하지 않고도 고객 정보를 조회할 수 있는 API를 개발한 경험이 있으며, 해당 공고에서는 네트워크 자산 식별 및 스캔 기능 개발, SSH/Telnet/FTP/SFTP 기반 원격 접속 프록시 서버 개발 등 유사한 백엔드 개발 업무를 요구하고 있습니다.\"]",
+    "created_at": "2026-02-07 02:59:15.987625+00"
+  },
+  {
+    "id": "313",
+    "user_id": "9",
+    "recruitment_id": "491",
+    "rank_order": "22",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] 폴라리스오피스의 AI 엔지니어 직무는 제한적 컴퓨팅 환경 내에서 AI 모델의 효율적인 추론 인프라 설계를 요구하며, 이는 사용자의 모델 최적화 및 실험 설계 경험과 관련이 깊습니다.\"]",
+    "created_at": "2026-02-07 04:48:52.455543+00"
+  },
+  {
+    "id": "314",
+    "user_id": "6",
+    "recruitment_id": "573",
+    "rank_order": "103",
+    "reason": "[\"[FileUploadUI] 사용자는 React와 JavaScript를 사용하여 다양한 프로젝트를 성공적으로 수행하였으며, 특히 비동기 작업 처리 및 사용자 경험 향상에 강점을 가지고 있습니다. 이 공고는 대시보드 및 웹 기반 데이터 시각화 프론트엔드 개발을 주요 업무로 하며, 사용자의 기술적 배경과 일치합니다.\"]",
+    "created_at": "2026-02-08 08:59:47.803709+00"
+  },
+  {
+    "id": "315",
+    "user_id": "6",
+    "recruitment_id": "448",
+    "rank_order": "105",
+    "reason": "[\"[FileUploadUI] 사용자는 React와 JavaScript를 사용하여 다양한 프로젝트를 성공적으로 수행하였으며, 특히 비동기 작업 처리 및 사용자 경험 향상에 강점을 가지고 있습니다. 이 공고는 React / React Native 기반 프론트엔드 구조 설계 및 TypeScript를 활용한 UI 로직 구현을 필요로 하여 사용자의 기술과 잘 맞습니다.\"]",
+    "created_at": "2026-02-08 08:59:47.803709+00"
+  },
+  {
+    "id": "316",
+    "user_id": "6",
+    "recruitment_id": "564",
+    "rank_order": "106",
+    "reason": "[\"[FileUploadUI] 사용자는 React와 JavaScript를 사용하여 다양한 프로젝트를 성공적으로 수행하였으며, 특히 비동기 작업 처리 및 사용자 경험 향상에 강점을 가지고 있습니다. 이 공고는 AI 시스템 대시보드 및 서비스 프런트엔드 개발을 주요 업무로 하며, 사용자의 기술적 배경과 일치합니다.\"]",
+    "created_at": "2026-02-08 08:59:47.803709+00"
+  },
+  {
+    "id": "317",
+    "user_id": "6",
+    "recruitment_id": "577",
+    "rank_order": "107",
+    "reason": "[\"[FileUploadUI] 사용자는 React와 JavaScript를 사용하여 다양한 프로젝트를 성공적으로 수행하였으며, 특히 비동기 작업 처리 및 사용자 경험 향상에 강점을 가지고 있습니다. 이 공고는 프론트엔드 개발 환경을 잘 이해하고 있으며, React를 비롯한 SPA 프레임워크 사용에 능숙한 사람을 필요로 하여 사용자의 기술과 잘 맞습니다.\"]",
+    "created_at": "2026-02-08 08:59:47.803709+00"
+  },
+  {
+    "id": "318",
+    "user_id": "6",
+    "recruitment_id": "558",
+    "rank_order": "109",
+    "reason": "[\"[FileUploadUI] 사용자는 React와 JavaScript를 사용하여 다양한 프로젝트를 성공적으로 수행하였으며, 특히 비동기 작업 처리 및 사용자 경험 향상에 강점을 가지고 있습니다. 이 공고는 웹/모바일 서비스 프론트엔드 기획·개발을 주요 업무로 하며, 사용자의 기술적 배경과 일치합니다.\"]",
+    "created_at": "2026-02-08 08:59:47.803709+00"
+  },
+  {
+    "id": "319",
+    "user_id": "8",
+    "recruitment_id": "544",
+    "rank_order": "102",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 사용자는 Python과 FastAPI를 사용한 경험이 있고, 이 공고에서는 Node.js와 Python을 기반으로 한 백엔드 서비스 개발 및 운영을 주요 업무로 하고 있어 사용자의 기술과 일치합니다.\"]",
+    "created_at": "2026-02-08 09:10:12.052309+00"
+  },
+  {
+    "id": "320",
+    "user_id": "8",
+    "recruitment_id": "615",
+    "rank_order": "101",
+    "reason": "[\"[MareNectaris/ajou-2501-cg-team-project] 토스증권의 Data Engineer (Realtime) 직무는 실시간 데이터 플랫폼 운영 경험을 필요로 하며, 이는 사용자가 추구하는 데이터 엔지니어로서의 역량 강화에 도움이 됩니다.\"]",
+    "created_at": "2026-02-08 09:14:13.080238+00"
+  },
+  {
+    "id": "321",
+    "user_id": "8",
+    "recruitment_id": "301",
+    "rank_order": "102",
+    "reason": "[\"[MareNectaris/ajou-2501-cg-team-project] 콘센트릭스서비스코리아의 [Catalyst]데이터 엔지니어 직무는 BigQuery와 GCP 기반의 데이터 파이프라인 운영을 포함하며, 이는 사용자가 다루고자 하는 기술과 밀접하게 연관되어 있습니다.\"]",
+    "created_at": "2026-02-08 09:14:13.080238+00"
+  },
+  {
+    "id": "322",
+    "user_id": "8",
+    "recruitment_id": "398",
+    "rank_order": "103",
+    "reason": "[\"[MareNectaris/ajou-2501-cg-team-project] (주)지누스의 데이터 엔지니어(DW/Mart 분야) 직무는 글로벌 온라인 마켓 데이터 수집 및 관리와 관련된 업무로, 사용자의 데이터 엔지니어 역량을 확장시킬 좋은 기회입니다.\"]",
+    "created_at": "2026-02-08 09:14:13.080238+00"
+  },
+  {
+    "id": "323",
+    "user_id": "8",
+    "recruitment_id": "479",
+    "rank_order": "104",
+    "reason": "[\"[MareNectaris/ajou-2501-cg-team-project] 지누스의 또 다른 데이터 엔지니어 포지션으로, 해외 법인과의 협업을 통해 다양한 데이터 관리 경험을 쌓을 수 있어 사용자의 경력에 큰 도움이 될 것입니다.\"]",
+    "created_at": "2026-02-08 09:14:13.080238+00"
+  },
+  {
+    "id": "324",
+    "user_id": "8",
+    "recruitment_id": "397",
+    "rank_order": "105",
+    "reason": "[\"[MareNectaris/ajou-2501-cg-team-project] 콘센트릭스서비스코리아의 또 다른 [Catalyst]데이터 엔지니어 포지션으로, 빅쿼리와 GCP 기반 SQL 실무 경험이 필요하므로 사용자의 기술 향상에 기여할 수 있습니다.\"]",
+    "created_at": "2026-02-08 09:14:13.080238+00"
+  },
+  {
+    "id": "325",
+    "user_id": "8",
+    "recruitment_id": "592",
+    "rank_order": "106",
+    "reason": "[\"[MareNectaris/ajou-2501-cg-team-project] 마지막으로 지누스의 데이터 엔지니어 포지션 역시 글로벌 데이터 관리와 파이프라인 운영 경험을 제공하여 사용자의 경력 발전에 유익합니다.\"]",
+    "created_at": "2026-02-08 09:14:13.080238+00"
+  },
+  {
+    "id": "326",
+    "user_id": "8",
+    "recruitment_id": "578",
+    "rank_order": "105",
+    "reason": "[\"[내부 운영용 어드민 API 개발] (주)데이타솔루션의 개발자는 클라우드 기반 업무 시스템 개발 및 유지보수를 담당하며, Spring Boot와 AWS 등의 경험이 필요합니다. 이는 사용자가 Spring Boot와 유사한 FastAPI를 사용하고, 클라우드 환경에 배포한 경험과 관련이 있습니다.\"]",
+    "created_at": "2026-02-08 09:15:01.383027+00"
+  },
+  {
+    "id": "327",
+    "user_id": "8",
+    "recruitment_id": "313",
+    "rank_order": "106",
+    "reason": "[\"[Train Simulation in WebGL] 레브잇의 Product Engineer Internship 직무는 LLM 기반 쇼핑 AI Agent 서비스에 필요한 기능을 설계 및 개발하는 것으로, 이는 사용자가 최신 프로젝트에서 WebGL 기반의 실시간 3D 기차 시뮬레이션을 성공적으로 구현한 경험과 관련이 있습니다.\"]",
+    "created_at": "2026-02-08 09:16:31.799018+00"
+  },
+  {
+    "id": "328",
+    "user_id": "8",
+    "recruitment_id": "386",
+    "rank_order": "107",
+    "reason": "[\"[Train Simulation in WebGL] 또 다른 데이타솔루션의 데이터 엔지니어 채용 공고는 클라우드 기반 업무 시스템 개발 및 유지보수를 포함하며, 이는 사용자가 데이터 처리 및 관리 역량을 보유하고 있다는 점과 관련이 있습니다.\"]",
+    "created_at": "2026-02-08 09:16:31.799018+00"
+  },
+  {
+    "id": "329",
+    "user_id": "8",
+    "recruitment_id": "573",
+    "rank_order": "11",
+    "reason": "[\"[Train Simulation 3D WebGL Project] 사용자는 Full Stack Data Engineer로서 데이터 처리 및 관리 역량을 보유하고 있으며, 최근 WebGL 기반의 실시간 3D 기차 시뮬레이션 프로젝트를 성공적으로 완료했습니다. 이는 프론트엔드 개발자로서 데이터 시각화와 관련된 기술과 경험이 필요함을 보여줍니다. 따라서 대시보드 및 웹 기반 데이터 시각화 프론트엔드 개발 경험이 중요한 이 공고에 적합합니다.\"]",
+    "created_at": "2026-02-08 09:17:11.933418+00"
+  },
+  {
+    "id": "330",
+    "user_id": "8",
+    "recruitment_id": "374",
+    "rank_order": "12",
+    "reason": "[\"[Train Simulation 3D WebGL Project] 사용자의 프로젝트는 사용자 정의 카메라 기능과 쉽게 편집 가능한 트랙 구성을 포함하며, 이는 복잡한 데이터를 시각적으로 효과적으로 표현하고 관리하는 능력을 나타냅니다. 이러한 경험은 Vue.js와 React 기반의 UI 컴포넌트 개발 및 REST API 연동을 요구하는 이 공고에 잘 맞습니다.\"]",
+    "created_at": "2026-02-08 09:17:11.933418+00"
+  },
+  {
+    "id": "331",
+    "user_id": "8",
+    "recruitment_id": "566",
+    "rank_order": "13",
+    "reason": "[\"[Train Simulation 3D WebGL Project] 사용자는 WebGL, JavaScript, HTML, CSS 등을 사용한 프로젝트 경험이 있습니다. 이 기술은 모빌리티 관련 웹/앱 개발 및 운영에서 React/ReactNative 설계 및 개발에 유용하게 활용될 수 있습니다. 또한, 사용자는 복잡한 시스템을 성공적으로 개발한 경험이 있어 모빌리티 시스템의 개발 및 유지보수에 기여할 수 있을 것입니다.\"]",
+    "created_at": "2026-02-08 09:17:11.933418+00"
+  },
+  {
+    "id": "332",
+    "user_id": "8",
+    "recruitment_id": "205",
+    "rank_order": "14",
+    "reason": "[\"[Train Simulation 3D WebGL Project] 사용자는 복잡한 3D 시뮬레이션 프로젝트를 성공적으로 완료했으며, 이는 React / React Native 기반 프론트엔드 구조 설계 및 개발에 유용한 경험이 됩니다. 또한, TypeScript를 활용한 안정적인 UI 로직 구현과 데이터 시각화 경험이 이 공고에 적합합니다.\"]",
+    "created_at": "2026-02-08 09:17:11.933418+00"
+  },
+  {
+    "id": "333",
+    "user_id": "8",
+    "recruitment_id": "452",
+    "rank_order": "1",
+    "reason": "[\"[Train Simulation 3D WebGL Project] Vue.js와 React 기반의 UI 컴포넌트 개발 경험이 있으며, 이는 해당 직무의 주요 요구사항 중 하나입니다.\"]",
+    "created_at": "2026-02-08 09:18:08.672425+00"
+  },
+  {
+    "id": "334",
+    "user_id": "8",
+    "recruitment_id": "133",
+    "rank_order": "15",
+    "reason": "[\"[Train Simulation 3D WebGL Project] Swift 및 iOS 개발 경험이 없지만, 사용자의 기술적 다양성과 적응력을 고려했을 때 도전해볼 만합니다.\"]",
+    "created_at": "2026-02-08 09:18:08.672425+00"
+  },
+  {
+    "id": "335",
+    "user_id": "8",
+    "recruitment_id": "564",
+    "rank_order": "16",
+    "reason": "[\"[Train Simulation 3D WebGL Project] 복잡한 AI 분석 데이터를 시각화하는 대시보드 개발 경험이 있어 사용자 친화적인 UI/UX 설계에 유리합니다.\"]",
+    "created_at": "2026-02-08 09:18:08.672425+00"
+  },
+  {
+    "id": "336",
+    "user_id": "8",
+    "recruitment_id": "86",
+    "rank_order": "0",
+    "reason": "[\"[Train Simulation 3D WebGL Project] 생성형 AI 및 디지털 제품 개발 경험이 있으며, 이는 현재 산업의 중요한 트렌드입니다.\"]",
+    "created_at": "2026-02-08 09:18:08.672425+00"
+  },
+  {
+    "id": "337",
+    "user_id": "8",
+    "recruitment_id": "563",
+    "rank_order": "18",
+    "reason": "[\"[Train Simulation 3D WebGL Project] CRM 웹 서비스의 기능 개선 및 유지보수 경험이 있어 유사한 프로젝트에도 기여할 수 있습니다.\"]",
+    "created_at": "2026-02-08 09:18:08.672425+00"
+  },
+  {
+    "id": "338",
+    "user_id": "9",
+    "recruitment_id": "56",
+    "rank_order": "17",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] 한화시스템의 sLLM 엔지니어 역할은 특수 목적의 소형 언어 모델(sLLM) 개발 및 최적화를 포함하며, 사용자의 모델 설계 및 실험 경험과 밀접한 관련이 있습니다.\"]",
+    "created_at": "2026-02-08 14:29:57.992016+00"
+  },
+  {
+    "id": "339",
+    "user_id": "9",
+    "recruitment_id": "611",
+    "rank_order": "18",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] 토스증권의 ML Engineer (LLM)는 LLM 모델 학습 및 운영을 포함하여 데이터 정의부터 모델 운영까지 전체 사이클을 관리하는 역할로, 사용자의 다양한 AI 프로젝트 경력과 관련성이 높습니다.\"]",
+    "created_at": "2026-02-08 14:29:57.992016+00"
+  },
+  {
+    "id": "340",
+    "user_id": "9",
+    "recruitment_id": "614",
+    "rank_order": "0",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] 사용자는 데이터 모델링 및 데이터 웨어하우스 구축에 대한 경험이 있으며, 이는 토스증권의 Data Analytics Engineer 역할에서 요구되는 데이터 마트 설계 및 운영 능력과 일치합니다.\"]",
+    "created_at": "2026-02-09 07:17:03.315432+00"
+  },
+  {
+    "id": "341",
+    "user_id": "6",
+    "recruitment_id": "715",
+    "rank_order": "9",
+    "reason": "[\"[FileUploadUI] 사용자는 여러 프로젝트를 통해 데이터 시각화와 관련된 경험을 쌓았으며, 이는 대시보드 및 웹 기반 데이터 시각화 프론트엔드 개발이라는 주요 업무와 관련이 깊습니다. D3.js, Chart.js, ECharts 등의 데이터 시각화 라이브러리 활용 능력도 이 공고에서 중요한 역할을 할 것입니다.\"]",
+    "created_at": "2026-02-10 11:23:58.755748+00"
+  },
+  {
+    "id": "342",
+    "user_id": "6",
+    "recruitment_id": "702",
+    "rank_order": "2",
+    "reason": "[\"[FileUploadUI] 로봇 관제 서비스 프론트엔드 개발 및 유지보수 업무는 사용자가 쌓아온 실시간 데이터 처리 및 비동기 작업 처리 경험과 매우 유사합니다. 특히, Socket.io 및 Three.js를 활용한 실시간 모니터링 및 3D 시각화 UI 개발 경험은 이 직무에서 큰 장점으로 작용할 것입니다.\"]",
+    "created_at": "2026-02-10 11:23:58.755748+00"
+  },
+  {
+    "id": "343",
+    "user_id": "6",
+    "recruitment_id": "705",
+    "rank_order": "14",
+    "reason": "[\"[FileUploadUI] 사용자는 React와 JavaScript를 사용한 프로젝트 경험이 있으며, 특히 사용자 피드백을 중심으로 한 UI 설계 경험이 뛰어납니다. 이는 공고 19에서 요구하는 프론트엔드 기획 및 개발에 적합합니다.\"]",
+    "created_at": "2026-02-10 11:24:47.655688+00"
+  },
+  {
+    "id": "344",
+    "user_id": "6",
+    "recruitment_id": "458",
+    "rank_order": "15",
+    "reason": "[\"[FileUploadUI] 사용자의 주요 기술 스택인 React와 JavaScript가 이 공고에서도 요구되며, 특히 RESTful API 연동 및 HTTP 통신 구현 경험이 중요한 요소로 작용합니다. 이는 사용자가 이전에 수행했던 작업들과 일치하므로 적합합니다.\"]",
+    "created_at": "2026-02-10 11:26:31.39511+00"
+  },
+  {
+    "id": "345",
+    "user_id": "6",
+    "recruitment_id": "561",
+    "rank_order": "105",
+    "reason": "[\"[FileUploadUI] 사용자는 Vue.js와 React 기반의 UI 컴포넌트를 개발한 경험이 있으며, REST API 연동 및 비동기 처리 경험이 풍부합니다. 이 공고는 Vue.js와 React 기반의 UI 컴포넌트 개발 및 REST API 연동을 포함한 다양한 프론트엔드 작업을 필요로 하므로 사용자의 경험과 잘 맞습니다.\"]",
+    "created_at": "2026-02-10 11:27:04.949917+00"
+  },
+  {
+    "id": "346",
+    "user_id": "9",
+    "recruitment_id": "824",
+    "rank_order": "16",
+    "reason": "[\"[Efficient Transformer for Long-Context Korean QA] (주)빅링크에이아이의 데이터엔지니어 직무는 Python 및 데이터 분석 프로그램 개발에 중점을 두고 있으며, 사용자의 데이터 분석 및 처리 경험과 일치합니다.\"]",
+    "created_at": "2026-02-11 02:53:31.909574+00"
+  },
+  {
+    "id": "347",
+    "user_id": "6",
+    "recruitment_id": "798",
+    "rank_order": "108",
+    "reason": "[\"[FileUploadUI] 사용자는 React와 JavaScript를 기반으로 한 다양한 프로젝트를 성공적으로 수행하였으며, 특히 사용자 경험을 중심으로 한 UI 설계 경험이 풍부합니다. 공고 20은 웹/모바일 서비스 프론트엔드 기획 및 개발 포지션으로, 사용자 경험(UX) 개선 및 백엔드와의 협업 경험이 요구됩니다.\"]",
+    "created_at": "2026-02-11 06:12:00.367103+00"
+  },
+  {
+    "id": "348",
+    "user_id": "8",
+    "recruitment_id": "695",
+    "rank_order": "26",
+    "reason": "[\"[내부 운영용 어드민 API 개발] 사용자는 Docker를 사용한 배포 경험이 있고, 해당 공고에서는 Docker 사용 경험이 요구되며, 이는 사용자가 이미 보유한 기술이므로 적합합니다.\"]",
+    "created_at": "2026-02-11 06:45:55.331784+00"
+  }
+]

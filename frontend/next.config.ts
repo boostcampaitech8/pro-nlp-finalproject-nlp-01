@@ -1,11 +1,17 @@
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === 'production';
+const isMock = process.env.NEXT_PUBLIC_MOCK === 'true';
+
 const nextConfig: NextConfig = {
-  // Vercel handles deployments automatically without 'export' mode
+  // Static export for GitHub Pages
+  output: isMock ? 'export' : undefined,
+  basePath: isMock ? '/pro-nlp-finalproject-nlp-01' : '',
+  assetPrefix: isMock ? '/pro-nlp-finalproject-nlp-01/' : '',
   images: {
     unoptimized: true,
   },
-  trailingSlash: false,
+  trailingSlash: true,
 };
 
 export default nextConfig;

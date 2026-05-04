@@ -1,0 +1,317 @@
+[
+  {
+    "id": "46",
+    "user_id": "9",
+    "title": "포트폴리오 분석 완료",
+    "message": "[Open-Domain Question Answering (ODQA)] AI 분석이 완료되었습니다. 내용을 검토해 주세요.",
+    "is_read": "true",
+    "link": "/my/portfolios/38",
+    "created_at": "2026-02-04 01:49:50.323117+00"
+  },
+  {
+    "id": "47",
+    "user_id": "8",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[이노션 - 데이터 엔지니어 (Google Analytics)] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "true",
+    "link": "/my/cover-letters/18",
+    "created_at": "2026-02-04 02:37:14.689846+00"
+  },
+  {
+    "id": "49",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[디노티시아 - [전문연구요원] LLM Engineer] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/19",
+    "created_at": "2026-02-04 03:55:13.707135+00"
+  },
+  {
+    "id": "50",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[Superb AI - [R&D][전문연구요원] Machine Learning Engineer] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/20",
+    "created_at": "2026-02-04 03:59:11.665554+00"
+  },
+  {
+    "id": "51",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[피앤피시큐어 - Vision AI 엔지니어] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/21",
+    "created_at": "2026-02-04 04:05:02.689726+00"
+  },
+  {
+    "id": "52",
+    "user_id": "8",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[인티그레이션(메디스트림) - [AX] [인턴] 데이터 엔지니어] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "true",
+    "link": "/my/cover-letters/23",
+    "created_at": "2026-02-04 04:07:37.40262+00"
+  },
+  {
+    "id": "53",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[보잉코리아 - Junior/Senior Software Engineer] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/22",
+    "created_at": "2026-02-04 04:07:47.478359+00"
+  },
+  {
+    "id": "54",
+    "user_id": "6",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[네이버웹툰 - 한국 웹툰 iOS 개발 (경력)] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "true",
+    "link": "/my/cover-letters/24",
+    "created_at": "2026-02-04 04:08:00.243189+00"
+  },
+  {
+    "id": "55",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[LG AI연구원 - 독자 AI파운데이션 모델 개발 Internship (World Best LLM)] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/25",
+    "created_at": "2026-02-04 04:14:38.992452+00"
+  },
+  {
+    "id": "56",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[Superb AI - [R&D] Machine Learning Engineer] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/26",
+    "created_at": "2026-02-04 04:15:21.30029+00"
+  },
+  {
+    "id": "57",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[LG AI연구원 - 독자 AI파운데이션 모델 개발 Internship (World Best LLM)] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/27",
+    "created_at": "2026-02-04 04:26:13.746309+00"
+  },
+  {
+    "id": "58",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[삼일회계법인 - 생성형 AI & AX 개발자/컨설턴트 채용] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/28",
+    "created_at": "2026-02-04 04:36:46.562669+00"
+  },
+  {
+    "id": "66",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[매드업 - [제품 본부]백엔드개발자 채용] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/30",
+    "created_at": "2026-02-05 04:36:18.538752+00"
+  },
+  {
+    "id": "67",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[매드업 - [제품 본부]백엔드개발자 채용] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/30",
+    "created_at": "2026-02-05 04:38:04.754239+00"
+  },
+  {
+    "id": "68",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[매드업 - [제품 본부]백엔드개발자 채용] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/30",
+    "created_at": "2026-02-05 04:39:58.96936+00"
+  },
+  {
+    "id": "69",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[매드업 - [제품 본부]백엔드개발자 채용] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/30",
+    "created_at": "2026-02-05 04:43:22.808805+00"
+  },
+  {
+    "id": "70",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[NAVER Cloud - Multimodal VLOps (체험형 인턴)] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/31",
+    "created_at": "2026-02-05 04:50:37.714388+00"
+  },
+  {
+    "id": "71",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[디노티시아 - [전문연구요원] LLM Engineer] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/32",
+    "created_at": "2026-02-05 08:28:16.138725+00"
+  },
+  {
+    "id": "72",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[Superb AI - [R&D] Machine Learning Engineer] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "true",
+    "link": "/my/cover-letters/26",
+    "created_at": "2026-02-05 10:45:34.11864+00"
+  },
+  {
+    "id": "73",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[주식회사 두꺼비세상 - [아파트너] AI 백엔드 엔지니어] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "true",
+    "link": "/my/cover-letters/33",
+    "created_at": "2026-02-05 10:48:46.150396+00"
+  },
+  {
+    "id": "74",
+    "user_id": "8",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[메가존클라우드 - Data Engineer Junior] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "true",
+    "link": "/my/cover-letters/34",
+    "created_at": "2026-02-05 10:52:05.62454+00"
+  },
+  {
+    "id": "75",
+    "user_id": "7",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[NAVER Cloud - LLM Studio Backend Engineer (경력)] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "true",
+    "link": "/my/cover-letters/35",
+    "created_at": "2026-02-06 05:17:40.298557+00"
+  },
+  {
+    "id": "77",
+    "user_id": "6",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[넛지헬스케어 - [병역특례] 프론트엔드개발 산업기능요원 모집] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "true",
+    "link": "/my/cover-letters/37",
+    "created_at": "2026-02-06 05:52:41.383106+00"
+  },
+  {
+    "id": "78",
+    "user_id": "6",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[넛지헬스케어 - [병역특례] 프론트엔드개발 산업기능요원 모집] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "true",
+    "link": "/my/cover-letters/37",
+    "created_at": "2026-02-06 05:55:56.158509+00"
+  },
+  {
+    "id": "79",
+    "user_id": "6",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[효성그룹 - 2026년 1분기 효성그룹 경력/신입사원 채용] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "true",
+    "link": "/my/cover-letters/38",
+    "created_at": "2026-02-06 12:23:10.706168+00"
+  },
+  {
+    "id": "80",
+    "user_id": "6",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[코코넛사일로(주) - [코코넛사일로(주)]프론트엔드신입 채용] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/39",
+    "created_at": "2026-02-06 12:30:05.022134+00"
+  },
+  {
+    "id": "81",
+    "user_id": "8",
+    "title": "포트폴리오 분석 완료",
+    "message": "[Train Simulation in WebGL] AI 분석이 완료되었습니다. 내용을 검토해 주세요.",
+    "is_read": "true",
+    "link": "/my/portfolios/91",
+    "created_at": "2026-02-08 09:14:36.710332+00"
+  },
+  {
+    "id": "82",
+    "user_id": "8",
+    "title": "포트폴리오 분석 완료",
+    "message": "[Train Simulation in WebGL] AI 분석이 완료되었습니다. 내용을 검토해 주세요.",
+    "is_read": "true",
+    "link": "/my/portfolios/92",
+    "created_at": "2026-02-08 09:16:31.693813+00"
+  },
+  {
+    "id": "83",
+    "user_id": "8",
+    "title": "포트폴리오 분석 완료",
+    "message": "[Train Simulation 3D WebGL Project] AI 분석이 완료되었습니다. 내용을 검토해 주세요.",
+    "is_read": "true",
+    "link": "/my/portfolios/93",
+    "created_at": "2026-02-08 09:17:11.82878+00"
+  },
+  {
+    "id": "84",
+    "user_id": "8",
+    "title": "포트폴리오 분석 완료",
+    "message": "[Train Simulation 3D WebGL Project] AI 분석이 완료되었습니다. 내용을 검토해 주세요.",
+    "is_read": "true",
+    "link": "/my/portfolios/94",
+    "created_at": "2026-02-08 09:18:08.588526+00"
+  },
+  {
+    "id": "85",
+    "user_id": "8",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[더존비즈온 - [AI – RAG] AI연구소 AI엔지니어 채용] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/40",
+    "created_at": "2026-02-08 09:23:20.871255+00"
+  },
+  {
+    "id": "86",
+    "user_id": "8",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[더존비즈온 - [AI – RAG] AI연구소 AI엔지니어 채용] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/40",
+    "created_at": "2026-02-08 09:25:13.737759+00"
+  },
+  {
+    "id": "87",
+    "user_id": "8",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[더존비즈온 - [AI – RAG] AI연구소 AI엔지니어 채용] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/40",
+    "created_at": "2026-02-08 09:26:47.095913+00"
+  },
+  {
+    "id": "88",
+    "user_id": "6",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[네이버웹툰 - 한국 웹툰 iOS 개발 (경력)] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/24",
+    "created_at": "2026-02-11 06:14:18.941129+00"
+  },
+  {
+    "id": "89",
+    "user_id": "9",
+    "title": "자기소개서 일괄 생성 완료",
+    "message": "[퓨리오사AI - 기술영업 (Technical Sales)] 자기소개서의 모든 문항 작성이 완료되었습니다.",
+    "is_read": "false",
+    "link": "/my/cover-letters/41",
+    "created_at": "2026-02-11 06:44:21.870066+00"
+  }
+]
