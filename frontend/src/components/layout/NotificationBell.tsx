@@ -21,7 +21,7 @@ export function NotificationBell() {
     const router = useRouter();
 
     // Filter to show ONLY unread notifications in the overlay
-    const unreadNotifications = notifications.filter(n => !n.is_read);
+    const unreadNotifications = (notifications || []).filter(n => !n.is_read);
 
     return (
         <DropdownMenu>

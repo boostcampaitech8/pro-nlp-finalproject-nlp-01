@@ -1,4 +1,4 @@
-import { getApiUrl, fetchWithAuth } from "./apiUtils";
+import { getApiUrl, fetchWithAuth, isMockMode, getMockData } from "./apiUtils";
 import { Portfolio } from "../types";
 
 export interface AnalysisResult {
@@ -27,9 +27,11 @@ export const portfolioApi: PortfolioApi = {
      * Upload a file (PDF, TXT, MD) to create a portfolio.
      */
     uploadFile: async (file: File): Promise<Portfolio> => {
+        if (isMockMode()) {
+            const data = await getMockData('portfolios.json');
+            return data[0];
+        }
         const formData = new FormData();
-        formData.append("file", file);
-        formData.append("title", file.name); // Default title to filename
 
         const res = await fetchWithAuth(getApiUrl("/portfolios/upload"), {
             method: "POST",
@@ -114,6 +116,7 @@ export const portfolioApi: PortfolioApi = {
      * Analyze a portfolio source (preview only).
      */
     analyzePortfolio: async (source: string, type: string): Promise<AnalysisResult> => {
+        if (isMockMode()) return { success: true, status: 'completed', portfolio_id: 35 };
         const res = await fetchWithAuth(getApiUrl("/portfolios/analyze"), {
             method: "POST",
             body: JSON.stringify({ source, type }),
@@ -145,6 +148,12 @@ export const portfolioApi: PortfolioApi = {
     },
 
     getPortfolio: async (id: number): Promise<Portfolio> => {
+        if (isMockMode()) {
+            const data = await getMockData('portfolios.json');
+            const item = data.find((p: any) => String(p.id) === String(id));
+            if (!item) throw new Error("포트폴리오를 찾을 수 없습니다.");
+            return item;
+        }
         const res = await fetchWithAuth(getApiUrl(`/portfolios/${id}`));
         if (!res.ok) {
             throw new Error("Failed to fetch portfolio detail");
@@ -164,6 +173,7 @@ export const portfolioApi: PortfolioApi = {
      * Delete a portfolio.
      */
     deletePortfolio: async (id: number): Promise<boolean> => {
+        if (isMockMode()) return true;
         const res = await fetchWithAuth(getApiUrl(`/portfolios/${id}`), {
             method: "DELETE"
         });
@@ -191,6 +201,10 @@ export const portfolioApi: PortfolioApi = {
      * Fetch all portfolios.
      */
     fetchAll: async (): Promise<{ items: Portfolio[] }> => {
+        if (isMockMode()) {
+            const data = await getMockData('portfolios.json');
+            return { items: data };
+        }
         const res = await fetchWithAuth(getApiUrl("/portfolios"));
         if (!res.ok) {
             throw new Error("Failed to fetch portfolios");

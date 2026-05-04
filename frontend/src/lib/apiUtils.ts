@@ -54,10 +54,44 @@ if (typeof window !== 'undefined' && isMockMode()) {
         }
         return mockFetch(url, init);
     };
+
+    // Global SSE Stub
+    if (!window.EventSource || isMockMode()) {
+        (window as any).EventSource = class {
+            onopen: any = null;
+            onmessage: any = null;
+            onerror: any = null;
+            constructor(url: string) {
+                console.log("Mock EventSource initialized for:", url);
+                setTimeout(() => { if (this.onopen) this.onopen(); }, 100);
+            }
+            close() { console.log("Mock EventSource closed"); }
+        };
+    }
 }
 
 export async function fetchWithAuth(url: string, options: RequestInit = {}) {
     return fetch(url, options);
+}
+
+export async function getMockData(mockFile: string): Promise<any> {
+    const isGitHubPages = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
+    const basePath = isGitHubPages ? '/pro-nlp-finalproject-nlp-01' : '';
+    const res = await fetch(`${basePath}/mock-data/${mockFile}`);
+    const rawData = await res.json();
+    
+    const normalize = (obj: any) => {
+        if (!obj || typeof obj !== 'object') return obj;
+        const arrayFields = ['tags', 'questions', 'tech_stack', 'strengths'];
+        arrayFields.forEach(field => {
+            if (typeof obj[field] === 'string') {
+                try { obj[field] = JSON.parse(obj[field]); } catch (e) { obj[field] = []; }
+            }
+        });
+        return obj;
+    };
+    
+    return Array.isArray(rawData) ? rawData.map(normalize) : normalize(rawData);
 }
 
 async function mockFetch(url: string, options: RequestInit = {}): Promise<Response> {
@@ -90,8 +124,7 @@ async function mockFetch(url: string, options: RequestInit = {}): Promise<Respon
             }
 
             if (targetEmail.includes('exhibit')) {
-                const usersRes = await fetch(`${basePath}/mock-data/users.json`);
-                const users = await usersRes.json();
+                const users = await getMockData('users.json');
                 const user = users.find((u: { email: string }) => u.email === targetEmail);
                 if (user) {
                     return jsonRes({
@@ -108,8 +141,7 @@ async function mockFetch(url: string, options: RequestInit = {}): Promise<Respon
     if (cleanPath.includes('/users/me') || cleanPath.includes('/auth/me')) {
         const token = useAuthStore.getState().token || '';
         const userId = token.replace('mock-token-', '');
-        const usersRes = await fetch(`${basePath}/mock-data/users.json`);
-        const users = await usersRes.json();
+        const users = await getMockData('users.json');
         const me = users.find((u: { id: string }) => String(u.id) === userId) || users[0];
         return jsonRes(me);
     }
@@ -151,8 +183,7 @@ async function mockFetch(url: string, options: RequestInit = {}): Promise<Respon
         else if (cleanPath.includes('/integrations')) mockFile = 'user_integrations.json';
 
         if (mockFile) {
-            const res = await fetch(`${basePath}/mock-data/${mockFile}`);
-            const rawData = await res.json();
+            const data = await getMockData(mockFile);
 
             // Handle Versions specially
             if (cleanPath.includes('/versions')) {
@@ -161,19 +192,6 @@ async function mockFetch(url: string, options: RequestInit = {}): Promise<Respon
                     { id: 102, title: "AI 초안 생성본", created_at: "2026-05-02T14:30:00Z", items_snapshot: [] }
                 ]);
             }
-
-            const normalize = (obj: any) => {
-                if (!obj || typeof obj !== 'object') return obj;
-                const arrayFields = ['tags', 'questions', 'tech_stack', 'strengths'];
-                arrayFields.forEach(field => {
-                    if (typeof obj[field] === 'string') {
-                        try { obj[field] = JSON.parse(obj[field]); } catch (e) { obj[field] = []; }
-                    }
-                });
-                return obj;
-            };
-
-            const data = Array.isArray(rawData) ? rawData.map(normalize) : normalize(rawData);
 
             // Detail mapping
             const idMatch = cleanPath.match(/\/(\d+)$/);
